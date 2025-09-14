@@ -14,13 +14,181 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      digital_tourist_ids: {
+        Row: {
+          aadhaar_number: string
+          blockchain_hash: string
+          created_at: string
+          emergency_contacts: Json
+          id: string
+          issued_at: string
+          passport_number: string | null
+          status: string
+          tourist_name: string
+          trip_itinerary: string
+          updated_at: string
+          valid_from: string
+          valid_to: string
+        }
+        Insert: {
+          aadhaar_number: string
+          blockchain_hash: string
+          created_at?: string
+          emergency_contacts: Json
+          id?: string
+          issued_at?: string
+          passport_number?: string | null
+          status?: string
+          tourist_name: string
+          trip_itinerary: string
+          updated_at?: string
+          valid_from: string
+          valid_to: string
+        }
+        Update: {
+          aadhaar_number?: string
+          blockchain_hash?: string
+          created_at?: string
+          emergency_contacts?: Json
+          id?: string
+          issued_at?: string
+          passport_number?: string | null
+          status?: string
+          tourist_name?: string
+          trip_itinerary?: string
+          updated_at?: string
+          valid_from?: string
+          valid_to?: string
+        }
+        Relationships: []
+      }
+      geo_fences: {
+        Row: {
+          coordinates: Json
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          coordinates: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          coordinates?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sos_alerts: {
+        Row: {
+          address: string | null
+          alert_type: string
+          blockchain_hash: string
+          created_at: string
+          id: string
+          latitude: number
+          longitude: number
+          message: string | null
+          status: string
+          timestamp: string
+          tourist_id: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          alert_type: string
+          blockchain_hash: string
+          created_at?: string
+          id?: string
+          latitude: number
+          longitude: number
+          message?: string | null
+          status?: string
+          timestamp?: string
+          tourist_id: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          alert_type?: string
+          blockchain_hash?: string
+          created_at?: string
+          id?: string
+          latitude?: number
+          longitude?: number
+          message?: string | null
+          status?: string
+          timestamp?: string
+          tourist_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sos_alerts_tourist_id_fkey"
+            columns: ["tourist_id"]
+            isOneToOne: false
+            referencedRelation: "digital_tourist_ids"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tourist_locations: {
+        Row: {
+          created_at: string
+          id: string
+          latitude: number
+          longitude: number
+          timestamp: string
+          tourist_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          latitude: number
+          longitude: number
+          timestamp?: string
+          tourist_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          latitude?: number
+          longitude?: number
+          timestamp?: string
+          tourist_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tourist_locations_tourist_id_fkey"
+            columns: ["tourist_id"]
+            isOneToOne: false
+            referencedRelation: "digital_tourist_ids"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_blockchain_hash: {
+        Args: { data: Json }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
