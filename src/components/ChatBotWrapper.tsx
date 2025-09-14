@@ -5,15 +5,16 @@ import { ChatBot } from './ChatBot';
 export const ChatBotWrapper: React.FC = () => {
   const { user, userRole, loading } = useAuth();
 
-  // Don't render if loading or user not authenticated
-  if (loading || !user || !userRole) {
+  // Don't render if still loading
+  if (loading) {
     return null;
   }
 
+  // Show chatbot for both authenticated and guest users
   return (
     <ChatBot 
-      userRole={userRole}
-      userId={user.id}
+      userRole={userRole || 'guest'}
+      userId={user?.id || 'guest'}
       language="en"
     />
   );

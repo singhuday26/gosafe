@@ -63,6 +63,8 @@ export const ChatBot: React.FC<ChatBotProps> = ({
         return "Hello! I'm here to assist you with tourism authority operations. I can help with monitoring tourist safety, managing alerts, and providing administrative guidance. What do you need help with?";
       case 'admin':
         return "Hello! I'm your AI assistant for system administration. I can help with platform management, user oversight, and system operations. How can I help you today?";
+      case 'guest':
+        return "Hello! I'm your AI assistant for the Smart Tourist Safety System. I can provide information about our platform, safety features, and help with general tourism questions. Sign in to access more personalized features!";
       default:
         return "Hello! I'm your AI assistant. How can I help you today?";
     }
@@ -87,7 +89,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({
         body: {
           message: inputMessage,
           sessionId,
-          userId,
+          userId: userId === 'guest' ? null : userId,
           userRole,
           languageCode: language
         }

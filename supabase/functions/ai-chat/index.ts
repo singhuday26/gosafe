@@ -21,9 +21,76 @@ serve(async (req) => {
   try {
     const { message, sessionId, userId, userRole, languageCode = 'en' } = await req.json();
 
-    if (!message || !userId || !userRole) {
+    if (!message || !userRole) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
         status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Handle guest users (no database session management)
+    if (userRole === 'guest' || !userId) {
+      const startTime = Date.now();
+
+      // System prompt for guest users
+      const systemPrompt = "You are a helpful AI assistant for the Smart Tourist Safety System. Provide information about the platform features, tourism safety tips, and general guidance. Encourage users to sign up for personalized features. Be concise and helpful.";
+
+      const messages: ChatMessage[] = [
+        { role: 'user', content: systemPrompt },
+        { role: 'user', content: message }
+      ];
+
+      // Call Gemini API
+      const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
+      if (!geminiApiKey) {
+        return new Response(JSON.stringify({ error: 'Gemini API key not configured' }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const geminiResponse = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{
+                text: messages.map(m => `${m.role}: ${m.content}`).join('\n\n')
+              }]
+            }],
+            generationConfig: {
+              temperature: 0.7,
+              topK: 40,
+              topP: 0.95,
+              maxOutputTokens: 1024,
+            }
+          }),
+        }
+      );
+
+      if (!geminiResponse.ok) {
+        const errorText = await geminiResponse.text();
+        console.error('Gemini API error:', errorText);
+        return new Response(JSON.stringify({ error: 'Failed to generate response' }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const geminiData = await geminiResponse.json();
+      const aiResponse = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not generate a response.';
+
+      const responseTime = Date.now() - startTime;
+
+      return new Response(JSON.stringify({
+        response: aiResponse,
+        sessionId: null,
+        responseTime: responseTime
+      }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
