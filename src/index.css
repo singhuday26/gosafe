@@ -52,22 +52,53 @@
 
     --radius: 0.75rem;
 
-    /* Gradients */
+    /* North East India Themed Colors (Additive) */
+    --ne-tea-brown: 20 34% 56%; /* #A9746E - Assam Tea Brown */
+    --ne-mist-gray: 164 22% 87%; /* #DDE6E4 - Meghalaya Mist Gray */
+    --ne-sunset-orange: 35 100% 48%; /* #F57C00 - Nagaland Sunset Orange */
+    --ne-forest-green: 122 39% 49%; /* #4CAF50 - Arunachal Green */
+    --ne-sky-blue: 204 91% 41%; /* #0288D1 - Sikkim Sky Blue */
+    --ne-maroon: 350 42% 40%; /* #8E3B46 - Manipur Maroon */
+    
+    /* NE Semantic Colors */
+    --ne-primary: var(--ne-tea-brown);
+    --ne-accent: var(--ne-sunset-orange);
+    --ne-soft: var(--ne-mist-gray);
+
+    /* Gradients - Enhanced with NE Colors */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(217 91% 45%));
     --gradient-tourism: linear-gradient(135deg, hsl(var(--tourism)), hsl(152 69% 25%));
     --gradient-safety: linear-gradient(135deg, hsl(var(--safety)), hsl(142 76% 30%));
-    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--tourism)) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(210 20% 98%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(var(--ne-sky-blue)) 0%, hsl(var(--ne-forest-green)) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(var(--ne-mist-gray)) 100%);
+    
+    /* North East Themed Gradients */
+    --gradient-ne-hero: linear-gradient(135deg, hsl(var(--ne-sky-blue)) 0%, hsl(var(--ne-forest-green)) 50%, hsl(var(--ne-tea-brown)) 100%);
+    --gradient-ne-hills: linear-gradient(180deg, hsl(var(--ne-sky-blue) / 0.2) 0%, hsl(var(--ne-forest-green) / 0.3) 100%);
+    --gradient-ne-tea: linear-gradient(135deg, hsl(var(--ne-tea-brown)) 0%, hsl(var(--ne-maroon)) 100%);
+    --gradient-ne-mist: linear-gradient(135deg, hsl(var(--ne-mist-gray)) 0%, hsl(0 0% 100%) 100%);
+    --gradient-ne-tribal: linear-gradient(90deg, 
+      hsl(var(--ne-sunset-orange) / 0.1) 0%, 
+      hsl(var(--ne-forest-green) / 0.1) 25%, 
+      hsl(var(--ne-tea-brown) / 0.1) 50%, 
+      hsl(var(--ne-maroon) / 0.1) 75%, 
+      hsl(var(--ne-sky-blue) / 0.1) 100%);
 
-    /* Shadows */
+    /* Shadows - Enhanced with NE Colors */
     --shadow-soft: 0 2px 10px -2px hsl(var(--primary) / 0.1);
     --shadow-medium: 0 4px 20px -4px hsl(var(--primary) / 0.15);
     --shadow-strong: 0 8px 30px -8px hsl(var(--primary) / 0.2);
     --shadow-emergency: 0 4px 20px -4px hsl(var(--danger) / 0.3);
+    
+    /* NE Themed Shadows */
+    --shadow-ne-soft: 0 2px 10px -2px hsl(var(--ne-tea-brown) / 0.15);
+    --shadow-ne-medium: 0 4px 20px -4px hsl(var(--ne-tea-brown) / 0.2);
+    --shadow-ne-glow: 0 0 20px hsl(var(--ne-sunset-orange) / 0.3);
 
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --transition-ne: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5% 26%;
@@ -114,9 +145,18 @@
     --input: 217 33% 18%;
     --ring: 217 91% 65%;
 
+    /* North East Colors - Dark Mode Adjustments */
+    --ne-tea-brown: 20 34% 65%; /* Lighter for dark mode */
+    --ne-mist-gray: 164 22% 25%; /* Darker for dark mode */
+    --ne-sunset-orange: 35 100% 55%; /* Slightly brighter */
+    --ne-forest-green: 122 39% 55%; /* Slightly brighter */
+    --ne-sky-blue: 204 91% 50%; /* Slightly brighter */
+    --ne-maroon: 350 42% 50%; /* Slightly brighter */
+
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(217 91% 50%));
-    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--tourism)) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(222 84% 5%) 0%, hsl(217 33% 18%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(var(--ne-sky-blue)) 0%, hsl(var(--ne-forest-green)) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(222 84% 5%) 0%, hsl(var(--ne-mist-gray)) 100%);
+    --gradient-ne-hero: linear-gradient(135deg, hsl(var(--ne-sky-blue)) 0%, hsl(var(--ne-forest-green)) 50%, hsl(var(--ne-tea-brown)) 100%);
 
     --sidebar-background: 240 6% 10%;
     --sidebar-foreground: 240 5% 96%;
@@ -135,7 +175,7 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground font-body antialiased;
   }
 
   /* Utility Classes */
@@ -159,6 +199,27 @@
     background: var(--gradient-card);
   }
 
+  /* North East Themed Utility Classes */
+  .gradient-ne-hero {
+    background: var(--gradient-ne-hero);
+  }
+
+  .gradient-ne-hills {
+    background: var(--gradient-ne-hills);
+  }
+
+  .gradient-ne-tea {
+    background: var(--gradient-ne-tea);
+  }
+
+  .gradient-ne-mist {
+    background: var(--gradient-ne-mist);
+  }
+
+  .gradient-ne-tribal {
+    background: var(--gradient-ne-tribal);
+  }
+
   .shadow-soft {
     box-shadow: var(--shadow-soft);
   }
@@ -175,12 +236,58 @@
     box-shadow: var(--shadow-emergency);
   }
 
+  .shadow-ne-soft {
+    box-shadow: var(--shadow-ne-soft);
+  }
+
+  .shadow-ne-medium {
+    box-shadow: var(--shadow-ne-medium);
+  }
+
+  .shadow-ne-glow {
+    box-shadow: var(--shadow-ne-glow);
+  }
+
   .transition-smooth {
     transition: var(--transition-smooth);
   }
 
   .transition-bounce {
     transition: var(--transition-bounce);
+  }
+
+  .transition-ne {
+    transition: var(--transition-ne);
+  }
+
+  /* North East Themed Interactive Elements */
+  .ne-button-primary {
+    @apply bg-ne-tea-brown text-white hover:bg-ne-maroon transition-ne rounded-lg px-6 py-3 font-medium shadow-ne-soft hover:shadow-ne-medium;
+  }
+
+  .ne-card {
+    @apply bg-white/90 backdrop-blur-sm border border-ne-mist-gray/50 rounded-xl shadow-ne-soft hover:shadow-ne-medium transition-ne;
+  }
+
+  .ne-tribal-border {
+    position: relative;
+  }
+
+  .ne-tribal-border::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--gradient-ne-tribal);
+    border-radius: inherit;
+    padding: 2px;
+    mask: 
+      linear-gradient(#fff 0 0) content-box, 
+      linear-gradient(#fff 0 0);
+    mask-composite: xor;
+    -webkit-mask-composite: xor;
   }
 
   /* Emergency pulse animation */

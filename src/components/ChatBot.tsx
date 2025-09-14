@@ -145,25 +145,25 @@ export const ChatBot: React.FC<ChatBotProps> = ({
     return (
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 h-12 w-12 rounded-full p-0 shadow-lg hover:shadow-xl transition-all duration-200 z-50"
+        className="fixed bottom-4 right-4 h-12 w-12 rounded-full p-0 shadow-ne-medium hover:shadow-ne-glow transition-ne z-50 bg-ne-tea-brown hover:bg-ne-maroon animate-pulse-ne"
         size="icon"
       >
-        <MessageCircle className="h-6 w-6" />
+        <MessageCircle className="h-6 w-6 text-white" />
       </Button>
     );
   }
 
   return (
-    <Card className={`fixed bottom-4 right-4 w-80 shadow-xl z-50 transition-all duration-200 ${
+    <Card className={`fixed bottom-4 right-4 w-80 shadow-ne-strong z-50 transition-ne ne-card border-ne-tea-brown/20 ${
       isMinimized ? 'h-12' : 'h-96'
     }`}>
-      <CardHeader className="p-3 pb-2 flex flex-row items-center justify-between space-y-0">
-        <CardTitle className="text-sm font-medium">AI Assistant</CardTitle>
+      <CardHeader className="p-3 pb-2 flex flex-row items-center justify-between space-y-0 bg-ne-tea-brown text-white rounded-t-xl">
+        <CardTitle className="text-sm font-medium font-heading">AI Assistant</CardTitle>
         <div className="flex gap-1">
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6"
+            className="h-6 w-6 text-white hover:bg-white/20"
             onClick={() => setIsMinimized(!isMinimized)}
           >
             {isMinimized ? <Maximize2 className="h-3 w-3" /> : <Minimize2 className="h-3 w-3" />}
@@ -171,7 +171,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6"
+            className="h-6 w-6 text-white hover:bg-white/20"
             onClick={() => setIsOpen(false)}
           >
             <X className="h-3 w-3" />
@@ -189,10 +189,10 @@ export const ChatBot: React.FC<ChatBotProps> = ({
                   className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
+                    className={`max-w-[80%] rounded-lg px-3 py-2 text-sm font-body transition-ne ${
                       message.role === 'user'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground'
+                        ? 'bg-ne-tea-brown text-white'
+                        : 'bg-ne-mist-gray text-ne-tea-brown'
                     }`}
                   >
                     {message.content}
@@ -201,11 +201,11 @@ export const ChatBot: React.FC<ChatBotProps> = ({
               ))}
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-muted text-muted-foreground rounded-lg px-3 py-2 text-sm">
+                  <div className="bg-ne-mist-gray text-ne-tea-brown rounded-lg px-3 py-2 text-sm font-body">
                     <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-current rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                      <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                      <div className="w-2 h-2 bg-ne-tea-brown rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-ne-tea-brown rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                      <div className="w-2 h-2 bg-ne-tea-brown rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
                     </div>
                   </div>
                 </div>
@@ -220,14 +220,14 @@ export const ChatBot: React.FC<ChatBotProps> = ({
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Type your message..."
-              className="flex-1"
+              className="flex-1 font-body border-ne-tea-brown/20 focus:border-ne-tea-brown"
               disabled={isLoading}
             />
             <Button
               onClick={sendMessage}
               size="icon"
               disabled={isLoading || !inputMessage.trim()}
-              className="shrink-0"
+              className="shrink-0 bg-ne-tea-brown hover:bg-ne-maroon text-white transition-ne"
             >
               <Send className="h-4 w-4" />
             </Button>
