@@ -1,0 +1,115 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "save": "Sauvegarder",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "back": "Retour",
+    "next": "Suivant",
+    "submit": "Soumettre",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "refresh": "Actualiser"
+  },
+  "navigation": {
+    "home": "Accueil",
+    "register": "S'inscrire",
+    "dashboard": "Tableau de bord",
+    "login": "Se connecter",
+    "logout": "Se déconnecter"
+  },
+  "tourist": {
+    "dashboard": {
+      "title": "Tableau de bord Touriste",
+      "safety_score": "Score de Sécurité",
+      "current_location": "Localisation Actuelle",
+      "sos_alert": "Alerte SOS",
+      "emergency_contacts": "Contacts d'Urgence",
+      "quick_actions": "Actions Rapides",
+      "device_status": "État de l'Appareil",
+      "nearby_zones": "Zones Proches",
+      "recent_activities": "Activités Récentes"
+    },
+    "registration": {
+      "title": "Inscription Touriste",
+      "personal_info": "Informations Personnelles",
+      "trip_info": "Informations du Voyage",
+      "emergency_contacts": "Contacts d'Urgence",
+      "tourist_name": "Nom Complet",
+      "aadhaar_number": "Numéro Aadhaar",
+      "passport_number": "Numéro de Passeport",
+      "trip_itinerary": "Itinéraire du Voyage",
+      "contact_name": "Nom du Contact",
+      "relationship": "Relation",
+      "phone_number": "Numéro de Téléphone",
+      "email": "Adresse Email"
+    },
+    "sos": {
+      "panic": "Panique",
+      "medical": "Urgence Médicale",
+      "security": "Problème de Sécurité",
+      "other": "Autre Urgence",
+      "alert_sent": "Alerte SOS envoyée!",
+      "alert_active": "Alerte SOS Active",
+      "location_shared": "Votre localisation est partagée avec les autorités"
+    }
+  },
+  "authority": {
+    "dashboard": {
+      "title": "Tableau de bord Autorité",
+      "overview": "Aperçu",
+      "tourists": "Touristes",
+      "alerts": "Alertes",
+      "map_view": "Vue Carte",
+      "active_tourists": "Touristes Actifs",
+      "active_alerts": "Alertes SOS Actives",
+      "resolved_today": "Résolus Aujourd'hui",
+      "avg_response_time": "Temps de Réponse Moyen"
+    },
+    "login": {
+      "title": "Connexion Autorité",
+      "authority_id": "ID Autorité",
+      "password": "Mot de passe",
+      "invalid_credentials": "Identifiants invalides"
+    }
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Tableau de bord Admin",
+      "system_overview": "Aperçu du Système",
+      "user_management": "Gestion des Utilisateurs",
+      "security_logs": "Journaux de Sécurité",
+      "system_health": "Santé du Système"
+    }
+  },
+  "map": {
+    "legend": "Légende de la Carte",
+    "active_tourists": "Touristes Actifs",
+    "sos_alerts": "Alertes SOS",
+    "offline": "Hors ligne",
+    "safe_zones": "Zones Sûres",
+    "restricted": "Zones Restreintes",
+    "danger_zones": "Zones Dangereuses",
+    "initialize_map": "Initialiser Carte Interactive",
+    "mapbox_token": "Token Public Mapbox",
+    "get_token": "Obtenez votre token sur mapbox.com"
+  },
+  "geofence": {
+    "safe": "Zone Sûre",
+    "restricted": "Zone Restreinte",
+    "danger": "Zone Dangereuse",
+    "entered": "Entré dans {{type}}",
+    "exited": "Sorti de {{type}}"
+  },
+  "notifications": {
+    "sos_created": "Alerte SOS créée avec succès",
+    "location_updated": "Localisation mise à jour",
+    "id_verified": "ID Digital vérifié avec succès",
+    "id_generated": "ID Digital Touriste généré avec succès",
+    "alert_resolved": "Alerte résolue avec succès"
+  }
+}

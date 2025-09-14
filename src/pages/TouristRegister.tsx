@@ -14,6 +14,7 @@ import { BlockchainService, DigitalTouristID, EmergencyContact } from "@/lib/blo
 const TouristRegister = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [generatedID, setGeneratedID] = useState<DigitalTouristID | null>(null);
   

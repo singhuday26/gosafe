@@ -1,0 +1,115 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "search": "Search",
+    "filter": "Filter",
+    "refresh": "Refresh"
+  },
+  "navigation": {
+    "home": "Home",
+    "register": "Register",
+    "dashboard": "Dashboard",
+    "login": "Login",
+    "logout": "Logout"
+  },
+  "tourist": {
+    "dashboard": {
+      "title": "Tourist Dashboard",
+      "safety_score": "Safety Score",
+      "current_location": "Current Location",
+      "sos_alert": "SOS Alert",
+      "emergency_contacts": "Emergency Contacts",
+      "quick_actions": "Quick Actions",
+      "device_status": "Device Status",
+      "nearby_zones": "Nearby Zones",
+      "recent_activities": "Recent Activities"
+    },
+    "registration": {
+      "title": "Tourist Registration",
+      "personal_info": "Personal Information",
+      "trip_info": "Trip Information",
+      "emergency_contacts": "Emergency Contacts",
+      "tourist_name": "Full Name",
+      "aadhaar_number": "Aadhaar Number",
+      "passport_number": "Passport Number",
+      "trip_itinerary": "Trip Itinerary",
+      "contact_name": "Contact Name",
+      "relationship": "Relationship",
+      "phone_number": "Phone Number",
+      "email": "Email Address"
+    },
+    "sos": {
+      "panic": "Panic",
+      "medical": "Medical Emergency", 
+      "security": "Security Issue",
+      "other": "Other Emergency",
+      "alert_sent": "SOS alert has been sent!",
+      "alert_active": "SOS Alert Active",
+      "location_shared": "Your location is being shared with authorities"
+    }
+  },
+  "authority": {
+    "dashboard": {
+      "title": "Authority Dashboard",
+      "overview": "Overview", 
+      "tourists": "Tourists",
+      "alerts": "Alerts",
+      "map_view": "Map View",
+      "active_tourists": "Active Tourists",
+      "active_alerts": "Active SOS Alerts",
+      "resolved_today": "Resolved Today",
+      "avg_response_time": "Avg Response Time"
+    },
+    "login": {
+      "title": "Authority Login",
+      "authority_id": "Authority ID",
+      "password": "Password",
+      "invalid_credentials": "Invalid credentials"
+    }
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Admin Dashboard",
+      "system_overview": "System Overview",
+      "user_management": "User Management", 
+      "security_logs": "Security Logs",
+      "system_health": "System Health"
+    }
+  },
+  "map": {
+    "legend": "Map Legend",
+    "active_tourists": "Active Tourists",
+    "sos_alerts": "SOS Alerts", 
+    "offline": "Offline",
+    "safe_zones": "Safe Zones",
+    "restricted": "Restricted Areas",
+    "danger_zones": "Danger Zones",
+    "initialize_map": "Initialize Interactive Map",
+    "mapbox_token": "Mapbox Public Token",
+    "get_token": "Get your token from mapbox.com"
+  },
+  "geofence": {
+    "safe": "Safe Zone",
+    "restricted": "Restricted Area", 
+    "danger": "Danger Zone",
+    "entered": "Entered {{type}}",
+    "exited": "Exited {{type}}"
+  },
+  "notifications": {
+    "sos_created": "SOS alert created successfully",
+    "location_updated": "Location updated",
+    "id_verified": "Digital ID verified successfully",
+    "id_generated": "Digital Tourist ID generated successfully",
+    "alert_resolved": "Alert resolved successfully"
+  }
+}

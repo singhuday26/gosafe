@@ -1,1 +1,7 @@
 project_id = "bleswtkoafdljurmythi"
+
+[functions.blockchain-operations]
+verify_jwt = false
+
+[functions.emergency-notifications]
+verify_jwt = false

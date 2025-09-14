@@ -1,0 +1,115 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "submit": "Enviar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "refresh": "Actualizar"
+  },
+  "navigation": {
+    "home": "Inicio",
+    "register": "Registrarse",
+    "dashboard": "Panel",
+    "login": "Iniciar Sesión",
+    "logout": "Cerrar Sesión"
+  },
+  "tourist": {
+    "dashboard": {
+      "title": "Panel del Turista",
+      "safety_score": "Puntuación de Seguridad",
+      "current_location": "Ubicación Actual",
+      "sos_alert": "Alerta SOS",
+      "emergency_contacts": "Contactos de Emergencia",
+      "quick_actions": "Acciones Rápidas",
+      "device_status": "Estado del Dispositivo",
+      "nearby_zones": "Zonas Cercanas",
+      "recent_activities": "Actividades Recientes"
+    },
+    "registration": {
+      "title": "Registro de Turista",
+      "personal_info": "Información Personal",
+      "trip_info": "Información del Viaje",
+      "emergency_contacts": "Contactos de Emergencia",
+      "tourist_name": "Nombre Completo",
+      "aadhaar_number": "Número Aadhaar",
+      "passport_number": "Número de Pasaporte",
+      "trip_itinerary": "Itinerario del Viaje",
+      "contact_name": "Nombre del Contacto",
+      "relationship": "Relación",
+      "phone_number": "Número de Teléfono",
+      "email": "Dirección de Email"
+    },
+    "sos": {
+      "panic": "Pánico",
+      "medical": "Emergencia Médica",
+      "security": "Problema de Seguridad",
+      "other": "Otra Emergencia",
+      "alert_sent": "¡Alerta SOS enviada!",
+      "alert_active": "Alerta SOS Activa",
+      "location_shared": "Su ubicación se está compartiendo con las autoridades"
+    }
+  },
+  "authority": {
+    "dashboard": {
+      "title": "Panel de Autoridad",
+      "overview": "Resumen",
+      "tourists": "Turistas",
+      "alerts": "Alertas",
+      "map_view": "Vista del Mapa",
+      "active_tourists": "Turistas Activos",
+      "active_alerts": "Alertas SOS Activas",
+      "resolved_today": "Resueltos Hoy",
+      "avg_response_time": "Tiempo Promedio de Respuesta"
+    },
+    "login": {
+      "title": "Inicio de Sesión de Autoridad",
+      "authority_id": "ID de Autoridad",
+      "password": "Contraseña",
+      "invalid_credentials": "Credenciales inválidas"
+    }
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Panel de Administrador",
+      "system_overview": "Resumen del Sistema",
+      "user_management": "Gestión de Usuarios",
+      "security_logs": "Registros de Seguridad",
+      "system_health": "Salud del Sistema"
+    }
+  },
+  "map": {
+    "legend": "Leyenda del Mapa",
+    "active_tourists": "Turistas Activos",
+    "sos_alerts": "Alertas SOS",
+    "offline": "Desconectado",
+    "safe_zones": "Zonas Seguras",
+    "restricted": "Áreas Restringidas",
+    "danger_zones": "Zonas de Peligro",
+    "initialize_map": "Inicializar Mapa Interactivo",
+    "mapbox_token": "Token Público de Mapbox",
+    "get_token": "Obtén tu token en mapbox.com"
+  },
+  "geofence": {
+    "safe": "Zona Segura",
+    "restricted": "Área Restringida",
+    "danger": "Zona de Peligro",
+    "entered": "Ingresó a {{type}}",
+    "exited": "Salió de {{type}}"
+  },
+  "notifications": {
+    "sos_created": "Alerta SOS creada exitosamente",
+    "location_updated": "Ubicación actualizada",
+    "id_verified": "ID Digital verificado exitosamente",
+    "id_generated": "ID Digital de Turista generado exitosamente",
+    "alert_resolved": "Alerta resuelta exitosamente"
+  }
+}

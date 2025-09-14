@@ -1,0 +1,340 @@
+import React, { useEffect, useRef, useState } from 'react';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { MapPin, Shield, AlertTriangle, Users } from 'lucide-react';
+
+interface MapComponentProps {
+  tourists?: Array<{
+    id: string;
+    name: string;
+    latitude: number;
+    longitude: number;
+    status: 'active' | 'sos' | 'offline';
+  }>;
+  geoFences?: Array<{
+    id: string;
+    name: string;
+    type: 'safe' | 'restricted' | 'danger';
+    coordinates: Array<{ lat: number; lng: number }>;
+  }>;
+  sosAlerts?: Array<{
+    id: string;
+    latitude: number;
+    longitude: number;
+    type: string;
+    tourist_name?: string;
+  }>;
+  center?: [number, number];
+  zoom?: number;
+  onLocationSelect?: (lat: number, lng: number) => void;
+}
+
+const MapComponent: React.FC<MapComponentProps> = ({
+  tourists = [],
+  geoFences = [],
+  sosAlerts = [],
+  center = [77.2090, 28.6139], // Delhi coordinates
+  zoom = 12,
+  onLocationSelect
+}) => {
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const map = useRef<mapboxgl.Map | null>(null);
+  const [mapboxToken, setMapboxToken] = useState('');
+  const [showTokenInput, setShowTokenInput] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const initializeMap = (token: string) => {
+    if (!mapContainer.current || !token) return;
+
+    setIsLoading(true);
+    mapboxgl.accessToken = token;
+
+    try {
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: 'mapbox://styles/mapbox/light-v11',
+        center: center,
+        zoom: zoom,
+      });
+
+      // Add navigation controls
+      map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+      map.current.on('load', () => {
+        if (!map.current) return;
+
+        // Add geo-fence layers
+        geoFences.forEach((fence, index) => {
+          const sourceId = `geofence-${index}`;
+          const layerId = `geofence-layer-${index}`;
+
+          // Convert coordinates to GeoJSON polygon
+          const coordinates = fence.coordinates.map(coord => [coord.lng, coord.lat]);
+          coordinates.push(coordinates[0]); // Close the polygon
+
+          map.current!.addSource(sourceId, {
+            type: 'geojson',
+            data: {
+              type: 'Feature',
+              geometry: {
+                type: 'Polygon',
+                coordinates: [coordinates]
+              },
+              properties: {
+                name: fence.name,
+                type: fence.type
+              }
+            }
+          });
+
+          const fillColor = 
+            fence.type === 'safe' ? '#10B981' : 
+            fence.type === 'restricted' ? '#F59E0B' : '#EF4444';
+
+          map.current!.addLayer({
+            id: layerId,
+            type: 'fill',
+            source: sourceId,
+            paint: {
+              'fill-color': fillColor,
+              'fill-opacity': 0.2
+            }
+          });
+
+          map.current!.addLayer({
+            id: `${layerId}-outline`,
+            type: 'line',
+            source: sourceId,
+            paint: {
+              'line-color': fillColor,
+              'line-width': 2
+            }
+          });
+        });
+
+        // Add tourist markers
+        tourists.forEach(tourist => {
+          const markerColor = 
+            tourist.status === 'sos' ? '#EF4444' :
+            tourist.status === 'offline' ? '#6B7280' : '#10B981';
+
+          const marker = new mapboxgl.Marker({ color: markerColor })
+            .setLngLat([tourist.longitude, tourist.latitude])
+            .setPopup(
+              new mapboxgl.Popup({ offset: 25 })
+                .setHTML(`
+                  <div class="p-2">
+                    <h3 class="font-semibold">${tourist.name}</h3>
+                    <p class="text-sm">Status: ${tourist.status}</p>
+                    <p class="text-xs text-gray-500">
+                      ${tourist.latitude.toFixed(4)}, ${tourist.longitude.toFixed(4)}
+                    </p>
+                  </div>
+                `)
+            )
+            .addTo(map.current!);
+        });
+
+        // Add SOS alert markers
+        sosAlerts.forEach(alert => {
+          const sosMarker = new mapboxgl.Marker({ 
+            color: '#DC2626',
+            scale: 1.2
+          })
+            .setLngLat([alert.longitude, alert.latitude])
+            .setPopup(
+              new mapboxgl.Popup({ offset: 25 })
+                .setHTML(`
+                  <div class="p-2 border-l-4 border-red-500">
+                    <h3 class="font-semibold text-red-700">🚨 SOS Alert</h3>
+                    <p class="text-sm">Type: ${alert.type}</p>
+                    ${alert.tourist_name ? `<p class="text-sm">Tourist: ${alert.tourist_name}</p>` : ''}
+                    <p class="text-xs text-gray-500">
+                      ${alert.latitude.toFixed(4)}, ${alert.longitude.toFixed(4)}
+                    </p>
+                  </div>
+                `)
+            )
+            .addTo(map.current!);
+
+          // Add pulsing animation for SOS markers
+          const markerElement = sosMarker.getElement();
+          markerElement.classList.add('animate-pulse');
+        });
+
+        setIsLoading(false);
+      });
+
+      // Add click handler for location selection
+      if (onLocationSelect) {
+        map.current.on('click', (e) => {
+          const { lng, lat } = e.lngLat;
+          onLocationSelect(lat, lng);
+        });
+      }
+
+      setShowTokenInput(false);
+    } catch (error) {
+      console.error('Error initializing map:', error);
+      setIsLoading(false);
+    }
+  };
+
+  const handleTokenSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (mapboxToken) {
+      localStorage.setItem('mapbox-token', mapboxToken);
+      initializeMap(mapboxToken);
+    }
+  };
+
+  useEffect(() => {
+    // Check for saved token
+    const savedToken = localStorage.getItem('mapbox-token');
+    if (savedToken) {
+      setMapboxToken(savedToken);
+      setShowTokenInput(false);
+      initializeMap(savedToken);
+    }
+
+    return () => {
+      if (map.current) {
+        map.current.remove();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    // Update markers when data changes
+    if (map.current && !showTokenInput) {
+      // Clear existing markers and re-add them
+      // This is a simplified approach - in production, you'd want to efficiently update markers
+      map.current.remove();
+      initializeMap(mapboxToken);
+    }
+  }, [tourists, geoFences, sosAlerts]);
+
+  if (showTokenInput) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full p-8 space-y-6">
+        <div className="text-center">
+          <MapPin className="h-16 w-16 mx-auto text-primary mb-4" />
+          <h2 className="text-2xl font-bold mb-2">Initialize Interactive Map</h2>
+          <p className="text-muted-foreground mb-6">
+            Enter your Mapbox public token to enable the interactive map with real-time tracking
+          </p>
+        </div>
+
+        <form onSubmit={handleTokenSubmit} className="w-full max-w-md space-y-4">
+          <div>
+            <Label htmlFor="mapbox-token">Mapbox Public Token</Label>
+            <Input
+              id="mapbox-token"
+              type="password"
+              value={mapboxToken}
+              onChange={(e) => setMapboxToken(e.target.value)}
+              placeholder="pk.eyJ1IjoiZXhhbXBsZSIsImEiOiJjbGZ..."
+              required
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Get your token from{' '}
+              <a 
+                href="https://account.mapbox.com/access-tokens/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-primary underline"
+              >
+                mapbox.com
+              </a>
+            </p>
+          </div>
+          
+          <Button type="submit" className="w-full" disabled={!mapboxToken || isLoading}>
+            {isLoading ? 'Initializing...' : 'Initialize Map'}
+          </Button>
+        </form>
+
+        <Alert>
+          <Shield className="h-4 w-4" />
+          <AlertDescription>
+            Your Mapbox token is stored locally and used only for map rendering.
+            For production use, consider storing tokens securely in your backend.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative h-full">
+      <div ref={mapContainer} className="absolute inset-0 rounded-lg" />
+      
+      {/* Map Legend */}
+      <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-lg">
+        <h3 className="font-semibold text-sm mb-2">Map Legend</h3>
+        <div className="space-y-1 text-xs">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+            <span>Active Tourists</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+            <span>SOS Alerts</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
+            <span>Offline</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-2 bg-green-500/20 border border-green-500"></div>
+            <span>Safe Zones</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-2 bg-yellow-500/20 border border-yellow-500"></div>
+            <span>Restricted</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-2 bg-red-500/20 border border-red-500"></div>
+            <span>Danger Zones</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Statistics Overlay */}
+      <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-lg">
+        <div className="grid grid-cols-3 gap-4 text-center">
+          <div>
+            <Users className="h-4 w-4 mx-auto mb-1" />
+            <div className="text-lg font-bold">{tourists.length}</div>
+            <div className="text-xs text-muted-foreground">Tourists</div>
+          </div>
+          <div>
+            <AlertTriangle className="h-4 w-4 mx-auto mb-1 text-red-500" />
+            <div className="text-lg font-bold">{sosAlerts.length}</div>
+            <div className="text-xs text-muted-foreground">SOS Alerts</div>
+          </div>
+          <div>
+            <Shield className="h-4 w-4 mx-auto mb-1 text-green-500" />
+            <div className="text-lg font-bold">{geoFences.filter(f => f.type === 'safe').length}</div>
+            <div className="text-xs text-muted-foreground">Safe Zones</div>
+          </div>
+        </div>
+      </div>
+
+      {isLoading && (
+        <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+            <p>Loading map...</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default MapComponent;

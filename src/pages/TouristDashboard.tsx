@@ -15,6 +15,7 @@ import { BlockchainService, calculateSafetyScore, checkGeoFenceStatus, mockGeoFe
 const TouristDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [currentTouristId, setCurrentTouristId] = useState<string | null>(null);
   const [safetyScore, setSafetyScore] = useState(0);
   const [currentLocation, setCurrentLocation] = useState<{latitude: number, longitude: number} | null>(null);
