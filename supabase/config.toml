@@ -1,5 +1,8 @@
 project_id = "bleswtkoafdljurmythi"
 
+[functions.ai-chat]
+verify_jwt = false
+
 [functions.blockchain-operations]
 verify_jwt = false
 
