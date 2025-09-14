@@ -1,11 +1,14 @@
-import { Shield, Users, MapPin, UserCheck, AlertTriangle, Globe } from "lucide-react";
+import { Shield, Users, MapPin, UserCheck, AlertTriangle, Globe, LogIn, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import LanguageSelector from "@/components/LanguageSelector";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user, userRole, signOut, loading } = useAuth();
 
   const features = [
     {
@@ -42,6 +45,47 @@ const Index = () => {
       {/* Hero Section */}
       <section className="relative overflow-hidden gradient-hero">
         <div className="absolute inset-0 bg-black/10"></div>
+        <div className="absolute top-4 right-4 flex items-center gap-2">
+          <LanguageSelector />
+          {user ? (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-white/30 text-white hover:bg-white/10"
+                onClick={() => {
+                  const dashboardMap: { [key: string]: string } = {
+                    tourist: '/tourist',
+                    authority: '/authority',
+                    admin: '/admin',
+                  };
+                  navigate(dashboardMap[userRole || 'tourist'] || '/tourist');
+                }}
+              >
+                Dashboard
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="border-white/30 text-white hover:bg-white/10"
+                onClick={signOut}
+              >
+                <LogOut className="h-4 w-4 mr-1" />
+                Sign Out
+              </Button>
+            </div>
+          ) : (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="border-white/30 text-white hover:bg-white/10"
+              onClick={() => navigate('/auth')}
+            >
+              <LogIn className="h-4 w-4 mr-1" />
+              Sign In
+            </Button>
+          )}
+        </div>
         <div className="relative container mx-auto px-4 py-20 text-center text-white">
           <Badge variant="secondary" className="mb-6 bg-white/10 text-white border-white/20">
             Smart India Hackathon 2025 • Problem Statement 25002
@@ -63,7 +107,7 @@ const Index = () => {
               size="lg" 
               variant="secondary"
               className="bg-white text-primary hover:bg-white/90 shadow-medium"
-              onClick={() => navigate('/tourist')}
+              onClick={() => user ? navigate('/tourist') : navigate('/auth')}
             >
               <UserCheck className="mr-2 h-5 w-5" />
               Tourist Portal
@@ -72,7 +116,7 @@ const Index = () => {
               size="lg" 
               variant="outline"
               className="border-white/30 text-white hover:bg-white/10"
-              onClick={() => navigate('/authority')}
+              onClick={() => user && userRole === 'authority' ? navigate('/authority') : navigate('/auth')}
             >
               <Shield className="mr-2 h-5 w-5" />
               Authority Dashboard
@@ -155,9 +199,9 @@ const Index = () => {
               <CardContent>
                 <Button 
                   className="w-full gradient-primary text-white"
-                  onClick={() => navigate('/register')}
+                  onClick={() => user ? navigate('/register') : navigate('/auth?tab=signup')}
                 >
-                  Register Now
+                  {user ? 'Register Now' : 'Sign Up to Register'}
                 </Button>
               </CardContent>
             </Card>
@@ -176,7 +220,7 @@ const Index = () => {
                 <Button 
                   variant="outline" 
                   className="w-full border-tourism text-tourism hover:bg-tourism hover:text-white"
-                  onClick={() => navigate('/authority/login')}
+                  onClick={() => user && userRole === 'authority' ? navigate('/authority') : navigate('/auth')}
                 >
                   Authority Login
                 </Button>
@@ -197,7 +241,7 @@ const Index = () => {
                 <Button 
                   variant="outline" 
                   className="w-full border-warning text-warning hover:bg-warning hover:text-white"
-                  onClick={() => navigate('/admin')}
+                  onClick={() => user && userRole === 'admin' ? navigate('/admin') : navigate('/auth')}
                 >
                   Admin Access
                 </Button>

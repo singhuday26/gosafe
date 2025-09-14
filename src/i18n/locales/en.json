@@ -111,5 +111,29 @@
     "id_verified": "Digital ID verified successfully",
     "id_generated": "Digital Tourist ID generated successfully",
     "alert_resolved": "Alert resolved successfully"
+  },
+  "auth": {
+    "description": "Secure access to your safety dashboard",
+    "sign_up": "Sign Up",
+    "email": "Email Address",
+    "email_placeholder": "Enter your email",
+    "password": "Password",
+    "password_placeholder": "Enter your password",
+    "confirm_password": "Confirm Password",
+    "confirm_password_placeholder": "Confirm your password",
+    "full_name": "Full Name",
+    "full_name_placeholder": "Enter your full name",
+    "phone_number": "Phone Number",
+    "phone_placeholder": "Enter your phone number",
+    "role": "Role",
+    "select_role": "Select your role",
+    "tourist": "Tourist",
+    "authority": "Authority",
+    "admin": "Administrator",
+    "organization": "Organization",
+    "organization_placeholder": "Enter your organization",
+    "forgot_password": "Forgot Password?",
+    "send_reset_email": "Send Reset Email",
+    "passwords_dont_match": "Passwords don't match"
   }
 }
