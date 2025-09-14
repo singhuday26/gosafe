@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { 
   Shield, MapPin, AlertTriangle, Users, Phone, Clock, 
   Battery, Signal, Navigation, AlertCircle, CheckCircle 
