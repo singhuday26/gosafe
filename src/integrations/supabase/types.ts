@@ -14,6 +14,86 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          message_type: string
+          metadata: Json | null
+          response_time_ms: number | null
+          session_id: string
+          tokens_used: number | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          message_type: string
+          metadata?: Json | null
+          response_time_ms?: number | null
+          session_id: string
+          tokens_used?: number | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          message_type?: string
+          metadata?: Json | null
+          response_time_ms?: number | null
+          session_id?: string
+          tokens_used?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_chat_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "ai_chat_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_chat_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          language_code: string
+          last_activity: string
+          metadata: Json | null
+          session_id: string
+          updated_at: string
+          user_id: string
+          user_role: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          language_code?: string
+          last_activity?: string
+          metadata?: Json | null
+          session_id: string
+          updated_at?: string
+          user_id: string
+          user_role: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          language_code?: string
+          last_activity?: string
+          metadata?: Json | null
+          session_id?: string
+          updated_at?: string
+          user_id?: string
+          user_role?: string
+        }
+        Relationships: []
+      }
       digital_tourist_ids: {
         Row: {
           aadhaar_number: string
@@ -221,9 +301,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_old_chat_sessions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       generate_blockchain_hash: {
         Args: { data: Json }
         Returns: string
+      }
+      get_or_create_chat_session: {
+        Args: {
+          p_language_code?: string
+          p_metadata?: Json
+          p_user_id: string
+          p_user_role: string
+        }
+        Returns: {
+          is_new: boolean
+          session_id: string
+        }[]
       }
       get_user_role: {
         Args: { user_uuid: string }
