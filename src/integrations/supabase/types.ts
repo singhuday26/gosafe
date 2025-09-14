@@ -92,6 +92,42 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          assigned_geo_fence_ids: string[] | null
+          created_at: string
+          full_name: string | null
+          id: string
+          organization: string | null
+          phone_number: string | null
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_geo_fence_ids?: string[] | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          organization?: string | null
+          phone_number?: string | null
+          role?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_geo_fence_ids?: string[] | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          organization?: string | null
+          phone_number?: string | null
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       sos_alerts: {
         Row: {
           address: string | null
@@ -188,6 +224,14 @@ export type Database = {
       generate_blockchain_hash: {
         Args: { data: Json }
         Returns: string
+      }
+      get_user_role: {
+        Args: { user_uuid: string }
+        Returns: string
+      }
+      has_role: {
+        Args: { required_role: string; user_uuid: string }
+        Returns: boolean
       }
     }
     Enums: {
