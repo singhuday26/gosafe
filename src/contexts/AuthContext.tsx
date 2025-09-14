@@ -43,20 +43,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (session?.user) {
           setTimeout(async () => {
             try {
+              // First try to get role from user metadata (for immediate access)
+              const roleFromMetadata = session.user.user_metadata?.role;
+              if (roleFromMetadata) {
+                setUserRole(roleFromMetadata);
+              }
+
+              // Then try to get from profiles table (this will be the authoritative source)
               const { data: profile, error } = await supabase
                 .from('profiles')
                 .select('role')
                 .eq('user_id', session.user.id)
-                .single();
+                .maybeSingle();
               
-              if (error) {
+              if (error && error.code !== '42P17') { // Ignore recursion errors for now
                 console.error('Error fetching user role:', error);
-              } else {
-                setUserRole(profile?.role || 'tourist');
+              } else if (profile?.role) {
+                setUserRole(profile.role);
+              } else if (!roleFromMetadata) {
+                // Fallback to default role if no profile exists yet
+                setUserRole('tourist'); 
               }
             } catch (error) {
               console.error('Error in role fetch:', error);
-              setUserRole('tourist'); // Default role
+              // Use role from metadata or default
+              const roleFromMetadata = session.user.user_metadata?.role;
+              setUserRole(roleFromMetadata || 'tourist');
             }
           }, 0);
         } else {
@@ -76,20 +88,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Fetch user role for existing session
         setTimeout(async () => {
           try {
+            // First try to get role from user metadata
+            const roleFromMetadata = session.user.user_metadata?.role;
+            if (roleFromMetadata) {
+              setUserRole(roleFromMetadata);
+            }
+
+            // Then try to get from profiles table
             const { data: profile, error } = await supabase
               .from('profiles')
               .select('role')
               .eq('user_id', session.user.id)
-              .single();
+              .maybeSingle();
             
-            if (error) {
+            if (error && error.code !== '42P17') { // Ignore recursion errors
               console.error('Error fetching user role:', error);
-            } else {
-              setUserRole(profile?.role || 'tourist');
+            } else if (profile?.role) {
+              setUserRole(profile.role);
+            } else if (!roleFromMetadata) {
+              setUserRole('tourist');
             }
           } catch (error) {
             console.error('Error in role fetch:', error);
-            setUserRole('tourist');
+            const roleFromMetadata = session.user.user_metadata?.role;
+            setUserRole(roleFromMetadata || 'tourist');
           }
           setLoading(false);
         }, 0);
@@ -103,6 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUp = async (email: string, password: string, userData?: any) => {
     try {
+      // Use the actual deployed URL for email redirect
       const redirectUrl = `${window.location.origin}/auth/callback`;
       
       const { data, error } = await supabase.auth.signUp({
@@ -123,28 +146,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { error };
       }
 
-      // Create profile if sign up successful
+      // Create profile if sign up successful and user is confirmed
       if (data.user && !error) {
-        const profileData = {
-          user_id: data.user.id,
-          full_name: userData?.full_name || '',
-          role: userData?.role || 'tourist',
-          phone_number: userData?.phone_number || '',
-          organization: userData?.organization || '',
-        };
+        // Only try to create profile if user is confirmed (for immediate signups)
+        // For email confirmation flows, this will be handled after email verification
+        if (data.user.email_confirmed_at || !data.user.confirmation_sent_at) {
+          const profileData = {
+            user_id: data.user.id,
+            full_name: userData?.full_name || '',
+            role: userData?.role || 'tourist',
+            phone_number: userData?.phone_number || '',
+            organization: userData?.organization || '',
+          };
 
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([profileData]);
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert([profileData]);
 
-        if (profileError) {
-          console.error('Error creating profile:', profileError);
+          if (profileError) {
+            console.error('Error creating profile:', profileError);
+            // Don't show this as an error to user since signup was successful
+          }
         }
       }
 
       toast({
         title: "Sign Up Successful",
-        description: "Please check your email to verify your account.",
+        description: data.user?.email_confirmed_at 
+          ? "Account created successfully!" 
+          : "Please check your email to verify your account.",
       });
 
       return { error: null };

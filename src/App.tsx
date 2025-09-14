@@ -30,6 +30,14 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/auth/callback" element={<Auth />} />
             <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute requiredRole="">
+                  <Index />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
               path="/register" 
               element={
                 <ProtectedRoute requiredRole="tourist">
