@@ -22,10 +22,27 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          hover: "hsl(var(--primary-hover))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
+        },
+        tourism: {
+          DEFAULT: "hsl(var(--tourism))",
+          foreground: "hsl(var(--tourism-foreground))",
+        },
+        safety: {
+          DEFAULT: "hsl(var(--safety))",
+          foreground: "hsl(var(--safety-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
+        danger: {
+          DEFAULT: "hsl(var(--danger))",
+          foreground: "hsl(var(--danger-foreground))",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
