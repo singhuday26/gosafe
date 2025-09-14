@@ -1,5 +1,5 @@
 // Mock Blockchain Implementation for SIH 2025 Demo
-import { createHash } from 'crypto';
+// Browser-compatible hash function for mock blockchain
 
 export interface DigitalTouristID {
   id: string;
@@ -51,9 +51,15 @@ export class BlockchainService {
   }
 
   private generateHash(data: any): string {
-    return createHash('sha256')
-      .update(JSON.stringify(data) + Date.now())
-      .digest('hex');
+    // Simple browser-compatible hash function for mock blockchain
+    const str = JSON.stringify(data) + Date.now();
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return Math.abs(hash).toString(16);
   }
 
   generateDigitalID(touristData: Omit<DigitalTouristID, 'id' | 'blockchainHash' | 'issuedAt' | 'status'>): DigitalTouristID {
