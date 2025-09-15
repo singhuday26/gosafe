@@ -1,0 +1,32 @@
+run = "npm run dev"
+entrypoint = "src/main.tsx"
+
+[env]
+NODE_ENV = "development"
+
+[nix]
+channel = "stable-22_11"
+
+[deployment]
+run = ["sh", "-c", "npm run build && npm run preview"]
+deploymentTarget = "static"
+
+[[ports]]
+localPort = 8080
+externalPort = 80
+exposeLocalhost = true
+
+[languages.typescript]
+pattern = "**/{*.ts,*.tsx}"
+
+[languages.typescript.languageServer]
+start = "typescript-language-server --stdio"
+
+[languages.javascript]
+pattern = "**/{*.js,*.jsx}"
+
+[languages.javascript.languageServer]
+start = "typescript-language-server --stdio"
+
+[gitHubImport]
+requiredFiles = [".replit", "replit.nix", "package.json"]
