@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import LanguageSelector from "@/components/LanguageSelector";
+import LanguageTransition from "@/components/LanguageTransition";
 import { useTranslation } from "react-i18next";
 
 const Index = () => {
@@ -137,22 +138,24 @@ const Index = () => {
           )}
         </div>
         <div className="relative container mx-auto px-4 py-12 sm:py-16 lg:py-20 text-center text-white">
-          <Badge
-            variant="secondary"
-            className="mb-4 sm:mb-6 bg-white/10 text-white border-white/20 font-body text-xs sm:text-sm"
-          >
-            {t("home.badge")}
-          </Badge>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-heading font-bold mb-4 sm:mb-6 leading-tight px-2">
-            {t("home.title.line1")}
-            <br />
-            <span className="bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
-              {t("home.title.line2")}
-            </span>
-          </h1>
-          <p className="text-lg sm:text-xl md:text-2xl mb-6 sm:mb-8 text-white/90 max-w-3xl mx-auto font-body px-2">
-            {t("home.description")}
-          </p>
+          <LanguageTransition>
+            <Badge
+              variant="secondary"
+              className="mb-4 sm:mb-6 bg-white/10 text-white border-white/20 font-body text-xs sm:text-sm"
+            >
+              {t("home.badge")}
+            </Badge>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-heading font-bold mb-4 sm:mb-6 leading-tight px-2">
+              {t("home.title.line1")}
+              <br />
+              <span className="bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
+                {t("home.title.line2")}
+              </span>
+            </h1>
+            <p className="text-lg sm:text-xl md:text-2xl mb-6 sm:mb-8 text-white/90 max-w-3xl mx-auto font-body px-2">
+              {t("home.description")}
+            </p>
+          </LanguageTransition>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Button
@@ -259,11 +262,10 @@ const Index = () => {
               <CardHeader>
                 <CardTitle className="flex items-center font-heading text-ne-tea-brown">
                   <UserCheck className="mr-2 h-5 w-5 text-ne-tea-brown" />
-                  Tourist Registration
+                  {t("home.cards.tourist_registration.title")}
                 </CardTitle>
                 <CardDescription className="font-body">
-                  Get your blockchain-based Digital Tourist ID with
-                  Aadhaar/Passport verification for North East India travel
+                  {t("home.cards.tourist_registration.description")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -273,7 +275,11 @@ const Index = () => {
                     user ? navigate("/register") : navigate("/auth?tab=signup")
                   }
                 >
-                  {user ? "Register Now" : "Sign Up to Register"}
+                  {user
+                    ? t("home.cards.tourist_registration.button_authenticated")
+                    : t(
+                        "home.cards.tourist_registration.button_unauthenticated"
+                      )}
                 </Button>
               </CardContent>
             </Card>
@@ -282,11 +288,10 @@ const Index = () => {
               <CardHeader>
                 <CardTitle className="flex items-center font-heading text-ne-tea-brown">
                   <Shield className="mr-2 h-5 w-5 text-ne-tea-brown" />
-                  Authority Access
+                  {t("home.cards.authority_access.title")}
                 </CardTitle>
                 <CardDescription className="font-body">
-                  Police and tourism officials can monitor tourists and respond
-                  to incidents across NE states
+                  {t("home.cards.authority_access.description")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -299,7 +304,7 @@ const Index = () => {
                       : navigate("/auth")
                   }
                 >
-                  Authority Login
+                  {t("home.cards.authority_access.button")}
                 </Button>
               </CardContent>
             </Card>
@@ -308,11 +313,10 @@ const Index = () => {
               <CardHeader>
                 <CardTitle className="flex items-center font-heading text-ne-tea-brown">
                   <Users className="mr-2 h-5 w-5 text-ne-tea-brown" />
-                  Admin Panel
+                  {t("home.cards.admin_panel.title")}
                 </CardTitle>
                 <CardDescription className="font-body">
-                  System administrators can manage zones, analytics, and system
-                  configuration for the entire region
+                  {t("home.cards.admin_panel.description")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -325,7 +329,7 @@ const Index = () => {
                       : navigate("/auth")
                   }
                 >
-                  Admin Access
+                  {t("home.cards.admin_panel.button")}
                 </Button>
               </CardContent>
             </Card>
@@ -340,176 +344,208 @@ const Index = () => {
             <div className="flex items-center justify-center mb-4">
               <Shield className="h-8 w-8 mr-2" />
               <span className="text-2xl font-bold font-heading">
-                Smart Tourist Safety
+                {t("footer.title")}
               </span>
             </div>
             <p className="text-white/80 mb-4 font-body">
-              Ministry of Tourism & Home Affairs • Smart India Hackathon 2025
+              {t("footer.subtitle")}
             </p>
             <div className="mb-4 font-body text-white/70">
-              Protecting tourists across the Seven Sister States and Sikkim
+              {t("footer.description")}
             </div>
           </div>
-          
+
           {/* Useful Links */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 text-sm">
             <div>
-              <h4 className="font-semibold mb-3 text-white">Government Resources</h4>
+              <h4 className="font-semibold mb-3 text-white">
+                {t("footer.sections.government_resources.title")}
+              </h4>
               <ul className="space-y-2 text-white/80">
                 <li>
-                  <a 
-                    href="https://www.incredibleindia.org" 
-                    target="_blank" 
+                  <a
+                    href="https://www.incredibleindia.org"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-white transition-colors"
                   >
-                    Incredible India
+                    {t(
+                      "footer.sections.government_resources.links.incredible_india"
+                    )}
                   </a>
                 </li>
                 <li>
-                  <a 
-                    href="https://tourism.gov.in" 
-                    target="_blank" 
+                  <a
+                    href="https://tourism.gov.in"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-white transition-colors"
                   >
-                    Ministry of Tourism
+                    {t(
+                      "footer.sections.government_resources.links.ministry_tourism"
+                    )}
                   </a>
                 </li>
                 <li>
-                  <a 
-                    href="https://www.mha.gov.in" 
-                    target="_blank" 
+                  <a
+                    href="https://www.mha.gov.in"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-white transition-colors"
                   >
-                    Ministry of Home Affairs
+                    {t(
+                      "footer.sections.government_resources.links.ministry_home_affairs"
+                    )}
                   </a>
                 </li>
               </ul>
             </div>
-            
+
             <div>
-              <h4 className="font-semibold mb-3 text-white">Northeast Tourism</h4>
+              <h4 className="font-semibold mb-3 text-white">
+                {t("footer.sections.northeast_tourism.title")}
+              </h4>
               <ul className="space-y-2 text-white/80">
                 <li>
-                  <a 
-                    href="https://assamtourism.gov.in" 
-                    target="_blank" 
+                  <a
+                    href="https://assamtourism.gov.in"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-white transition-colors"
                   >
-                    Assam Tourism
+                    {t("footer.sections.northeast_tourism.links.assam_tourism")}
                   </a>
                 </li>
                 <li>
-                  <a 
-                    href="https://www.arunachaltourism.com" 
-                    target="_blank" 
+                  <a
+                    href="https://www.arunachaltourism.com"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-white transition-colors"
                   >
-                    Arunachal Tourism
+                    {t(
+                      "footer.sections.northeast_tourism.links.arunachal_tourism"
+                    )}
                   </a>
                 </li>
                 <li>
-                  <a 
-                    href="https://meghalayatourism.in" 
-                    target="_blank" 
+                  <a
+                    href="https://meghalayatourism.in"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-white transition-colors"
                   >
-                    Meghalaya Tourism
+                    {t(
+                      "footer.sections.northeast_tourism.links.meghalaya_tourism"
+                    )}
                   </a>
                 </li>
                 <li>
-                  <a 
-                    href="https://manipurtourism.gov.in" 
-                    target="_blank" 
+                  <a
+                    href="https://manipurtourism.gov.in"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-white transition-colors"
                   >
-                    Manipur Tourism
+                    {t(
+                      "footer.sections.northeast_tourism.links.manipur_tourism"
+                    )}
                   </a>
                 </li>
               </ul>
             </div>
-            
+
             <div>
-              <h4 className="font-semibold mb-3 text-white">Emergency Services</h4>
+              <h4 className="font-semibold mb-3 text-white">
+                {t("footer.sections.emergency_services.title")}
+              </h4>
               <ul className="space-y-2 text-white/80">
                 <li>
-                  <a href="tel:100" className="hover:text-white transition-colors">
-                    📞 Police: 100
+                  <a
+                    href="tel:100"
+                    className="hover:text-white transition-colors"
+                  >
+                    {t("footer.sections.emergency_services.links.police")}
                   </a>
                 </li>
                 <li>
-                  <a href="tel:108" className="hover:text-white transition-colors">
-                    🚑 Ambulance: 108
+                  <a
+                    href="tel:108"
+                    className="hover:text-white transition-colors"
+                  >
+                    {t("footer.sections.emergency_services.links.ambulance")}
                   </a>
                 </li>
                 <li>
-                  <a href="tel:1363" className="hover:text-white transition-colors">
-                    🚨 Tourist Helpline: 1363
+                  <a
+                    href="tel:1363"
+                    className="hover:text-white transition-colors"
+                  >
+                    {t(
+                      "footer.sections.emergency_services.links.tourist_helpline"
+                    )}
                   </a>
                 </li>
                 <li>
-                  <a href="tel:112" className="hover:text-white transition-colors">
-                    🆘 Emergency: 112
+                  <a
+                    href="tel:112"
+                    className="hover:text-white transition-colors"
+                  >
+                    {t("footer.sections.emergency_services.links.emergency")}
                   </a>
                 </li>
               </ul>
             </div>
-            
+
             <div>
-              <h4 className="font-semibold mb-3 text-white">Support</h4>
+              <h4 className="font-semibold mb-3 text-white">
+                {t("footer.sections.support.title")}
+              </h4>
               <ul className="space-y-2 text-white/80">
                 <li>
-                  <button 
+                  <button
                     onClick={() => navigate("/help")}
                     className="hover:text-white transition-colors text-left"
                   >
-                    Help Center
+                    {t("footer.sections.support.links.help_center")}
                   </button>
                 </li>
                 <li>
-                  <button 
+                  <button
                     onClick={() => navigate("/contact")}
                     className="hover:text-white transition-colors text-left"
                   >
-                    Contact Us
+                    {t("footer.sections.support.links.contact_us")}
                   </button>
                 </li>
                 <li>
-                  <button 
+                  <button
                     onClick={() => navigate("/privacy")}
                     className="hover:text-white transition-colors text-left"
                   >
-                    Privacy Policy
+                    {t("footer.sections.support.links.privacy_policy")}
                   </button>
                 </li>
                 <li>
-                  <button 
+                  <button
                     onClick={() => navigate("/terms")}
                     className="hover:text-white transition-colors text-left"
                   >
-                    Terms of Service
+                    {t("footer.sections.support.links.terms_of_service")}
                   </button>
                 </li>
               </ul>
             </div>
           </div>
-          
+
           <div className="border-t border-white/20 pt-6 text-center">
             <Badge
               variant="secondary"
               className="bg-white/10 text-white border-white/20 font-body mb-3"
             >
-              Problem Statement ID: 25002
+              {t("footer.problem_statement")}
             </Badge>
-            <p className="text-white/60 text-xs">
-              © 2025 Smart Tourist Safety Portal. Developed for Smart India Hackathon 2025.
-            </p>
+            <p className="text-white/60 text-xs">{t("footer.copyright")}</p>
           </div>
         </div>
       </footer>

@@ -1,0 +1,216 @@
+{
+  "nav": {
+    "signIn": "Entrar",
+    "signOut": "Sair",
+    "dashboard": "Painel"
+  },
+  "home": {
+    "badge": "Smart India Hackathon 2025 • Declaração de Problema 25002",
+    "title": {
+      "line1": "Sistema de Monitoramento",
+      "line2": "de Segurança Turística Inteligente"
+    },
+    "description": "Monitoramento de segurança alimentado por IA com IDs digitais blockchain, geo-cercamento em tempo real e resposta de emergência instantânea para experiências turísticas seguras no nordeste da Índia.",
+    "buttons": {
+      "tourist": "Portal do Turista",
+      "authority": "Painel das Autoridades"
+    },
+    "cards": {
+      "tourist_registration": {
+        "title": "Registro de Turista",
+        "description": "Registre-se como turista e obtenha acesso instantâneo a recursos de segurança e assistência de emergência",
+        "button_authenticated": "Registrar Agora",
+        "button_unauthenticated": "Entrar para Registrar"
+      },
+      "authority_access": {
+        "title": "Acesso das Autoridades",
+        "description": "Polícia e oficiais de turismo podem monitorar turistas e responder a incidentes nos estados do nordeste",
+        "button": "Login das Autoridades"
+      },
+      "admin_panel": {
+        "title": "Painel de Administração",
+        "description": "Administradores do sistema podem gerenciar zonas, análises e configuração do sistema para toda a região",
+        "button": "Acesso de Administrador"
+      }
+    }
+  },
+  "features": {
+    "badge": "Recursos Principais",
+    "title": "Ecossistema de Segurança Abrangente",
+    "description": "Aproveitando tecnologia de ponta para garantir a segurança turística através de monitoramento proativo e capacidades de resposta instantânea no nordeste da Índia.",
+    "list": {
+      "digitalId": {
+        "title": "ID Digital Blockchain",
+        "description": "Identificação turística segura e à prova de violação com validação de viagem"
+      },
+      "geoFencing": {
+        "title": "Geo-cercamento Inteligente",
+        "description": "Monitoramento de localização alimentado por IA com alertas de zona de segurança"
+      },
+      "sos": {
+        "title": "SOS de Emergência",
+        "description": "Sistema de alerta instantâneo com compartilhamento de localização em tempo real"
+      },
+      "authority": {
+        "title": "Painel das Autoridades",
+        "description": "Sistema abrangente de monitoramento e resposta a incidentes"
+      }
+    },
+    "dashboard": {
+      "digital-id": {
+        "title": "ID Digital Turístico",
+        "description": "ID turístico verificável apoiado por blockchain (temporário)."
+      },
+      "sos": {
+        "title": "SOS e Emergências",
+        "description": "SOS multi-gatilho com captura de contexto e escalação multi-canal."
+      },
+      "geo-fencing": {
+        "title": "Geo-cercamento Inteligente",
+        "description": "Monitoramento de localização alimentado por IA com alertas de zona de segurança."
+      },
+      "real-time": {
+        "title": "Monitoramento em Tempo Real",
+        "description": "Rastreamento ao vivo e notificações instantâneas para segurança aprimorada."
+      },
+      "ai-chatbot": {
+        "title": "Assistente IA",
+        "description": "Suporte inteligente 24/7 e orientação de emergência."
+      },
+      "iot-wearables": {
+        "title": "Dispositivos IoT Vestíveis",
+        "description": "Dispositivos inteligentes para monitoramento contínuo de saúde e segurança."
+      },
+      "efir": {
+        "title": "FIR Eletrônico",
+        "description": "Sistema digital de relatório de incidentes e gerenciamento de casos."
+      },
+      "multilingual": {
+        "title": "Suporte Multilíngue",
+        "description": "Suporte para mais de 70 idiomas incluindo todos os idiomas do nordeste da Índia."
+      },
+      "privacy-security": {
+        "title": "Privacidade e Segurança",
+        "description": "Criptografia de ponta a ponta e processamento de dados com foco na privacidade."
+      },
+      "admin-settings": {
+        "title": "Configurações de Administrador",
+        "description": "Ferramentas abrangentes de configuração e gerenciamento do sistema."
+      },
+      "learn_more": "Saber mais"
+    }
+  },
+  "stats": {
+    "activeTourists": {
+      "label": "Turistas Ativos",
+      "value": "12.458",
+      "trend": "+15%"
+    },
+    "safetyScore": {
+      "label": "Pontuação de Segurança",
+      "value": "94,2%",
+      "trend": "+2,1%"
+    },
+    "responseTime": {
+      "label": "Tempo de Resposta",
+      "value": "< 3 min",
+      "trend": "-8%"
+    },
+    "incidentsResolved": {
+      "label": "Incidentes Resolvidos",
+      "value": "1.247",
+      "trend": "+12%"
+    }
+  },
+  "common": {
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "save": "Salvar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "submit": "Enviar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "refresh": "Atualizar"
+  },
+  "navigation": {
+    "home": "Início",
+    "register": "Registrar",
+    "dashboard": "Painel",
+    "login": "Entrar",
+    "logout": "Sair"
+  },
+  "auth": {
+    "description": "Acesso seguro ao seu painel de segurança",
+    "sign_up": "Registrar-se",
+    "email": "Endereço de Email",
+    "email_placeholder": "Digite seu email",
+    "password": "Senha",
+    "password_placeholder": "Digite sua senha",
+    "confirm_password": "Confirmar Senha",
+    "confirm_password_placeholder": "Confirme sua senha",
+    "full_name": "Nome Completo",
+    "full_name_placeholder": "Digite seu nome completo",
+    "phone_number": "Número de Telefone",
+    "phone_placeholder": "Digite seu número de telefone",
+    "role": "Função",
+    "select_role": "Selecione sua função",
+    "tourist": "Turista",
+    "authority": "Autoridade",
+    "admin": "Administrador",
+    "organization": "Organização",
+    "organization_placeholder": "Digite sua organização",
+    "forgot_password": "Esqueceu a senha?",
+    "send_reset_email": "Enviar Email de Reset",
+    "passwords_dont_match": "As senhas não coincidem"
+  },
+  "footer": {
+    "title": "Segurança Turística Inteligente",
+    "subtitle": "Ministério do Turismo e Assuntos Internos • Smart India Hackathon 2025",
+    "description": "Protegendo turistas nos Sete Estados Irmãos e Sikkim",
+    "sections": {
+      "government_resources": {
+        "title": "Recursos Governamentais",
+        "links": {
+          "incredible_india": "Índia Incrível",
+          "ministry_tourism": "Ministério do Turismo",
+          "ministry_home_affairs": "Ministério dos Assuntos Internos"
+        }
+      },
+      "northeast_tourism": {
+        "title": "Turismo do Nordeste",
+        "links": {
+          "assam_tourism": "Turismo de Assam",
+          "arunachal_tourism": "Turismo de Arunachal",
+          "meghalaya_tourism": "Turismo de Meghalaya",
+          "manipur_tourism": "Turismo de Manipur"
+        }
+      },
+      "emergency_services": {
+        "title": "Serviços de Emergência",
+        "links": {
+          "police": "📞 Polícia: 100",
+          "ambulance": "🚑 Ambulância: 108",
+          "tourist_helpline": "🚨 Linha de Ajuda Turística: 1363",
+          "emergency": "🆘 Emergência: 112"
+        }
+      },
+      "support": {
+        "title": "Suporte",
+        "links": {
+          "help_center": "Central de Ajuda",
+          "contact_us": "Entre em Contato",
+          "privacy_policy": "Política de Privacidade",
+          "terms_of_service": "Termos de Serviço"
+        }
+      }
+    },
+    "problem_statement": "ID da Declaração de Problema: 25002",
+    "copyright": "© 2025 Portal de Segurança Turística Inteligente. Desenvolvido para Smart India Hackathon 2025."
+  }
+}
