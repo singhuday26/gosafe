@@ -86,9 +86,14 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<MapboxMap | null>(null);
   const markersRef = useRef<Marker[]>([]);
-  const [mapboxToken, setMapboxToken] = useState("");
-  const [showTokenInput, setShowTokenInput] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasMapboxToken, setHasMapboxToken] = useState(false);
+
+  const mapboxToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+
+  useEffect(() => {
+    setHasMapboxToken(!!mapboxToken);
+  }, [mapboxToken]);
 
   // Clear existing markers
   const clearMarkers = useCallback(() => {
@@ -248,8 +253,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
             onLocationSelect(lat, lng);
           });
         }
-
-        setShowTokenInput(false);
       } catch (error) {
         console.error("Error initializing map:", error);
         setIsLoading(false);
@@ -266,90 +269,41 @@ const MapComponent: React.FC<MapComponentProps> = ({
     ]
   );
 
-  const handleTokenSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (mapboxToken) {
-      localStorage.setItem("mapbox-token", mapboxToken);
+  useEffect(() => {
+    if (hasMapboxToken && mapboxToken) {
       initializeMap(mapboxToken);
     }
-  };
-
-  useEffect(() => {
-    // Check for saved token
-    const loadMap = async () => {
-      const savedToken = localStorage.getItem("mapbox-token");
-      if (savedToken) {
-        setMapboxToken(savedToken);
-        setShowTokenInput(false);
-        await initializeMap(savedToken);
-      }
-    };
-
-    loadMap();
 
     return () => {
       if (map.current) {
         map.current.remove();
       }
     };
-  }, [initializeMap]);
+  }, [initializeMap, hasMapboxToken, mapboxToken]);
 
-  if (showTokenInput) {
+  if (!hasMapboxToken) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-8 space-y-6">
-        <div className="text-center">
-          <MapPin className="h-16 w-16 mx-auto text-primary mb-4" />
-          <h2 className="text-2xl font-bold mb-2">
-            Initialize Interactive Map
-          </h2>
-          <p className="text-muted-foreground mb-6">
-            Enter your Mapbox public token to enable the interactive map with
-            real-time tracking
-          </p>
-        </div>
-
-        <form
-          onSubmit={handleTokenSubmit}
-          className="w-full max-w-md space-y-4"
-        >
-          <div>
-            <Label htmlFor="mapbox-token">Mapbox Public Token</Label>
-            <Input
-              id="mapbox-token"
-              type="password"
-              value={mapboxToken}
-              onChange={(e) => setMapboxToken(e.target.value)}
-              placeholder="pk.eyJ1IjoiZXhhbXBsZSIsImEiOiJjbGZ..."
-              required
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              Get your token from{" "}
-              <a
-                href="https://account.mapbox.com/access-tokens/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary underline"
-              >
-                mapbox.com
-              </a>
-            </p>
-          </div>
-
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={!mapboxToken || isLoading}
-          >
-            {isLoading ? "Initializing..." : "Initialize Map"}
-          </Button>
-        </form>
-
+      <div className="flex flex-col items-center justify-center h-64 bg-muted/20 rounded-lg p-6">
+        <MapPin className="h-12 w-12 text-muted-foreground mb-4" />
+        <h3 className="text-lg font-semibold mb-2">
+          Map Configuration Required
+        </h3>
+        <p className="text-muted-foreground text-center max-w-md mb-4">
+          Please add your Mapbox access token to the environment variables
+          (VITE_MAPBOX_ACCESS_TOKEN) to enable the interactive map.
+        </p>
         <Alert>
           <Shield className="h-4 w-4" />
           <AlertDescription>
-            Your Mapbox token is stored locally and used only for map rendering.
-            For production use, consider storing tokens securely in your
-            backend.
+            Get your token from{" "}
+            <a
+              href="https://account.mapbox.com/access-tokens/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary underline"
+            >
+              mapbox.com
+            </a>
           </AlertDescription>
         </Alert>
       </div>
