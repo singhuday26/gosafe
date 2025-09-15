@@ -1,4 +1,127 @@
 {
+  "nav": {
+    "signIn": "Iniciar Sesión",
+    "signOut": "Cerrar Sesión",
+    "dashboard": "Panel de Control"
+  },
+  "home": {
+    "badge": "Smart India Hackathon 2025 • Declaración del Problema 25002",
+    "title": {
+      "line1": "Seguridad Turística Inteligente",
+      "line2": "Sistema de Monitoreo"
+    },
+    "description": "Monitoreo de seguridad impulsado por IA con IDs digitales blockchain, geo-cercado en tiempo real y respuesta de emergencia instantánea para experiencias turísticas seguras en el noreste de India.",
+    "buttons": {
+      "tourist": "Portal Turístico",
+      "authority": "Panel de Autoridades"
+    },
+    "cards": {
+      "tourist_registration": {
+        "title": "Registro de Turistas",
+        "description": "Regístrate como turista y obtén acceso instantáneo a funciones de seguridad y asistencia de emergencia",
+        "button_authenticated": "Registrarse Ahora",
+        "button_unauthenticated": "Registrarse para Inscribirse"
+      },
+      "authority_access": {
+        "title": "Acceso de Autoridades",
+        "description": "La policía y los funcionarios de turismo pueden monitorear turistas y responder a incidentes en los estados del noreste",
+        "button": "Inicio de Sesión de Autoridades"
+      },
+      "admin_panel": {
+        "title": "Panel de Administración",
+        "description": "Los administradores del sistema pueden gestionar zonas, análisis y configuración del sistema para toda la región",
+        "button": "Acceso de Administrador"
+      }
+    }
+  },
+  "features": {
+    "badge": "Características Principales",
+    "title": "Ecosistema de Seguridad Integral",
+    "description": "Aprovechando tecnología de vanguardia para garantizar la seguridad turística a través de monitoreo proactivo y capacidades de respuesta instantánea en el noreste de India.",
+    "list": {
+      "digitalId": {
+        "title": "ID Digital Blockchain",
+        "description": "Identificación turística segura y a prueba de manipulaciones con validación de viaje"
+      },
+      "geoFencing": {
+        "title": "Geo-cercado Inteligente",
+        "description": "Monitoreo de ubicación impulsado por IA con alertas de zona de seguridad"
+      },
+      "sos": {
+        "title": "SOS de Emergencia",
+        "description": "Sistema de alerta instantánea con compartición de ubicación en tiempo real"
+      },
+      "authority": {
+        "title": "Panel de Autoridades",
+        "description": "Sistema integral de monitoreo y respuesta a incidentes"
+      }
+    },
+    "dashboard": {
+      "digital-id": {
+        "title": "ID Digital Turístico",
+        "description": "ID turístico verificable respaldado por blockchain (temporal)."
+      },
+      "sos": {
+        "title": "SOS y Emergencias",
+        "description": "SOS multi-activador con captura de contexto y escalación multi-canal."
+      },
+      "geo-fencing": {
+        "title": "Geo-cercado Inteligente",
+        "description": "Monitoreo de ubicación impulsado por IA con alertas de zona de seguridad."
+      },
+      "real-time": {
+        "title": "Monitoreo en Tiempo Real",
+        "description": "Seguimiento en vivo y notificaciones instantáneas para mayor seguridad."
+      },
+      "ai-chatbot": {
+        "title": "Asistente IA",
+        "description": "Soporte inteligente 24/7 y orientación de emergencia."
+      },
+      "iot-wearables": {
+        "title": "Dispositivos IoT Portables",
+        "description": "Dispositivos inteligentes para monitoreo continuo de salud y seguridad."
+      },
+      "efir": {
+        "title": "FIR Electrónico",
+        "description": "Sistema digital de reporte de incidentes y gestión de casos."
+      },
+      "multilingual": {
+        "title": "Soporte Multilingüe",
+        "description": "Soporte para más de 70 idiomas incluyendo todos los idiomas del noreste de India."
+      },
+      "privacy-security": {
+        "title": "Privacidad y Seguridad",
+        "description": "Cifrado de extremo a extremo y manejo de datos con enfoque en la privacidad."
+      },
+      "admin-settings": {
+        "title": "Configuraciones de Administrador",
+        "description": "Herramientas integrales de configuración y gestión del sistema."
+      },
+      "learn_more": "Saber más"
+    }
+  },
+  "stats": {
+    "activeTourists": {
+      "label": "Turistas Activos",
+      "value": "12,458",
+      "trend": "+15%"
+    },
+    "safetyScore": {
+      "label": "Puntuación de Seguridad",
+      "value": "94.2%",
+      "trend": "+2.1%"
+    },
+    "responseTime": {
+      "label": "Tiempo de Respuesta",
+      "value": "< 3 min",
+      "trend": "-8%"
+    },
+    "incidentsResolved": {
+      "label": "Incidentes Resueltos",
+      "value": "1,247",
+      "trend": "+12%"
+    }
+  },
   "common": {
     "loading": "Cargando...",
     "error": "Error",
@@ -22,94 +145,72 @@
     "login": "Iniciar Sesión",
     "logout": "Cerrar Sesión"
   },
-  "tourist": {
-    "dashboard": {
-      "title": "Panel del Turista",
-      "safety_score": "Puntuación de Seguridad",
-      "current_location": "Ubicación Actual",
-      "sos_alert": "Alerta SOS",
-      "emergency_contacts": "Contactos de Emergencia",
-      "quick_actions": "Acciones Rápidas",
-      "device_status": "Estado del Dispositivo",
-      "nearby_zones": "Zonas Cercanas",
-      "recent_activities": "Actividades Recientes"
+  "auth": {
+    "description": "Acceso seguro a tu panel de seguridad",
+    "sign_up": "Registrarse",
+    "email": "Dirección de Correo",
+    "email_placeholder": "Ingresa tu correo",
+    "password": "Contraseña",
+    "password_placeholder": "Ingresa tu contraseña",
+    "confirm_password": "Confirmar Contraseña",
+    "confirm_password_placeholder": "Confirma tu contraseña",
+    "full_name": "Nombre Completo",
+    "full_name_placeholder": "Ingresa tu nombre completo",
+    "phone_number": "Número de Teléfono",
+    "phone_placeholder": "Ingresa tu número de teléfono",
+    "role": "Rol",
+    "select_role": "Selecciona tu rol",
+    "tourist": "Turista",
+    "authority": "Autoridad",
+    "admin": "Administrador",
+    "organization": "Organización",
+    "organization_placeholder": "Ingresa tu organización",
+    "forgot_password": "¿Olvidaste tu contraseña?",
+    "send_reset_email": "Enviar Correo de Restablecimiento",
+    "passwords_dont_match": "Las contraseñas no coinciden"
+  },
+  "footer": {
+    "title": "Seguridad Turística Inteligente",
+    "subtitle": "Ministerio de Turismo y Asuntos del Hogar • Smart India Hackathon 2025",
+    "description": "Protegiendo turistas en los Siete Estados Hermanos y Sikkim",
+    "sections": {
+      "government_resources": {
+        "title": "Recursos Gubernamentales",
+        "links": {
+          "incredible_india": "India Increíble",
+          "ministry_tourism": "Ministerio de Turismo",
+          "ministry_home_affairs": "Ministerio de Asuntos del Hogar"
+        }
+      },
+      "northeast_tourism": {
+        "title": "Turismo del Noreste",
+        "links": {
+          "assam_tourism": "Turismo de Assam",
+          "arunachal_tourism": "Turismo de Arunachal",
+          "meghalaya_tourism": "Turismo de Meghalaya",
+          "manipur_tourism": "Turismo de Manipur"
+        }
+      },
+      "emergency_services": {
+        "title": "Servicios de Emergencia",
+        "links": {
+          "police": "📞 Policía: 100",
+          "ambulance": "🚑 Ambulancia: 108",
+          "tourist_helpline": "🚨 Línea de Ayuda Turística: 1363",
+          "emergency": "🆘 Emergencia: 112"
+        }
+      },
+      "support": {
+        "title": "Soporte",
+        "links": {
+          "help_center": "Centro de Ayuda",
+          "contact_us": "Contáctanos",
+          "privacy_policy": "Política de Privacidad",
+          "terms_of_service": "Términos de Servicio"
+        }
+      }
     },
-    "registration": {
-      "title": "Registro de Turista",
-      "personal_info": "Información Personal",
-      "trip_info": "Información del Viaje",
-      "emergency_contacts": "Contactos de Emergencia",
-      "tourist_name": "Nombre Completo",
-      "aadhaar_number": "Número Aadhaar",
-      "passport_number": "Número de Pasaporte",
-      "trip_itinerary": "Itinerario del Viaje",
-      "contact_name": "Nombre del Contacto",
-      "relationship": "Relación",
-      "phone_number": "Número de Teléfono",
-      "email": "Dirección de Email"
-    },
-    "sos": {
-      "panic": "Pánico",
-      "medical": "Emergencia Médica",
-      "security": "Problema de Seguridad",
-      "other": "Otra Emergencia",
-      "alert_sent": "¡Alerta SOS enviada!",
-      "alert_active": "Alerta SOS Activa",
-      "location_shared": "Su ubicación se está compartiendo con las autoridades"
-    }
-  },
-  "authority": {
-    "dashboard": {
-      "title": "Panel de Autoridad",
-      "overview": "Resumen",
-      "tourists": "Turistas",
-      "alerts": "Alertas",
-      "map_view": "Vista del Mapa",
-      "active_tourists": "Turistas Activos",
-      "active_alerts": "Alertas SOS Activas",
-      "resolved_today": "Resueltos Hoy",
-      "avg_response_time": "Tiempo Promedio de Respuesta"
-    },
-    "login": {
-      "title": "Inicio de Sesión de Autoridad",
-      "authority_id": "ID de Autoridad",
-      "password": "Contraseña",
-      "invalid_credentials": "Credenciales inválidas"
-    }
-  },
-  "admin": {
-    "dashboard": {
-      "title": "Panel de Administrador",
-      "system_overview": "Resumen del Sistema",
-      "user_management": "Gestión de Usuarios",
-      "security_logs": "Registros de Seguridad",
-      "system_health": "Salud del Sistema"
-    }
-  },
-  "map": {
-    "legend": "Leyenda del Mapa",
-    "active_tourists": "Turistas Activos",
-    "sos_alerts": "Alertas SOS",
-    "offline": "Desconectado",
-    "safe_zones": "Zonas Seguras",
-    "restricted": "Áreas Restringidas",
-    "danger_zones": "Zonas de Peligro",
-    "initialize_map": "Inicializar Mapa Interactivo",
-    "mapbox_token": "Token Público de Mapbox",
-    "get_token": "Obtén tu token en mapbox.com"
-  },
-  "geofence": {
-    "safe": "Zona Segura",
-    "restricted": "Área Restringida",
-    "danger": "Zona de Peligro",
-    "entered": "Ingresó a {{type}}",
-    "exited": "Salió de {{type}}"
-  },
-  "notifications": {
-    "sos_created": "Alerta SOS creada exitosamente",
-    "location_updated": "Ubicación actualizada",
-    "id_verified": "ID Digital verificado exitosamente",
-    "id_generated": "ID Digital de Turista generado exitosamente",
-    "alert_resolved": "Alerta resuelta exitosamente"
+    "problem_statement": "ID de Declaración del Problema: 25002",
+    "copyright": "© 2025 Portal de Seguridad Turística Inteligente. Desarrollado para Smart India Hackathon 2025."
   }
 }

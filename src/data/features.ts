@@ -151,4 +151,157 @@ export const FEATURES: Feature[] = [
       },
     ],
   },
+  {
+    id: "geo-fencing",
+    title: "Smart Geo-Fencing",
+    short: "AI-powered location monitoring with safety zone alerts.",
+    icon: "MapPin",
+    heroColor: "bg-ne-assam",
+    sections: [
+      {
+        heading: "Overview",
+        body: "Advanced geofencing system that monitors tourist locations and provides safety zone alerts.",
+        bullets: [
+          "Real-time location tracking",
+          "Smart safety zone detection",
+          "Automatic alerts for restricted areas",
+          "AI-powered risk assessment",
+        ],
+      },
+    ],
+  },
+  {
+    id: "real-time",
+    title: "Real-time Monitoring",
+    short: "Live tracking and instant notifications for enhanced safety.",
+    icon: "Shield",
+    heroColor: "bg-ne-meghalaya",
+    sections: [
+      {
+        heading: "Overview",
+        body: "Comprehensive real-time monitoring system for tourist safety and security.",
+        bullets: [
+          "Live location tracking",
+          "Instant notifications",
+          "24/7 monitoring dashboard",
+          "Automated safety alerts",
+        ],
+      },
+    ],
+  },
+  {
+    id: "ai-chatbot",
+    title: "AI Assistant",
+    short: "24/7 intelligent support and emergency guidance.",
+    icon: "MessageSquare",
+    heroColor: "bg-ne-mizoram",
+    sections: [
+      {
+        heading: "Overview",
+        body: "AI-powered assistant providing round-the-clock support and emergency guidance.",
+        bullets: [
+          "Natural language processing",
+          "Emergency protocol guidance",
+          "Multilingual support",
+          "Contextual assistance",
+        ],
+      },
+    ],
+  },
+  {
+    id: "iot-wearables",
+    title: "IoT Wearables",
+    short: "Smart devices for continuous health and safety monitoring.",
+    icon: "Wifi",
+    heroColor: "bg-ne-nagaland",
+    sections: [
+      {
+        heading: "Overview",
+        body: "Smart wearable devices for continuous health and safety monitoring.",
+        bullets: [
+          "Health vitals monitoring",
+          "Activity tracking",
+          "Emergency detection",
+          "Seamless connectivity",
+        ],
+      },
+    ],
+  },
+  {
+    id: "efir",
+    title: "Electronic FIR",
+    short: "Digital incident reporting and case management system.",
+    icon: "FileText",
+    heroColor: "bg-ne-tripura",
+    sections: [
+      {
+        heading: "Overview",
+        body: "Digital system for filing and managing First Information Reports (FIR).",
+        bullets: [
+          "Online FIR filing",
+          "Digital case management",
+          "Status tracking",
+          "Document management",
+        ],
+      },
+    ],
+  },
+  {
+    id: "multilingual",
+    title: "Multilingual Support",
+    short:
+      "Support for 70+ languages including all Northeast Indian languages.",
+    icon: "Globe",
+    heroColor: "bg-ne-manipur",
+    sections: [
+      {
+        heading: "Overview",
+        body: "Comprehensive multilingual support for diverse user needs.",
+        bullets: [
+          "70+ language support",
+          "Northeast Indian languages",
+          "Real-time translation",
+          "Cultural adaptation",
+        ],
+      },
+    ],
+  },
+  {
+    id: "privacy-security",
+    title: "Privacy & Security",
+    short: "End-to-end encryption and privacy-first data handling.",
+    icon: "Lock",
+    heroColor: "bg-ne-arunachal",
+    sections: [
+      {
+        heading: "Overview",
+        body: "Advanced privacy and security measures to protect user data.",
+        bullets: [
+          "End-to-end encryption",
+          "Privacy-first design",
+          "Secure data handling",
+          "Compliance standards",
+        ],
+      },
+    ],
+  },
+  {
+    id: "admin-settings",
+    title: "Admin Settings",
+    short: "Comprehensive system configuration and management tools.",
+    icon: "Settings",
+    heroColor: "bg-ne-tea-brown",
+    sections: [
+      {
+        heading: "Overview",
+        body: "Complete administrative control and system configuration tools.",
+        bullets: [
+          "System configuration",
+          "User management",
+          "Security settings",
+          "Performance monitoring",
+        ],
+      },
+    ],
+  },
 ];
