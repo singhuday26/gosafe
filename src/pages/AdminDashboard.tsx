@@ -13,6 +13,7 @@ import {
   CheckCircle,
   Globe,
   Lock,
+
   Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -40,12 +41,23 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { BlockchainService, mockGeoFences } from "@/lib/blockchain";
+import GeoFenceEditor from "@/components/GeoFenceEditor";
+
+// Define GeoFence type locally since we need it for state management
+interface GeoFence {
+  id: string;
+  name: string;
+  type: "safe" | "restricted" | "danger";
+  coordinates: Array<{ lat: number; lng: number }>;
+  description: string;
+}
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminPassword, setAdminPassword] = useState("");
+  const [geoFences, setGeoFences] = useState<GeoFence[]>([]);
   const [systemSettings, setSystemSettings] = useState({
     aiAnomalyDetection: true,
     geoFenceAlerts: true,
@@ -65,6 +77,14 @@ const AdminDashboard = () => {
     if (adminAuth) {
       setIsAuthenticated(true);
     }
+
+    // Initialize with mock geofences
+    setGeoFences(
+      mockGeoFences.map((fence) => ({
+        ...fence,
+        description: fence.description || "No description provided",
+      }))
+    );
   }, []);
 
   const handleAdminLogin = () => {
@@ -89,6 +109,25 @@ const AdminDashboard = () => {
     localStorage.removeItem("adminAuth");
     setIsAuthenticated(false);
     navigate("/");
+
+  };
+
+  // GeoFence management functions
+  const handleGeoFenceCreate = (newGeoFence: Omit<GeoFence, "id">) => {
+    const id = `gf-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const geoFence: GeoFence = { ...newGeoFence, id };
+    setGeoFences((prev) => [...prev, geoFence]);
+  };
+
+  const handleGeoFenceUpdate = (id: string, updates: Partial<GeoFence>) => {
+    setGeoFences((prev) =>
+      prev.map((fence) => (fence.id === id ? { ...fence, ...updates } : fence))
+    );
+  };
+
+  const handleGeoFenceDelete = (id: string) => {
+    setGeoFences((prev) => prev.filter((fence) => fence.id !== id));
+
   };
 
   const handleSettingChange = (setting: string, value: boolean) => {
@@ -454,6 +493,36 @@ const AdminDashboard = () => {
           </TabsContent>
 
           <TabsContent value="geofences">
+            
+            
+                        <div className="flex justify-end mb-2">
+              <Button variant="outline" size="sm">
+                <Download className="w-4 h-4 mr-2" />
+                Export Zones
+              </Button>
+            </div>
+            <GeoFenceEditor
+              geoFences={geoFences}
+              onGeoFenceCreate={handleGeoFenceCreate}
+              onGeoFenceUpdate={handleGeoFenceUpdate}
+              onGeoFenceDelete={handleGeoFenceDelete}
+              center={[77.209, 28.6139]}
+              zoom={10}
+            />
+
+            
+            
+            
+            
+            <GeoFenceEditor
+              geoFences={geoFences}
+              onGeoFenceCreate={handleGeoFenceCreate}
+              onGeoFenceUpdate={handleGeoFenceUpdate}
+              onGeoFenceDelete={handleGeoFenceDelete}
+              center={[77.209, 28.6139]}
+              zoom={10}
+            />
+=======
             <Card className="gradient-card shadow-soft">
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -547,6 +616,7 @@ const AdminDashboard = () => {
                 </div>
               </CardContent>
             </Card>
+
           </TabsContent>
 
           <TabsContent value="analytics">

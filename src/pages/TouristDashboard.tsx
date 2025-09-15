@@ -32,7 +32,11 @@ import {
   checkGeoFenceStatus,
   mockGeoFences,
 } from "@/lib/blockchain";
+
+import MapComponent from "@/components/MapComponent";
+
 import MapView from "@/components/MapView";
+
 
 const TouristDashboard = () => {
   const navigate = useNavigate();
@@ -119,9 +123,11 @@ const TouristDashboard = () => {
         address: "Tourist Location Area, Delhi, India", // Mock address
       },
       type: "panic",
+
       message: `Emergency SOS triggered by tourist. Escalation: ${currentEscalation}${
         geoFenceStatus ? ` (${geoFenceStatus.name})` : ""
       }`,
+
     });
 
     toast({
@@ -456,6 +462,58 @@ const TouristDashboard = () => {
                       </Badge>
                     </div>
                   ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Live Map View */}
+            <Card className="gradient-card shadow-soft">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Navigation className="mr-2 h-5 w-5 text-primary" />
+                  Live Map View
+                </CardTitle>
+                <CardDescription>
+                  Interactive map with geofences and your location
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-64 rounded-lg overflow-hidden border">
+                  <MapComponent
+                    tourists={
+                      currentLocation
+                        ? [
+                            {
+                              id: currentTouristId || "tourist-1",
+                              name: "You",
+                              latitude: currentLocation.latitude,
+                              longitude: currentLocation.longitude,
+                              status: isSOSActive ? "sos" : "active",
+                            },
+                          ]
+                        : []
+                    }
+                    geoFences={mockGeoFences}
+                    sosAlerts={
+                      isSOSActive && currentLocation
+                        ? [
+                            {
+                              id: "current-sos",
+                              latitude: currentLocation.latitude,
+                              longitude: currentLocation.longitude,
+                              type: "emergency",
+                              tourist_name: "You",
+                            },
+                          ]
+                        : []
+                    }
+                    center={
+                      currentLocation
+                        ? [currentLocation.longitude, currentLocation.latitude]
+                        : [77.209, 28.6139]
+                    }
+                    zoom={13}
+                  />
                 </div>
               </CardContent>
             </Card>
