@@ -23,7 +23,7 @@ import LanguageSelector from "@/components/LanguageSelector";
 import LanguageTransition from "@/components/LanguageTransition";
 import { useTranslation } from "react-i18next";
 
-const Index = () => {
+const Home = () => {
   const navigate = useNavigate();
   const { user, userRole, signOut, loading } = useAuth();
   const { t } = useTranslation();
@@ -553,4 +553,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default Home;

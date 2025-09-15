@@ -10,7 +10,7 @@ import { ChatBotWrapper } from "@/components/ChatBotWrapper";
 import "@/i18n";
 
 // Lazy load route components
-const Index = lazy(() => import("./pages/Index"));
+const Home = lazy(() => import("./pages/Home"));
 const Auth = lazy(() => import("./pages/Auth"));
 const TouristRegister = lazy(() => import("./pages/TouristRegister"));
 const TouristDashboard = lazy(() => import("./pages/TouristDashboard"));
@@ -50,14 +50,14 @@ const App = () => (
         <BrowserRouter>
           <Suspense fallback={<LoadingSpinner />}>
             <Routes>
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<Home />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/auth/callback" element={<Auth />} />
               <Route
                 path="/dashboard"
                 element={
                   <ProtectedRoute requiredRole="">
-                    <Index />
+                    <Home />
                   </ProtectedRoute>
                 }
               />
