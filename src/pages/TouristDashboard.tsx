@@ -32,7 +32,11 @@ import {
   checkGeoFenceStatus,
   mockGeoFences,
 } from "@/lib/blockchain";
+
 import MapComponent from "@/components/MapComponent";
+
+import MapView from "@/components/MapView";
+
 
 const TouristDashboard = () => {
   const navigate = useNavigate();
@@ -46,6 +50,10 @@ const TouristDashboard = () => {
   } | null>(null);
   const [isSOSActive, setIsSOSActive] = useState(false);
   const [lastSOSTime, setLastSOSTime] = useState<Date | null>(null);
+  const [nearbyGeofences, setNearbyGeofences] = useState<unknown[]>([]);
+  const [escalationType, setEscalationType] = useState<"police" | "ranger">(
+    "police"
+  );
 
   useEffect(() => {
     // Check if user has valid Digital ID
@@ -97,6 +105,15 @@ const TouristDashboard = () => {
     setIsSOSActive(true);
     setLastSOSTime(new Date());
 
+    // Check geofences for escalation logic
+    const geoFenceStatus = checkGeoFenceStatus(
+      currentLocation.latitude,
+      currentLocation.longitude
+    );
+    const currentEscalation =
+      geoFenceStatus?.type === "danger" ? "ranger" : "police";
+    setEscalationType(currentEscalation);
+
     const blockchain = BlockchainService.getInstance();
     const sosAlert = blockchain.createSOSAlert({
       touristId: currentTouristId,
@@ -106,12 +123,18 @@ const TouristDashboard = () => {
         address: "Tourist Location Area, Delhi, India", // Mock address
       },
       type: "panic",
-      message: "Emergency SOS triggered by tourist",
+
+      message: `Emergency SOS triggered by tourist. Escalation: ${currentEscalation}${
+        geoFenceStatus ? ` (${geoFenceStatus.name})` : ""
+      }`,
+
     });
 
     toast({
       title: "SOS Alert Triggered!",
-      description: "Emergency services have been notified. Help is on the way.",
+      description: `Emergency services notified. ${
+        currentEscalation === "ranger" ? "Rangers" : "Police"
+      } dispatched to your location.`,
       variant: "destructive",
     });
 
@@ -121,7 +144,9 @@ const TouristDashboard = () => {
       blockchain.updateSOSStatus(sosAlert.id, "responded");
       toast({
         title: "Help is Coming",
-        description: "Local authorities are responding to your location.",
+        description: `Local ${
+          currentEscalation === "ranger" ? "rangers" : "authorities"
+        } are responding to your location.`,
       });
     }, 30000);
   };
@@ -182,6 +207,111 @@ const TouristDashboard = () => {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Left Column - Safety & Status */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Interactive Map */}
+            <Card className="gradient-card shadow-soft">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <MapPin className="mr-2 h-5 w-5 text-primary" />
+                  Live Location & Safety Zones
+                </CardTitle>
+                <CardDescription>
+                  Real-time location tracking with geofence monitoring
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-64 rounded-lg border overflow-hidden">
+                  <MapView
+                    tourists={
+                      currentLocation
+                        ? [
+                            {
+                              id: currentTouristId || "current",
+                              name: "You",
+                              latitude: currentLocation.latitude,
+                              longitude: currentLocation.longitude,
+                              status: isSOSActive ? "sos" : "active",
+                            },
+                          ]
+                        : []
+                    }
+                    geofences={mockGeoFences.map((fence) => ({
+                      id: fence.id,
+                      name: fence.name,
+                      description: fence.description,
+                      coordinates: fence.coordinates,
+                      type: fence.type as
+                        | "safe"
+                        | "restricted"
+                        | "danger"
+                        | "tourist_zone",
+                      active: true,
+                    }))}
+                    sosAlerts={
+                      isSOSActive && currentLocation
+                        ? [
+                            {
+                              id: "current-sos",
+                              latitude: currentLocation.latitude,
+                              longitude: currentLocation.longitude,
+                              alert_type: "panic",
+                              tourist_name: "Current User",
+                              timestamp: new Date().toISOString(),
+                              status: "active",
+                            },
+                          ]
+                        : []
+                    }
+                    center={
+                      currentLocation
+                        ? [currentLocation.longitude, currentLocation.latitude]
+                        : undefined
+                    }
+                    zoom={14}
+                    showControls={true}
+                    interactive={true}
+                    className="w-full h-full"
+                  />
+                </div>
+
+                {/* Current Zone Status */}
+                {currentLocation && (
+                  <div className="mt-4 p-3 bg-muted rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Current Zone:</span>
+                      {(() => {
+                        const zone = checkGeoFenceStatus(
+                          currentLocation.latitude,
+                          currentLocation.longitude
+                        );
+                        if (zone) {
+                          return (
+                            <Badge
+                              variant={
+                                zone.type === "danger"
+                                  ? "destructive"
+                                  : zone.type === "restricted"
+                                  ? "secondary"
+                                  : "default"
+                              }
+                            >
+                              {zone.name}
+                            </Badge>
+                          );
+                        }
+                        return <Badge variant="outline">Open Area</Badge>;
+                      })()}
+                    </div>
+                    {escalationType === "ranger" && (
+                      <div className="mt-2 text-xs text-amber-600 bg-amber-50 p-2 rounded">
+                        ⚠️ You're in a high-risk area. Rangers will respond to
+                        emergencies.
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Safety Score */}
             <Card
               className={`gradient-card shadow-soft ${
