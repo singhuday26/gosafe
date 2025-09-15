@@ -98,9 +98,8 @@ const Index = () => {
           {user ? (
             <div className="flex items-center gap-2">
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
-                className="border-white/30 text-white hover:bg-white/10 font-body"
                 onClick={() => {
                   const dashboardMap: { [key: string]: string } = {
                     tourist: "/tourist",
@@ -113,9 +112,8 @@ const Index = () => {
                 {t("nav.dashboard")}
               </Button>
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
-                className="border-white/30 text-white hover:bg-white/10 font-body"
                 onClick={signOut}
               >
                 <LogOut className="h-4 w-4 mr-1" />
@@ -124,9 +122,8 @@ const Index = () => {
             </div>
           ) : (
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
-              className="border-white/30 text-white hover:bg-white/10 font-body"
               onClick={() => navigate("/auth")}
             >
               <LogIn className="h-4 w-4 mr-1" />
@@ -155,7 +152,6 @@ const Index = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Button
               size="lg"
-              className="bg-ne-tea-brown text-white hover:bg-ne-maroon shadow-ne-medium transition-ne font-body font-medium"
               onClick={() => (user ? navigate("/tourist") : navigate("/auth"))}
             >
               <UserCheck className="mr-2 h-5 w-5" />
@@ -163,8 +159,7 @@ const Index = () => {
             </Button>
             <Button
               size="lg"
-              variant="outline"
-              className="border-white/30 text-white hover:bg-ne-forest-green hover:border-ne-forest-green transition-ne font-body"
+              variant="secondary"
               onClick={() =>
                 user && userRole === "authority"
                   ? navigate("/authority")
@@ -268,7 +263,7 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 <Button
-                  className="w-full bg-ne-tea-brown text-white hover:bg-ne-maroon transition-ne font-body font-medium shadow-ne-soft"
+                  className="w-full"
                   onClick={() =>
                     user ? navigate("/register") : navigate("/auth?tab=signup")
                   }
@@ -292,7 +287,7 @@ const Index = () => {
               <CardContent>
                 <Button
                   variant="outline"
-                  className="w-full border-ne-tea-brown text-ne-tea-brown hover:bg-ne-tea-brown hover:text-white transition-ne font-body"
+                  className="w-full"
                   onClick={() =>
                     user && userRole === "authority"
                       ? navigate("/authority")
@@ -318,7 +313,7 @@ const Index = () => {
               <CardContent>
                 <Button
                   variant="outline"
-                  className="w-full border-ne-tea-brown text-ne-tea-brown hover:bg-ne-tea-brown hover:text-white transition-ne font-body"
+                  className="w-full"
                   onClick={() =>
                     user && userRole === "admin"
                       ? navigate("/admin")

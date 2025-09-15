@@ -163,7 +163,7 @@ const TouristRegister = () => {
               <div className="flex gap-4">
                 <Button 
                   onClick={() => navigate('/tourist')}
-                  className="flex-1 gradient-primary text-white"
+                  className="flex-1"
                 >
                   Access Tourist Portal
                 </Button>
@@ -423,7 +423,7 @@ const TouristRegister = () => {
             <Button
               type="submit"
               size="lg"
-              className="w-full gradient-primary text-white shadow-medium"
+              className="w-full"
               disabled={isLoading}
             >
               {isLoading ? (
