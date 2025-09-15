@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,17 +7,36 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { ChatBotWrapper } from "@/components/ChatBotWrapper";
-import '@/i18n';
-import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import TouristRegister from "./pages/TouristRegister";
-import TouristDashboard from "./pages/TouristDashboard";
-import AuthorityLogin from "./pages/AuthorityLogin";
-import AuthorityDashboard from "./pages/AuthorityDashboard";
-import AdminDashboard from "./pages/AdminDashboard";
-import NotFound from "./pages/NotFound";
+import "@/i18n";
 
-const queryClient = new QueryClient();
+// Lazy load route components
+const Index = lazy(() => import("./pages/Index"));
+const Auth = lazy(() => import("./pages/Auth"));
+const TouristRegister = lazy(() => import("./pages/TouristRegister"));
+const TouristDashboard = lazy(() => import("./pages/TouristDashboard"));
+const AuthorityLogin = lazy(() => import("./pages/AuthorityLogin"));
+const AuthorityDashboard = lazy(() => import("./pages/AuthorityDashboard"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // Data remains fresh for 5 minutes
+      gcTime: 30 * 60 * 1000, // Cache garbage collection after 30 minutes
+      refetchOnWindowFocus: false, // Don't refetch on window focus
+      retry: 2, // Retry failed queries twice
+      networkMode: "online", // Only fetch when online
+      refetchOnReconnect: true, // Refetch when reconnecting
+    },
+  },
+});
+
+const LoadingSpinner = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+  </div>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -25,59 +45,60 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/auth/callback" element={<Auth />} />
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute requiredRole="">
-                  <Index />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/register" 
-              element={
-                <ProtectedRoute requiredRole="tourist">
-                  <TouristRegister />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/tourist" 
-              element={
-                <ProtectedRoute requiredRole="tourist">
-                  <TouristDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route path="/authority/login" element={<AuthorityLogin />} />
-            <Route 
-              path="/authority" 
-              element={
-                <ProtectedRoute requiredRole="authority">
-                  <AuthorityDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin" 
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <AdminDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <Suspense fallback={<LoadingSpinner />}>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/auth/callback" element={<Auth />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute requiredRole="">
+                    <Index />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/register"
+                element={
+                  <ProtectedRoute requiredRole="tourist">
+                    <TouristRegister />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/tourist"
+                element={
+                  <ProtectedRoute requiredRole="tourist">
+                    <TouristDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/authority/login" element={<AuthorityLogin />} />
+              <Route
+                path="/authority"
+                element={
+                  <ProtectedRoute requiredRole="authority">
+                    <AuthorityDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
           <ChatBotWrapper />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
 );
-
 export default App;

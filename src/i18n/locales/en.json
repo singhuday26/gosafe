@@ -1,4 +1,66 @@
 {
+  "nav": {
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "dashboard": "Dashboard"
+  },
+  "home": {
+    "badge": "Smart India Hackathon 2025 • Problem Statement 25002",
+    "title": {
+      "line1": "Smart Tourist Safety",
+      "line2": "Monitoring System"
+    },
+    "description": "AI-powered safety monitoring with blockchain digital IDs, real-time geo-fencing, and instant emergency response for secure tourism experiences in North East India.",
+    "buttons": {
+      "tourist": "Tourist Portal",
+      "authority": "Authority Dashboard"
+    }
+  },
+  "features": {
+    "badge": "Core Features",
+    "title": "Comprehensive Safety Ecosystem",
+    "description": "Leveraging cutting-edge technology to ensure tourist safety through proactive monitoring and instant response capabilities across North East India.",
+    "list": {
+      "digitalId": {
+        "title": "Blockchain Digital ID",
+        "description": "Secure, tamper-proof tourist identification with trip validation"
+      },
+      "geoFencing": {
+        "title": "Smart Geo-Fencing",
+        "description": "AI-powered location monitoring with safety zone alerts"
+      },
+      "sos": {
+        "title": "Emergency SOS",
+        "description": "Instant alert system with real-time location sharing"
+      },
+      "authority": {
+        "title": "Authority Dashboard",
+        "description": "Comprehensive monitoring and incident response system"
+      }
+    }
+  },
+  "stats": {
+    "activeTourists": {
+      "label": "Active Tourists",
+      "value": "12,458",
+      "trend": "+15%"
+    },
+    "safetyScore": {
+      "label": "Safety Score",
+      "value": "94.2%",
+      "trend": "+2.1%"
+    },
+    "responseTime": {
+      "label": "Response Time",
+      "value": "< 3 min",
+      "trend": "-8%"
+    },
+    "incidentsResolved": {
+      "label": "Incidents Resolved",
+      "value": "1,247",
+      "trend": "+12%"
+    }
+  },
   "common": {
     "loading": "Loading...",
     "error": "Error",
@@ -50,7 +112,7 @@
     },
     "sos": {
       "panic": "Panic",
-      "medical": "Medical Emergency", 
+      "medical": "Medical Emergency",
       "security": "Security Issue",
       "other": "Other Emergency",
       "alert_sent": "SOS alert has been sent!",
@@ -61,7 +123,7 @@
   "authority": {
     "dashboard": {
       "title": "Authority Dashboard",
-      "overview": "Overview", 
+      "overview": "Overview",
       "tourists": "Tourists",
       "alerts": "Alerts",
       "map_view": "Map View",
@@ -81,7 +143,7 @@
     "dashboard": {
       "title": "Admin Dashboard",
       "system_overview": "System Overview",
-      "user_management": "User Management", 
+      "user_management": "User Management",
       "security_logs": "Security Logs",
       "system_health": "System Health"
     }
@@ -89,7 +151,7 @@
   "map": {
     "legend": "Map Legend",
     "active_tourists": "Active Tourists",
-    "sos_alerts": "SOS Alerts", 
+    "sos_alerts": "SOS Alerts",
     "offline": "Offline",
     "safe_zones": "Safe Zones",
     "restricted": "Restricted Areas",
@@ -100,7 +162,7 @@
   },
   "geofence": {
     "safe": "Safe Zone",
-    "restricted": "Restricted Area", 
+    "restricted": "Restricted Area",
     "danger": "Danger Zone",
     "entered": "Entered {{type}}",
     "exited": "Exited {{type}}"

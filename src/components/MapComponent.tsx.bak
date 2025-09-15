@@ -1,5 +1,14 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
-import type { Map as MapboxMap, Marker, NavigationControl } from "mapbox-gl";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
+imp  const map = useRef<MapboxMap | null>(null);
+  const markersRef = useRef<Marker[]>([]);
+  const [mapboxToken, setMapboxToken] = useState("");
+  const [showTokenInput, setShowTokenInput] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);ype { Map as MapboxMap, Marker } from "mapbox-gl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -84,7 +93,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   onLocationSelect,
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<MapboxMap | null>(null);
+  const map = useRef<Map | null>(null);
   const markersRef = useRef<Marker[]>([]);
   const [mapboxToken, setMapboxToken] = useState("");
   const [showTokenInput, setShowTokenInput] = useState(true);
@@ -98,101 +107,101 @@ const MapComponent: React.FC<MapComponentProps> = ({
     }
   }, []);
 
-  const initializeMap = useCallback(
-    async (token: string) => {
-      if (!mapContainer.current || !token) return;
+  const initializeMap = useCallback(async (token: string) => {
+    if (!mapContainer.current || !token) return;
 
-      setIsLoading(true);
+    setIsLoading(true);
 
-      try {
-        const mapboxgl = await loadMapbox();
-        mapboxgl.accessToken = token;
+    try {
+      const mapboxgl = await loadMapbox();
+      mapboxgl.accessToken = token;
 
-        if (map.current) {
-          map.current.remove();
-        }
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: "mapbox://styles/mapbox/light-v11",
+        center: center,
+        zoom: zoom,
+        maxZoom: 18,
+        minZoom: 3
 
-        map.current = new mapboxgl.Map({
-          container: mapContainer.current,
-          style: "mapbox://styles/mapbox/light-v11",
-          center,
-          zoom,
-          maxZoom: 18,
-          minZoom: 3,
-        });
+      // Add navigation controls
+      map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
 
-        const navigationControl = new mapboxgl.NavigationControl();
-        map.current.addControl(navigationControl, "top-right");
+      map.current.on("load", () => {
+        if (!map.current) return;
 
-        map.current.on("load", () => {
-          if (!map.current) return;
+        // Add geo-fence layers
+        geoFences.forEach((fence, index) => {
+          const sourceId = `geofence-${index}`;
+          const layerId = `geofence-layer-${index}`;
 
-          // Add geo-fence layers
-          geoFences.forEach((fence, index) => {
-            const sourceId = `geofence-${index}`;
-            const layerId = `geofence-layer-${index}`;
+          // Convert coordinates to GeoJSON polygon
+          const coordinates = fence.coordinates.map((coord) => [
+            coord.lng,
+            coord.lat,
+          ]);
+          coordinates.push(coordinates[0]); // Close the polygon
 
-            // Convert coordinates to GeoJSON polygon
-            const coordinates = fence.coordinates.map((coord) => [
-              coord.lng,
-              coord.lat,
-            ]);
-            coordinates.push(coordinates[0]); // Close the polygon
-
-            map.current!.addSource(sourceId, {
-              type: "geojson",
-              data: {
-                type: "Feature",
-                geometry: {
-                  type: "Polygon",
-                  coordinates: [coordinates],
-                },
-                properties: {
-                  name: fence.name,
-                  type: fence.type,
-                },
+          map.current!.addSource(sourceId, {
+            type: "geojson",
+            data: {
+              type: "Feature",
+              geometry: {
+                type: "Polygon",
+                coordinates: [coordinates],
               },
-            });
-
-            const fillColor =
-              fence.type === "safe"
-                ? "#10B981"
-                : fence.type === "restricted"
-                ? "#F59E0B"
-                : "#EF4444";
-
-            map.current!.addLayer({
-              id: layerId,
-              type: "fill",
-              source: sourceId,
-              paint: {
-                "fill-color": fillColor,
-                "fill-opacity": 0.2,
+              properties: {
+                name: fence.name,
+                type: fence.type,
               },
-            });
-
-            map.current!.addLayer({
-              id: `${layerId}-outline`,
-              type: "line",
-              source: sourceId,
-              paint: {
-                "line-color": fillColor,
-                "line-width": 2,
-              },
-            });
+            },
           });
 
-          // Clear existing markers
-          clearMarkers();
+          const fillColor =
+            fence.type === "safe"
+              ? "#10B981"
+              : fence.type === "restricted"
+              ? "#F59E0B"
+              : "#EF4444";
 
-          // Add tourist markers
-          tourists.forEach((tourist) => {
-            const marker = new mapboxgl.Marker({
-              element: createMarkerElement(tourist),
-            })
-              .setLngLat([tourist.longitude, tourist.latitude])
-              .setPopup(
-                new mapboxgl.Popup({ offset: 25, closeButton: false }).setHTML(`
+          map.current!.addLayer({
+            id: layerId,
+            type: "fill",
+            source: sourceId,
+            paint: {
+              "fill-color": fillColor,
+              "fill-opacity": 0.2,
+            },
+          });
+
+          map.current!.addLayer({
+            id: `${layerId}-outline`,
+            type: "line",
+            source: sourceId,
+            paint: {
+              "line-color": fillColor,
+              "line-width": 2,
+            },
+          });
+        });
+
+        // Add tourist markers
+        tourists.forEach((tourist) => {
+          const markerColor =
+            tourist.status === "sos"
+              ? "#EF4444"
+              : tourist.status === "offline"
+              ? "#6B7280"
+              : "#10B981";
+
+          const mapboxgl = await loadMapbox();
+          const marker = new mapboxgl.Marker({
+            color: markerColor,
+            element: createMarkerElement(tourist),
+          })
+            .setLngLat([tourist.longitude, tourist.latitude])
+            .setPopup(
+              new mapboxgl.Popup({ offset: 25, closeButton: false }).setHTML(`
                   <div class="p-2">
                     <h3 class="font-semibold">${tourist.name}</h3>
                     <p class="text-sm">Status: ${tourist.status}</p>
@@ -203,20 +212,21 @@ const MapComponent: React.FC<MapComponentProps> = ({
                     </p>
                   </div>
                 `)
-              )
-              .addTo(map.current!);
+            )
+            .addTo(map.current!);
+        });
 
-            markersRef.current.push(marker);
-          });
-
-          // Add SOS alert markers
-          sosAlerts.forEach((alert) => {
-            const marker = new mapboxgl.Marker({
-              element: createSOSMarkerElement(alert),
-            })
-              .setLngLat([alert.longitude, alert.latitude])
-              .setPopup(
-                new mapboxgl.Popup({ offset: 25, closeButton: false }).setHTML(`
+        // Add SOS alert markers
+        sosAlerts.forEach(async (alert) => {
+          const mapboxgl = await loadMapbox();
+          const sosMarker = new mapboxgl.Marker({
+            color: "#DC2626",
+            scale: 1.2,
+            element: createSOSMarkerElement(alert),
+          })
+            .setLngLat([alert.longitude, alert.latitude])
+            .setPopup(
+              new mapboxgl.Popup({ offset: 25, closeButton: false }).setHTML(`
                   <div class="p-2 border-l-4 border-red-500">
                     <h3 class="font-semibold text-red-700">🚨 SOS Alert</h3>
                     <p class="text-sm">Type: ${alert.type}</p>
@@ -227,44 +237,36 @@ const MapComponent: React.FC<MapComponentProps> = ({
                     }
                     <p class="text-xs text-gray-500">
                       ${alert.latitude.toFixed(4)}, ${alert.longitude.toFixed(
-                  4
-                )}
+                4
+              )}
                     </p>
                   </div>
                 `)
-              )
-              .addTo(map.current!);
+            )
+            .addTo(map.current!);
 
-            markersRef.current.push(marker);
-          });
-
-          setIsLoading(false);
+          // Add pulsing animation for SOS markers
+          const markerElement = sosMarker.getElement();
+          markerElement.classList.add("animate-pulse");
         });
 
-        // Add click handler for location selection
-        if (onLocationSelect) {
-          map.current.on("click", (e) => {
-            const { lng, lat } = e.lngLat;
-            onLocationSelect(lat, lng);
-          });
-        }
-
-        setShowTokenInput(false);
-      } catch (error) {
-        console.error("Error initializing map:", error);
         setIsLoading(false);
+      });
+
+      // Add click handler for location selection
+      if (onLocationSelect) {
+        map.current.on("click", (e) => {
+          const { lng, lat } = e.lngLat;
+          onLocationSelect(lat, lng);
+        });
       }
-    },
-    [
-      center,
-      zoom,
-      geoFences,
-      tourists,
-      sosAlerts,
-      onLocationSelect,
-      clearMarkers,
-    ]
-  );
+
+      setShowTokenInput(false);
+    } catch (error) {
+      console.error("Error initializing map:", error);
+      setIsLoading(false);
+    }
+  };
 
   const handleTokenSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -293,6 +295,16 @@ const MapComponent: React.FC<MapComponentProps> = ({
       }
     };
   }, [initializeMap]);
+
+  useEffect(() => {
+    // Update markers when data changes
+    if (map.current && !showTokenInput) {
+      // Clear existing markers and re-add them
+      // This is a simplified approach - in production, you'd want to efficiently update markers
+      map.current.remove();
+      initializeMap(mapboxToken);
+    }
+  }, [tourists, geoFences, sosAlerts]);
 
   if (showTokenInput) {
     return (

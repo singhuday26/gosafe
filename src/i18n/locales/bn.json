@@ -1,0 +1,33 @@
+{
+  "welcome": "গোসেফে স্বাগতম",
+  "subtitle": "আপনার ভ্রমণ নিরাপদ রাখুন",
+  "features": {
+    "digitalId": {
+      "title": "ডিজিটাল আইডি",
+      "description": "ব্লকচেইন-ভিত্তিক সুরক্ষিত পরিচয়"
+    },
+    "sos": {
+      "title": "জরুরি সহায়তা",
+      "description": "দ্রুত সাহায্যের জন্য SOS"
+    },
+    "tracking": {
+      "title": "রিয়েল-টাইম ট্র্যাকিং",
+      "description": "নিরাপদ লোকেশন ট্র্যাকিং"
+    },
+    "chat": {
+      "title": "AI সহকারী",
+      "description": "24/7 সহায়তা এবং গাইডেন্স"
+    }
+  },
+  "auth": {
+    "login": "লগ ইন",
+    "register": "নিবন্ধন",
+    "tourist": "পর্যটক",
+    "authority": "কর্তৃপক্ষ"
+  },
+  "actions": {
+    "learnMore": "আরও জানুন",
+    "getStarted": "শুরু করুন",
+    "help": "সাহায্য"
+  }
+}
