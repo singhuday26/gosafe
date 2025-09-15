@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import LanguageSelector from "@/components/LanguageSelector";
+import LanguageTransition from "@/components/LanguageTransition";
 import { useTranslation } from "react-i18next";
 
 const Index = () => {
@@ -93,13 +94,14 @@ const Index = () => {
       {/* Hero Section */}
       <section className="relative overflow-hidden gradient-ne-hero">
         <div className="absolute inset-0 bg-black/10 gradient-ne-hills"></div>
-        <div className="absolute top-4 right-4 flex items-center gap-2">
+        <div className="absolute top-2 sm:top-4 right-2 sm:right-4 flex items-center gap-1 sm:gap-2 z-10">
           <LanguageSelector />
           {user ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <Button
                 variant="secondary"
                 size="sm"
+                className="text-xs sm:text-sm px-2 sm:px-3"
                 onClick={() => {
                   const dashboardMap: { [key: string]: string } = {
                     tourist: "/tourist",
@@ -109,45 +111,51 @@ const Index = () => {
                   navigate(dashboardMap[userRole || "tourist"] || "/tourist");
                 }}
               >
-                {t("nav.dashboard")}
+                <span className="hidden sm:inline">{t("nav.dashboard")}</span>
+                <span className="sm:hidden">Dashboard</span>
               </Button>
               <Button
                 variant="secondary"
                 size="sm"
+                className="text-xs sm:text-sm px-2 sm:px-3"
                 onClick={signOut}
               >
-                <LogOut className="h-4 w-4 mr-1" />
-                {t("nav.signOut")}
+                <LogOut className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+                <span className="hidden sm:inline">{t("nav.signOut")}</span>
               </Button>
             </div>
           ) : (
             <Button
               variant="secondary"
               size="sm"
+              className="text-xs sm:text-sm px-2 sm:px-3"
               onClick={() => navigate("/auth")}
             >
-              <LogIn className="h-4 w-4 mr-1" />
-              {t("nav.signIn")}
+              <LogIn className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+              <span className="hidden sm:inline">{t("nav.signIn")}</span>
+              <span className="sm:hidden">Sign In</span>
             </Button>
           )}
         </div>
-        <div className="relative container mx-auto px-4 py-20 text-center text-white">
-          <Badge
-            variant="secondary"
-            className="mb-6 bg-white/10 text-white border-white/20 font-body"
-          >
-            {t("home.badge")}
-          </Badge>
-          <h1 className="text-4xl md:text-6xl font-heading font-bold mb-6 leading-tight">
-            {t("home.title.line1")}
-            <br />
-            <span className="bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
-              {t("home.title.line2")}
-            </span>
-          </h1>
-          <p className="text-xl md:text-2xl mb-8 text-white/90 max-w-3xl mx-auto font-body">
-            {t("home.description")}
-          </p>
+        <div className="relative container mx-auto px-4 py-12 sm:py-16 lg:py-20 text-center text-white">
+          <LanguageTransition>
+            <Badge
+              variant="secondary"
+              className="mb-4 sm:mb-6 bg-white/10 text-white border-white/20 font-body text-xs sm:text-sm"
+            >
+              {t("home.badge")}
+            </Badge>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-heading font-bold mb-4 sm:mb-6 leading-tight px-2">
+              {t("home.title.line1")}
+              <br />
+              <span className="bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
+                {t("home.title.line2")}
+              </span>
+            </h1>
+            <p className="text-lg sm:text-xl md:text-2xl mb-6 sm:mb-8 text-white/90 max-w-3xl mx-auto font-body px-2">
+              {t("home.description")}
+            </p>
+          </LanguageTransition>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Button
@@ -172,18 +180,18 @@ const Index = () => {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 max-w-5xl mx-auto px-2">
             {stats.map((stat, index) => (
               <Card
                 key={index}
-                className="ne-card bg-white/10 backdrop-blur-sm border-white/20 animate-fade-in"
+                className="ne-card bg-white/10 backdrop-blur-sm border-white/20 animate-fade-in hover:bg-white/15 transition-all"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <CardContent className="p-4 text-center">
-                  <div className="text-2xl font-bold text-white mb-1 font-heading">
+                <CardContent className="p-3 sm:p-4 text-center">
+                  <div className="text-xl sm:text-2xl font-bold text-white mb-1 font-heading">
                     {stat.value}
                   </div>
-                  <div className="text-sm text-white/80 mb-2 font-body">
+                  <div className="text-xs sm:text-sm text-white/80 mb-2 font-body leading-tight">
                     {stat.label}
                   </div>
                   <Badge
@@ -254,11 +262,10 @@ const Index = () => {
               <CardHeader>
                 <CardTitle className="flex items-center font-heading text-ne-tea-brown">
                   <UserCheck className="mr-2 h-5 w-5 text-ne-tea-brown" />
-                  Tourist Registration
+                  {t("home.cards.tourist_registration.title")}
                 </CardTitle>
                 <CardDescription className="font-body">
-                  Get your blockchain-based Digital Tourist ID with
-                  Aadhaar/Passport verification for North East India travel
+                  {t("home.cards.tourist_registration.description")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -268,7 +275,11 @@ const Index = () => {
                     user ? navigate("/register") : navigate("/auth?tab=signup")
                   }
                 >
-                  {user ? "Register Now" : "Sign Up to Register"}
+                  {user
+                    ? t("home.cards.tourist_registration.button_authenticated")
+                    : t(
+                        "home.cards.tourist_registration.button_unauthenticated"
+                      )}
                 </Button>
               </CardContent>
             </Card>
@@ -277,11 +288,10 @@ const Index = () => {
               <CardHeader>
                 <CardTitle className="flex items-center font-heading text-ne-tea-brown">
                   <Shield className="mr-2 h-5 w-5 text-ne-tea-brown" />
-                  Authority Access
+                  {t("home.cards.authority_access.title")}
                 </CardTitle>
                 <CardDescription className="font-body">
-                  Police and tourism officials can monitor tourists and respond
-                  to incidents across NE states
+                  {t("home.cards.authority_access.description")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -294,7 +304,7 @@ const Index = () => {
                       : navigate("/auth")
                   }
                 >
-                  Authority Login
+                  {t("home.cards.authority_access.button")}
                 </Button>
               </CardContent>
             </Card>
@@ -303,11 +313,10 @@ const Index = () => {
               <CardHeader>
                 <CardTitle className="flex items-center font-heading text-ne-tea-brown">
                   <Users className="mr-2 h-5 w-5 text-ne-tea-brown" />
-                  Admin Panel
+                  {t("home.cards.admin_panel.title")}
                 </CardTitle>
                 <CardDescription className="font-body">
-                  System administrators can manage zones, analytics, and system
-                  configuration for the entire region
+                  {t("home.cards.admin_panel.description")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -320,7 +329,7 @@ const Index = () => {
                       : navigate("/auth")
                   }
                 >
-                  Admin Access
+                  {t("home.cards.admin_panel.button")}
                 </Button>
               </CardContent>
             </Card>
@@ -330,25 +339,214 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="bg-ne-tea-brown text-white py-12">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center mb-4">
-            <Shield className="h-8 w-8 mr-2" />
-            <span className="text-2xl font-bold font-heading">
-              Smart Tourist Safety
-            </span>
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center mb-4">
+              <Shield className="h-8 w-8 mr-2" />
+              <span className="text-2xl font-bold font-heading">
+                {t("footer.title")}
+              </span>
+            </div>
+            <p className="text-white/80 mb-4 font-body">
+              {t("footer.subtitle")}
+            </p>
+            <div className="mb-4 font-body text-white/70">
+              {t("footer.description")}
+            </div>
           </div>
-          <p className="text-white/80 mb-4 font-body">
-            Ministry of Tourism & Home Affairs • Smart India Hackathon 2025
-          </p>
-          <div className="mb-4 font-body text-white/70">
-            Protecting tourists across the Seven Sister States and Sikkim
+
+          {/* Useful Links */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 text-sm">
+            <div>
+              <h4 className="font-semibold mb-3 text-white">
+                {t("footer.sections.government_resources.title")}
+              </h4>
+              <ul className="space-y-2 text-white/80">
+                <li>
+                  <a
+                    href="https://www.incredibleindia.org"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition-colors"
+                  >
+                    {t(
+                      "footer.sections.government_resources.links.incredible_india"
+                    )}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://tourism.gov.in"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition-colors"
+                  >
+                    {t(
+                      "footer.sections.government_resources.links.ministry_tourism"
+                    )}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://www.mha.gov.in"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition-colors"
+                  >
+                    {t(
+                      "footer.sections.government_resources.links.ministry_home_affairs"
+                    )}
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-3 text-white">
+                {t("footer.sections.northeast_tourism.title")}
+              </h4>
+              <ul className="space-y-2 text-white/80">
+                <li>
+                  <a
+                    href="https://assamtourism.gov.in"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition-colors"
+                  >
+                    {t("footer.sections.northeast_tourism.links.assam_tourism")}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://www.arunachaltourism.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition-colors"
+                  >
+                    {t(
+                      "footer.sections.northeast_tourism.links.arunachal_tourism"
+                    )}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://meghalayatourism.in"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition-colors"
+                  >
+                    {t(
+                      "footer.sections.northeast_tourism.links.meghalaya_tourism"
+                    )}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://manipurtourism.gov.in"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition-colors"
+                  >
+                    {t(
+                      "footer.sections.northeast_tourism.links.manipur_tourism"
+                    )}
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-3 text-white">
+                {t("footer.sections.emergency_services.title")}
+              </h4>
+              <ul className="space-y-2 text-white/80">
+                <li>
+                  <a
+                    href="tel:100"
+                    className="hover:text-white transition-colors"
+                  >
+                    {t("footer.sections.emergency_services.links.police")}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="tel:108"
+                    className="hover:text-white transition-colors"
+                  >
+                    {t("footer.sections.emergency_services.links.ambulance")}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="tel:1363"
+                    className="hover:text-white transition-colors"
+                  >
+                    {t(
+                      "footer.sections.emergency_services.links.tourist_helpline"
+                    )}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="tel:112"
+                    className="hover:text-white transition-colors"
+                  >
+                    {t("footer.sections.emergency_services.links.emergency")}
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-3 text-white">
+                {t("footer.sections.support.title")}
+              </h4>
+              <ul className="space-y-2 text-white/80">
+                <li>
+                  <button
+                    onClick={() => navigate("/help")}
+                    className="hover:text-white transition-colors text-left"
+                  >
+                    {t("footer.sections.support.links.help_center")}
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => navigate("/contact")}
+                    className="hover:text-white transition-colors text-left"
+                  >
+                    {t("footer.sections.support.links.contact_us")}
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => navigate("/privacy")}
+                    className="hover:text-white transition-colors text-left"
+                  >
+                    {t("footer.sections.support.links.privacy_policy")}
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => navigate("/terms")}
+                    className="hover:text-white transition-colors text-left"
+                  >
+                    {t("footer.sections.support.links.terms_of_service")}
+                  </button>
+                </li>
+              </ul>
+            </div>
           </div>
-          <Badge
-            variant="secondary"
-            className="bg-white/10 text-white border-white/20 font-body"
-          >
-            Problem Statement ID: 25002
-          </Badge>
+
+          <div className="border-t border-white/20 pt-6 text-center">
+            <Badge
+              variant="secondary"
+              className="bg-white/10 text-white border-white/20 font-body mb-3"
+            >
+              {t("footer.problem_statement")}
+            </Badge>
+            <p className="text-white/60 text-xs">{t("footer.copyright")}</p>
+          </div>
         </div>
       </footer>
     </div>

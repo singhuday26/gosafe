@@ -1,4 +1,127 @@
 {
+  "nav": {
+    "signIn": "登录",
+    "signOut": "登出",
+    "dashboard": "仪表板"
+  },
+  "home": {
+    "badge": "印度智慧黑客马拉松 2025 • 问题陈述 25002",
+    "title": {
+      "line1": "智能旅游安全",
+      "line2": "监控系统"
+    },
+    "description": "基于AI的安全监控，配备区块链数字身份、实时地理围栏和即时紧急响应，为印度东北部提供安全的旅游体验。",
+    "buttons": {
+      "tourist": "游客门户",
+      "authority": "当局面板"
+    },
+    "cards": {
+      "tourist_registration": {
+        "title": "游客注册",
+        "description": "注册为游客，即时获得安全功能和紧急援助的使用权限",
+        "button_authenticated": "立即注册",
+        "button_unauthenticated": "登录以注册"
+      },
+      "authority_access": {
+        "title": "当局访问",
+        "description": "警察和旅游官员可以在东北各州监控游客并响应事件",
+        "button": "当局登录"
+      },
+      "admin_panel": {
+        "title": "管理面板",
+        "description": "系统管理员可以管理整个地区的区域、分析和系统配置",
+        "button": "管理员访问"
+      }
+    }
+  },
+  "features": {
+    "badge": "核心功能",
+    "title": "全面安全生态系统",
+    "description": "利用尖端技术，通过主动监控和即时响应能力确保印度东北部的旅游安全。",
+    "list": {
+      "digitalId": {
+        "title": "区块链数字身份",
+        "description": "安全且防篡改的游客身份验证与旅行验证"
+      },
+      "geoFencing": {
+        "title": "智能地理围栏",
+        "description": "AI驱动的位置监控与安全区域警报"
+      },
+      "sos": {
+        "title": "紧急SOS",
+        "description": "即时警报系统与实时位置共享"
+      },
+      "authority": {
+        "title": "当局面板",
+        "description": "全面的事件监控和响应系统"
+      }
+    },
+    "dashboard": {
+      "digital-id": {
+        "title": "旅游数字身份",
+        "description": "区块链支持的可验证旅游身份（临时）。"
+      },
+      "sos": {
+        "title": "SOS和紧急情况",
+        "description": "多触发SOS，具有上下文捕获和多渠道升级。"
+      },
+      "geo-fencing": {
+        "title": "智能地理围栏",
+        "description": "AI驱动的位置监控与安全区域警报。"
+      },
+      "real-time": {
+        "title": "实时监控",
+        "description": "实时跟踪和即时通知以增强安全性。"
+      },
+      "ai-chatbot": {
+        "title": "AI助手",
+        "description": "24/7智能支持和紧急指导。"
+      },
+      "iot-wearables": {
+        "title": "物联网可穿戴设备",
+        "description": "用于持续健康和安全监控的智能设备。"
+      },
+      "efir": {
+        "title": "电子FIR",
+        "description": "数字事件报告和案例管理系统。"
+      },
+      "multilingual": {
+        "title": "多语言支持",
+        "description": "支持70多种语言，包括所有印度东北部语言。"
+      },
+      "privacy-security": {
+        "title": "隐私与安全",
+        "description": "端到端加密和隐私优先的数据处理。"
+      },
+      "admin-settings": {
+        "title": "管理员设置",
+        "description": "全面的系统配置和管理工具。"
+      },
+      "learn_more": "了解更多"
+    }
+  },
+  "stats": {
+    "activeTourists": {
+      "label": "活跃游客",
+      "value": "12,458",
+      "trend": "+15%"
+    },
+    "safetyScore": {
+      "label": "安全评分",
+      "value": "94.2%",
+      "trend": "+2.1%"
+    },
+    "responseTime": {
+      "label": "响应时间",
+      "value": "< 3分钟",
+      "trend": "-8%"
+    },
+    "incidentsResolved": {
+      "label": "已解决事件",
+      "value": "1,247",
+      "trend": "+12%"
+    }
+  },
   "common": {
     "loading": "加载中...",
     "error": "错误",
@@ -9,7 +132,7 @@
     "delete": "删除",
     "edit": "编辑",
     "back": "返回",
-    "next": "下一步",
+    "next": "下一个",
     "submit": "提交",
     "search": "搜索",
     "filter": "筛选",
@@ -22,94 +145,72 @@
     "login": "登录",
     "logout": "登出"
   },
-  "tourist": {
-    "dashboard": {
-      "title": "游客仪表板",
-      "safety_score": "安全评分",
-      "current_location": "当前位置",
-      "sos_alert": "SOS 警报",
-      "emergency_contacts": "紧急联系人",
-      "quick_actions": "快速操作",
-      "device_status": "设备状态",
-      "nearby_zones": "附近区域",
-      "recent_activities": "最近活动"
+  "auth": {
+    "description": "安全访问您的安全仪表板",
+    "sign_up": "注册",
+    "email": "邮箱地址",
+    "email_placeholder": "输入您的邮箱",
+    "password": "密码",
+    "password_placeholder": "输入您的密码",
+    "confirm_password": "确认密码",
+    "confirm_password_placeholder": "确认您的密码",
+    "full_name": "全名",
+    "full_name_placeholder": "输入您的全名",
+    "phone_number": "电话号码",
+    "phone_placeholder": "输入您的电话号码",
+    "role": "角色",
+    "select_role": "选择您的角色",
+    "tourist": "游客",
+    "authority": "当局",
+    "admin": "管理员",
+    "organization": "组织",
+    "organization_placeholder": "输入您的组织",
+    "forgot_password": "忘记密码？",
+    "send_reset_email": "发送重置邮件",
+    "passwords_dont_match": "密码不匹配"
+  },
+  "footer": {
+    "title": "智能旅游安全",
+    "subtitle": "旅游部和内政部 • 印度智慧黑客马拉松 2025",
+    "description": "保护七姐妹州和锡金的游客",
+    "sections": {
+      "government_resources": {
+        "title": "政府资源",
+        "links": {
+          "incredible_india": "不可思议的印度",
+          "ministry_tourism": "旅游部",
+          "ministry_home_affairs": "内政部"
+        }
+      },
+      "northeast_tourism": {
+        "title": "东北旅游",
+        "links": {
+          "assam_tourism": "阿萨姆旅游",
+          "arunachal_tourism": "阿鲁纳恰尔旅游",
+          "meghalaya_tourism": "梅加拉亚旅游",
+          "manipur_tourism": "曼尼普尔旅游"
+        }
+      },
+      "emergency_services": {
+        "title": "紧急服务",
+        "links": {
+          "police": "📞 警察：100",
+          "ambulance": "🚑 救护车：108",
+          "tourist_helpline": "🚨 游客热线：1363",
+          "emergency": "🆘 紧急情况：112"
+        }
+      },
+      "support": {
+        "title": "支持",
+        "links": {
+          "help_center": "帮助中心",
+          "contact_us": "联系我们",
+          "privacy_policy": "隐私政策",
+          "terms_of_service": "服务条款"
+        }
+      }
     },
-    "registration": {
-      "title": "游客注册",
-      "personal_info": "个人信息",
-      "trip_info": "行程信息",
-      "emergency_contacts": "紧急联系人",
-      "tourist_name": "全名",
-      "aadhaar_number": "Aadhaar 号码",
-      "passport_number": "护照号码",
-      "trip_itinerary": "行程安排",
-      "contact_name": "联系人姓名",
-      "relationship": "关系",
-      "phone_number": "电话号码",
-      "email": "邮箱地址"
-    },
-    "sos": {
-      "panic": "恐慌",
-      "medical": "医疗急救",
-      "security": "安全问题",
-      "other": "其他紧急情况",
-      "alert_sent": "SOS 警报已发送！",
-      "alert_active": "SOS 警报激活",
-      "location_shared": "您的位置正在与当局共享"
-    }
-  },
-  "authority": {
-    "dashboard": {
-      "title": "当局仪表板",
-      "overview": "概览",
-      "tourists": "游客",
-      "alerts": "警报",
-      "map_view": "地图视图",
-      "active_tourists": "活跃游客",
-      "active_alerts": "活跃 SOS 警报",
-      "resolved_today": "今日已解决",
-      "avg_response_time": "平均响应时间"
-    },
-    "login": {
-      "title": "当局登录",
-      "authority_id": "当局 ID",
-      "password": "密码",
-      "invalid_credentials": "凭据无效"
-    }
-  },
-  "admin": {
-    "dashboard": {
-      "title": "管理员仪表板",
-      "system_overview": "系统概览",
-      "user_management": "用户管理",
-      "security_logs": "安全日志",
-      "system_health": "系统健康"
-    }
-  },
-  "map": {
-    "legend": "地图图例",
-    "active_tourists": "活跃游客",
-    "sos_alerts": "SOS 警报",
-    "offline": "离线",
-    "safe_zones": "安全区域",
-    "restricted": "限制区域",
-    "danger_zones": "危险区域",
-    "initialize_map": "初始化交互式地图",
-    "mapbox_token": "Mapbox 公共令牌",
-    "get_token": "从 mapbox.com 获取您的令牌"
-  },
-  "geofence": {
-    "safe": "安全区域",
-    "restricted": "限制区域",
-    "danger": "危险区域",
-    "entered": "进入 {{type}}",
-    "exited": "离开 {{type}}"
-  },
-  "notifications": {
-    "sos_created": "SOS 警报创建成功",
-    "location_updated": "位置已更新",
-    "id_verified": "数字身份证验证成功",
-    "id_generated": "数字游客身份证生成成功",
-    "alert_resolved": "警报解决成功"
+    "problem_statement": "问题陈述ID：25002",
+    "copyright": "© 2025 智能旅游安全门户。为印度智慧黑客马拉松 2025 开发。"
   }
 }

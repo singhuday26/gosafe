@@ -17,6 +17,8 @@ const TouristDashboard = lazy(() => import("./pages/TouristDashboard"));
 const AuthorityLogin = lazy(() => import("./pages/AuthorityLogin"));
 const AuthorityDashboard = lazy(() => import("./pages/AuthorityDashboard"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const Help = lazy(() => import("./pages/Help"));
+const Contact = lazy(() => import("./pages/Contact"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -91,6 +93,10 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+              <Route path="/help" element={<Help />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/privacy" element={<NotFound />} />
+              <Route path="/terms" element={<NotFound />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

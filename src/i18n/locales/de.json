@@ -1,0 +1,216 @@
+{
+  "nav": {
+    "signIn": "Anmelden",
+    "signOut": "Abmelden",
+    "dashboard": "Dashboard"
+  },
+  "home": {
+    "badge": "Smart India Hackathon 2025 • Problemstellung 25002",
+    "title": {
+      "line1": "Intelligentes Tourismus-",
+      "line2": "Sicherheitsüberwachungssystem"
+    },
+    "description": "KI-gestützte Sicherheitsüberwachung mit Blockchain-Digital-IDs, Echtzeit-Geofencing und sofortiger Notfallreaktion für sichere Tourismuserfahrungen in Nordostindien.",
+    "buttons": {
+      "tourist": "Touristenportal",
+      "authority": "Behörden-Panel"
+    },
+    "cards": {
+      "tourist_registration": {
+        "title": "Touristenregistrierung",
+        "description": "Registrieren Sie sich als Tourist und erhalten Sie sofortigen Zugang zu Sicherheitsfunktionen und Notfallhilfe",
+        "button_authenticated": "Jetzt registrieren",
+        "button_unauthenticated": "Anmelden zur Registrierung"
+      },
+      "authority_access": {
+        "title": "Behördenzugang",
+        "description": "Polizei und Tourismusbeamte können Touristen überwachen und auf Vorfälle in den nordöstlichen Bundesstaaten reagieren",
+        "button": "Behörden-Login"
+      },
+      "admin_panel": {
+        "title": "Admin-Panel",
+        "description": "Systemadministratoren können Zonen, Analysen und Systemkonfiguration für die gesamte Region verwalten",
+        "button": "Admin-Zugang"
+      }
+    }
+  },
+  "features": {
+    "badge": "Kernfunktionen",
+    "title": "Umfassendes Sicherheitsökosystem",
+    "description": "Nutzung modernster Technologie zur Gewährleistung der Touristensicherheit durch proaktive Überwachung und sofortige Reaktionsfähigkeiten in Nordostindien.",
+    "list": {
+      "digitalId": {
+        "title": "Blockchain-Digital-ID",
+        "description": "Sichere und manipulationssichere Touristenidentifikation mit Reisevalidierung"
+      },
+      "geoFencing": {
+        "title": "Intelligentes Geofencing",
+        "description": "KI-gestützte Standortüberwachung mit Sicherheitszonenwarnungen"
+      },
+      "sos": {
+        "title": "Notfall-SOS",
+        "description": "Sofortiges Warnsystem mit Echtzeit-Standortfreigabe"
+      },
+      "authority": {
+        "title": "Behörden-Panel",
+        "description": "Umfassendes Vorfallsüberwachungs- und Reaktionssystem"
+      }
+    },
+    "dashboard": {
+      "digital-id": {
+        "title": "Tourismus-Digital-ID",
+        "description": "Blockchain-gestützte verifizierbare Touristen-ID (temporär)."
+      },
+      "sos": {
+        "title": "SOS und Notfälle",
+        "description": "Multi-Trigger-SOS mit Kontexterfassung und Multi-Channel-Eskalation."
+      },
+      "geo-fencing": {
+        "title": "Intelligentes Geofencing",
+        "description": "KI-gestützte Standortüberwachung mit Sicherheitszonenwarnungen."
+      },
+      "real-time": {
+        "title": "Echtzeit-Überwachung",
+        "description": "Live-Tracking und sofortige Benachrichtigungen für erhöhte Sicherheit."
+      },
+      "ai-chatbot": {
+        "title": "KI-Assistent",
+        "description": "24/7 intelligente Unterstützung und Notfallberatung."
+      },
+      "iot-wearables": {
+        "title": "IoT-Wearables",
+        "description": "Intelligente Geräte für kontinuierliche Gesundheits- und Sicherheitsüberwachung."
+      },
+      "efir": {
+        "title": "Elektronisches FIR",
+        "description": "Digitales Vorfallsmeldesystem und Fallmanagement."
+      },
+      "multilingual": {
+        "title": "Mehrsprachige Unterstützung",
+        "description": "Unterstützung für über 70 Sprachen einschließlich aller nordostindischen Sprachen."
+      },
+      "privacy-security": {
+        "title": "Datenschutz und Sicherheit",
+        "description": "Ende-zu-Ende-Verschlüsselung und datenschutzorientierte Datenverarbeitung."
+      },
+      "admin-settings": {
+        "title": "Admin-Einstellungen",
+        "description": "Umfassende Systemkonfigurations- und Verwaltungstools."
+      },
+      "learn_more": "Mehr erfahren"
+    }
+  },
+  "stats": {
+    "activeTourists": {
+      "label": "Aktive Touristen",
+      "value": "12.458",
+      "trend": "+15%"
+    },
+    "safetyScore": {
+      "label": "Sicherheitsbewertung",
+      "value": "94,2%",
+      "trend": "+2,1%"
+    },
+    "responseTime": {
+      "label": "Reaktionszeit",
+      "value": "< 3 Min",
+      "trend": "-8%"
+    },
+    "incidentsResolved": {
+      "label": "Gelöste Vorfälle",
+      "value": "1.247",
+      "trend": "+12%"
+    }
+  },
+  "common": {
+    "loading": "Laden...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "cancel": "Abbrechen",
+    "confirm": "Bestätigen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "back": "Zurück",
+    "next": "Weiter",
+    "submit": "Senden",
+    "search": "Suchen",
+    "filter": "Filtern",
+    "refresh": "Aktualisieren"
+  },
+  "navigation": {
+    "home": "Startseite",
+    "register": "Registrieren",
+    "dashboard": "Dashboard",
+    "login": "Anmelden",
+    "logout": "Abmelden"
+  },
+  "auth": {
+    "description": "Sicherer Zugang zu Ihrem Sicherheits-Dashboard",
+    "sign_up": "Registrieren",
+    "email": "E-Mail-Adresse",
+    "email_placeholder": "Geben Sie Ihre E-Mail ein",
+    "password": "Passwort",
+    "password_placeholder": "Geben Sie Ihr Passwort ein",
+    "confirm_password": "Passwort bestätigen",
+    "confirm_password_placeholder": "Bestätigen Sie Ihr Passwort",
+    "full_name": "Vollständiger Name",
+    "full_name_placeholder": "Geben Sie Ihren vollständigen Namen ein",
+    "phone_number": "Telefonnummer",
+    "phone_placeholder": "Geben Sie Ihre Telefonnummer ein",
+    "role": "Rolle",
+    "select_role": "Wählen Sie Ihre Rolle",
+    "tourist": "Tourist",
+    "authority": "Behörde",
+    "admin": "Administrator",
+    "organization": "Organisation",
+    "organization_placeholder": "Geben Sie Ihre Organisation ein",
+    "forgot_password": "Passwort vergessen?",
+    "send_reset_email": "Reset-E-Mail senden",
+    "passwords_dont_match": "Passwörter stimmen nicht überein"
+  },
+  "footer": {
+    "title": "Intelligente Tourismussicherheit",
+    "subtitle": "Ministerium für Tourismus und Inneres • Smart India Hackathon 2025",
+    "description": "Schutz von Touristen in den Sieben Schwesterstaaten und Sikkim",
+    "sections": {
+      "government_resources": {
+        "title": "Regierungsressourcen",
+        "links": {
+          "incredible_india": "Unglaubliches Indien",
+          "ministry_tourism": "Tourismusministerium",
+          "ministry_home_affairs": "Innenministerium"
+        }
+      },
+      "northeast_tourism": {
+        "title": "Nordost-Tourismus",
+        "links": {
+          "assam_tourism": "Assam-Tourismus",
+          "arunachal_tourism": "Arunachal-Tourismus",
+          "meghalaya_tourism": "Meghalaya-Tourismus",
+          "manipur_tourism": "Manipur-Tourismus"
+        }
+      },
+      "emergency_services": {
+        "title": "Notdienste",
+        "links": {
+          "police": "📞 Polizei: 100",
+          "ambulance": "🚑 Krankenwagen: 108",
+          "tourist_helpline": "🚨 Touristen-Hotline: 1363",
+          "emergency": "🆘 Notfall: 112"
+        }
+      },
+      "support": {
+        "title": "Support",
+        "links": {
+          "help_center": "Hilfezentrum",
+          "contact_us": "Kontaktieren Sie uns",
+          "privacy_policy": "Datenschutzrichtlinie",
+          "terms_of_service": "Nutzungsbedingungen"
+        }
+      }
+    },
+    "problem_statement": "Problemstellung-ID: 25002",
+    "copyright": "© 2025 Intelligentes Tourismussicherheitsportal. Entwickelt für Smart India Hackathon 2025."
+  }
+}
