@@ -258,7 +258,7 @@ const Index = () => {
             <Card className="ne-card shadow-ne-soft hover:shadow-ne-medium transition-ne hover:scale-105">
               <CardHeader>
                 <CardTitle className="flex items-center font-heading text-ne-tea-brown">
-                  <UserCheck className="mr-2 h-5 w-5 text-ne-sunset-orange" />
+                  <UserCheck className="mr-2 h-5 w-5 text-ne-tea-brown" />
                   Tourist Registration
                 </CardTitle>
                 <CardDescription className="font-body">
@@ -281,7 +281,7 @@ const Index = () => {
             <Card className="ne-card shadow-ne-soft hover:shadow-ne-medium transition-ne hover:scale-105">
               <CardHeader>
                 <CardTitle className="flex items-center font-heading text-ne-tea-brown">
-                  <Shield className="mr-2 h-5 w-5 text-ne-forest-green" />
+                  <Shield className="mr-2 h-5 w-5 text-ne-tea-brown" />
                   Authority Access
                 </CardTitle>
                 <CardDescription className="font-body">
@@ -292,7 +292,7 @@ const Index = () => {
               <CardContent>
                 <Button
                   variant="outline"
-                  className="w-full border-ne-forest-green text-ne-forest-green hover:bg-ne-forest-green hover:text-white transition-ne font-body"
+                  className="w-full border-ne-tea-brown text-ne-tea-brown hover:bg-ne-tea-brown hover:text-white transition-ne font-body"
                   onClick={() =>
                     user && userRole === "authority"
                       ? navigate("/authority")
@@ -307,7 +307,7 @@ const Index = () => {
             <Card className="ne-card shadow-ne-soft hover:shadow-ne-medium transition-ne hover:scale-105">
               <CardHeader>
                 <CardTitle className="flex items-center font-heading text-ne-tea-brown">
-                  <Users className="mr-2 h-5 w-5 text-ne-sunset-orange" />
+                  <Users className="mr-2 h-5 w-5 text-ne-tea-brown" />
                   Admin Panel
                 </CardTitle>
                 <CardDescription className="font-body">
@@ -318,7 +318,7 @@ const Index = () => {
               <CardContent>
                 <Button
                   variant="outline"
-                  className="w-full border-ne-sunset-orange text-ne-sunset-orange hover:bg-ne-sunset-orange hover:text-white transition-ne font-body"
+                  className="w-full border-ne-tea-brown text-ne-tea-brown hover:bg-ne-tea-brown hover:text-white transition-ne font-body"
                   onClick={() =>
                     user && userRole === "admin"
                       ? navigate("/admin")
