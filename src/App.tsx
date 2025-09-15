@@ -17,6 +17,7 @@ const TouristDashboard = lazy(() => import("./pages/TouristDashboard"));
 const AuthorityLogin = lazy(() => import("./pages/AuthorityLogin"));
 const AuthorityDashboard = lazy(() => import("./pages/AuthorityDashboard"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const GeoFenceEditor = lazy(() => import("./pages/GeoFenceEditor"));
 const Help = lazy(() => import("./pages/Help"));
 const Contact = lazy(() => import("./pages/Contact"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -90,6 +91,14 @@ const App = () => (
                 element={
                   <ProtectedRoute requiredRole="admin">
                     <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/geofences"
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <GeoFenceEditor />
                   </ProtectedRoute>
                 }
               />

@@ -1,15 +1,39 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  Settings, Users, Shield, BarChart3, MapPin, Database, 
-  Activity, TrendingUp, AlertTriangle, CheckCircle, Globe, Lock 
+import {
+  Settings,
+  Users,
+  Shield,
+  BarChart3,
+  MapPin,
+  Database,
+  Activity,
+  TrendingUp,
+  AlertTriangle,
+  CheckCircle,
+  Globe,
+  Lock,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -28,7 +52,7 @@ const AdminDashboard = () => {
     autoEFIR: true,
     multilingualSupport: true,
     offlineMode: false,
-    emergencyBroadcast: true
+    emergencyBroadcast: true,
   });
 
   const blockchain = BlockchainService.getInstance();
@@ -37,7 +61,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     // Simple admin authentication for demo
-    const adminAuth = localStorage.getItem('adminAuth');
+    const adminAuth = localStorage.getItem("adminAuth");
     if (adminAuth) {
       setIsAuthenticated(true);
     }
@@ -45,8 +69,8 @@ const AdminDashboard = () => {
 
   const handleAdminLogin = () => {
     // Demo password
-    if (adminPassword === 'admin2025') {
-      localStorage.setItem('adminAuth', 'true');
+    if (adminPassword === "admin2025") {
+      localStorage.setItem("adminAuth", "true");
       setIsAuthenticated(true);
       toast({
         title: "Admin Access Granted",
@@ -62,48 +86,48 @@ const AdminDashboard = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('adminAuth');
+    localStorage.removeItem("adminAuth");
     setIsAuthenticated(false);
-    navigate('/');
+    navigate("/");
   };
 
   const handleSettingChange = (setting: string, value: boolean) => {
-    setSystemSettings(prev => ({ ...prev, [setting]: value }));
+    setSystemSettings((prev) => ({ ...prev, [setting]: value }));
     toast({
       title: "Setting Updated",
-      description: `${setting} has been ${value ? 'enabled' : 'disabled'}.`,
+      description: `${setting} has been ${value ? "enabled" : "disabled"}.`,
     });
   };
 
   const systemStats = [
-    { 
-      title: "Total Tourists", 
-      value: allTourists.length, 
+    {
+      title: "Total Tourists",
+      value: allTourists.length,
       change: "+12%",
       icon: Users,
-      color: "text-primary" 
+      color: "text-primary",
     },
-    { 
-      title: "Active Sessions", 
-      value: allTourists.filter(t => t.status === 'active').length, 
+    {
+      title: "Active Sessions",
+      value: allTourists.filter((t) => t.status === "active").length,
       change: "+8%",
       icon: Activity,
-      color: "text-safety" 
+      color: "text-safety",
     },
-    { 
-      title: "Total Alerts", 
-      value: allAlerts.length, 
+    {
+      title: "Total Alerts",
+      value: allAlerts.length,
       change: "-15%",
       icon: AlertTriangle,
-      color: "text-warning" 
+      color: "text-warning",
     },
-    { 
-      title: "System Uptime", 
-      value: "99.9%", 
+    {
+      title: "System Uptime",
+      value: "99.9%",
       change: "+0.1%",
       icon: TrendingUp,
-      color: "text-safety" 
-    }
+      color: "text-safety",
+    },
   ];
 
   if (!isAuthenticated) {
@@ -128,10 +152,10 @@ const AdminDashboard = () => {
                 placeholder="Enter admin password"
                 value={adminPassword}
                 onChange={(e) => setAdminPassword(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleAdminLogin()}
+                onKeyPress={(e) => e.key === "Enter" && handleAdminLogin()}
               />
             </div>
-            <Button 
+            <Button
               onClick={handleAdminLogin}
               className="w-full gradient-primary text-white"
             >
@@ -139,11 +163,13 @@ const AdminDashboard = () => {
               Access Admin Panel
             </Button>
             <div className="text-center">
-              <p className="text-xs text-muted-foreground">Demo Password: admin2025</p>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => navigate('/')}
+              <p className="text-xs text-muted-foreground">
+                Demo Password: admin2025
+              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/")}
                 className="mt-2"
               >
                 Back to Home
@@ -171,7 +197,10 @@ const AdminDashboard = () => {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <Badge variant="secondary" className="bg-danger/10 text-danger border-danger/20">
+              <Badge
+                variant="secondary"
+                className="bg-danger/10 text-danger border-danger/20"
+              >
                 <Shield className="mr-1 h-3 w-3" />
                 Admin Access
               </Badge>
@@ -191,21 +220,23 @@ const AdminDashboard = () => {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
                   <stat.icon className={`h-6 w-6 ${stat.color}`} />
-                  <Badge 
-                    variant="secondary" 
+                  <Badge
+                    variant="secondary"
                     className={`text-xs ${
-                      stat.change.startsWith('+') 
-                        ? 'bg-safety/10 text-safety border-safety/20' 
-                        : stat.change.startsWith('-')
-                        ? 'bg-warning/10 text-warning border-warning/20'
-                        : 'bg-muted/10 text-muted-foreground'
+                      stat.change.startsWith("+")
+                        ? "bg-safety/10 text-safety border-safety/20"
+                        : stat.change.startsWith("-")
+                        ? "bg-warning/10 text-warning border-warning/20"
+                        : "bg-muted/10 text-muted-foreground"
                     }`}
                   >
                     {stat.change}
                   </Badge>
                 </div>
                 <div className="text-2xl font-bold mb-1">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{stat.title}</div>
+                <div className="text-sm text-muted-foreground">
+                  {stat.title}
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -235,28 +266,36 @@ const AdminDashboard = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-sm">API Response Time</span>
-                      <span className="text-sm font-semibold text-safety">145ms</span>
+                      <span className="text-sm font-semibold text-safety">
+                        145ms
+                      </span>
                     </div>
                     <Progress value={85} className="h-2" />
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-sm">Database Performance</span>
-                      <span className="text-sm font-semibold text-safety">98%</span>
+                      <span className="text-sm font-semibold text-safety">
+                        98%
+                      </span>
                     </div>
                     <Progress value={98} className="h-2" />
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-sm">Blockchain Sync</span>
-                      <span className="text-sm font-semibold text-safety">100%</span>
+                      <span className="text-sm font-semibold text-safety">
+                        100%
+                      </span>
                     </div>
                     <Progress value={100} className="h-2" />
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-sm">AI Model Accuracy</span>
-                      <span className="text-sm font-semibold text-safety">94.7%</span>
+                      <span className="text-sm font-semibold text-safety">
+                        94.7%
+                      </span>
                     </div>
                     <Progress value={94.7} className="h-2" />
                   </div>
@@ -275,23 +314,37 @@ const AdminDashboard = () => {
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
                       <div className="w-2 h-2 bg-safety rounded-full"></div>
-                      <div className="text-sm">New tourist registration batch processed</div>
-                      <div className="text-xs text-muted-foreground ml-auto">2 min ago</div>
+                      <div className="text-sm">
+                        New tourist registration batch processed
+                      </div>
+                      <div className="text-xs text-muted-foreground ml-auto">
+                        2 min ago
+                      </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="w-2 h-2 bg-warning rounded-full"></div>
                       <div className="text-sm">Geo-fence boundary updated</div>
-                      <div className="text-xs text-muted-foreground ml-auto">15 min ago</div>
+                      <div className="text-xs text-muted-foreground ml-auto">
+                        15 min ago
+                      </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="w-2 h-2 bg-primary rounded-full"></div>
-                      <div className="text-sm">AI model retrained with new data</div>
-                      <div className="text-xs text-muted-foreground ml-auto">1 hour ago</div>
+                      <div className="text-sm">
+                        AI model retrained with new data
+                      </div>
+                      <div className="text-xs text-muted-foreground ml-auto">
+                        1 hour ago
+                      </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="w-2 h-2 bg-danger rounded-full"></div>
-                      <div className="text-sm">Emergency alert protocol tested</div>
-                      <div className="text-xs text-muted-foreground ml-auto">2 hours ago</div>
+                      <div className="text-sm">
+                        Emergency alert protocol tested
+                      </div>
+                      <div className="text-xs text-muted-foreground ml-auto">
+                        2 hours ago
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -334,7 +387,9 @@ const AdminDashboard = () => {
                   <Users className="mr-2 h-5 w-5 text-primary" />
                   User Management
                 </CardTitle>
-                <CardDescription>Manage tourist registrations and authority access</CardDescription>
+                <CardDescription>
+                  Manage tourist registrations and authority access
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -351,30 +406,43 @@ const AdminDashboard = () => {
                   <TableBody>
                     {allTourists.slice(0, 10).map((tourist) => (
                       <TableRow key={tourist.id}>
-                        <TableCell className="font-medium">{tourist.touristName}</TableCell>
-                        <TableCell className="font-mono text-sm">{tourist.id.slice(0, 16)}...</TableCell>
+                        <TableCell className="font-medium">
+                          {tourist.touristName}
+                        </TableCell>
+                        <TableCell className="font-mono text-sm">
+                          {tourist.id.slice(0, 16)}...
+                        </TableCell>
                         <TableCell>
-                          <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                          <Badge
+                            variant="secondary"
+                            className="bg-primary/10 text-primary border-primary/20"
+                          >
                             Tourist
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge 
+                          <Badge
                             variant="secondary"
                             className={
-                              tourist.status === 'active' 
-                                ? 'bg-safety/10 text-safety border-safety/20'
-                                : 'bg-warning/10 text-warning border-warning/20'
+                              tourist.status === "active"
+                                ? "bg-safety/10 text-safety border-safety/20"
+                                : "bg-warning/10 text-warning border-warning/20"
                             }
                           >
                             {tourist.status}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-sm">{tourist.issuedAt.toLocaleDateString()}</TableCell>
+                        <TableCell className="text-sm">
+                          {tourist.issuedAt.toLocaleDateString()}
+                        </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <Button size="sm" variant="outline">Edit</Button>
-                            <Button size="sm" variant="outline">Suspend</Button>
+                            <Button size="sm" variant="outline">
+                              Edit
+                            </Button>
+                            <Button size="sm" variant="outline">
+                              Suspend
+                            </Button>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -392,29 +460,59 @@ const AdminDashboard = () => {
                   <MapPin className="mr-2 h-5 w-5 text-primary" />
                   Geo-fence Management
                 </CardTitle>
-                <CardDescription>Configure safety zones and restricted areas</CardDescription>
+                <CardDescription>
+                  Configure safety zones and restricted areas
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
+                  <div className="flex gap-4 mb-6">
+                    <Button
+                      onClick={() => navigate("/admin/geofences")}
+                      className="gradient-primary text-white"
+                    >
+                      <MapPin className="mr-2 h-4 w-4" />
+                      Interactive Geofence Editor
+                    </Button>
+                    <Button variant="outline">
+                      <Download className="mr-2 h-4 w-4" />
+                      Export Zones
+                    </Button>
+                  </div>
+
                   <div className="grid lg:grid-cols-2 gap-6">
                     <div>
-                      <h4 className="font-semibold mb-4">Existing Geo-fences</h4>
+                      <h4 className="font-semibold mb-4">
+                        Existing Geo-fences
+                      </h4>
                       <div className="space-y-3">
                         {mockGeoFences.map((fence) => (
-                          <div key={fence.id} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div
+                            key={fence.id}
+                            className="flex items-center justify-between p-3 border rounded-lg"
+                          >
                             <div className="flex items-center">
-                              <div className={`w-3 h-3 rounded-full mr-3 ${
-                                fence.type === 'safe' ? 'bg-safety' : 
-                                fence.type === 'restricted' ? 'bg-warning' : 'bg-danger'
-                              }`}></div>
+                              <div
+                                className={`w-3 h-3 rounded-full mr-3 ${
+                                  fence.type === "safe"
+                                    ? "bg-safety"
+                                    : fence.type === "restricted"
+                                    ? "bg-warning"
+                                    : "bg-danger"
+                                }`}
+                              ></div>
                               <div>
                                 <p className="font-medium">{fence.name}</p>
-                                <p className="text-sm text-muted-foreground">{fence.description}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  {fence.description}
+                                </p>
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
                               <Badge variant="outline">{fence.type}</Badge>
-                              <Button size="sm" variant="outline">Edit</Button>
+                              <Button size="sm" variant="outline">
+                                Edit
+                              </Button>
                             </div>
                           </div>
                         ))}
@@ -458,31 +556,41 @@ const AdminDashboard = () => {
                   <BarChart3 className="mr-2 h-5 w-5 text-primary" />
                   System Analytics
                 </CardTitle>
-                <CardDescription>Performance metrics and usage statistics</CardDescription>
+                <CardDescription>
+                  Performance metrics and usage statistics
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-64 bg-muted/20 rounded-lg flex items-center justify-center mb-6">
                   <div className="text-center">
                     <BarChart3 className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">Analytics Dashboard</h3>
+                    <h3 className="text-lg font-semibold mb-2">
+                      Analytics Dashboard
+                    </h3>
                     <p className="text-muted-foreground">
                       Real-time charts and graphs would be displayed here
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-3 gap-4">
                   <div className="text-center p-4 bg-muted/20 rounded-lg">
                     <div className="text-2xl font-bold text-primary">1,247</div>
-                    <div className="text-sm text-muted-foreground">Total Interactions</div>
+                    <div className="text-sm text-muted-foreground">
+                      Total Interactions
+                    </div>
                   </div>
                   <div className="text-center p-4 bg-muted/20 rounded-lg">
                     <div className="text-2xl font-bold text-safety">98.2%</div>
-                    <div className="text-sm text-muted-foreground">Success Rate</div>
+                    <div className="text-sm text-muted-foreground">
+                      Success Rate
+                    </div>
                   </div>
                   <div className="text-center p-4 bg-muted/20 rounded-lg">
                     <div className="text-2xl font-bold text-warning">2.3s</div>
-                    <div className="text-sm text-muted-foreground">Avg Response</div>
+                    <div className="text-sm text-muted-foreground">
+                      Avg Response
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -496,7 +604,9 @@ const AdminDashboard = () => {
                   <Settings className="mr-2 h-5 w-5 text-primary" />
                   System Configuration
                 </CardTitle>
-                <CardDescription>Configure system features and settings</CardDescription>
+                <CardDescription>
+                  Configure system features and settings
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
@@ -504,41 +614,50 @@ const AdminDashboard = () => {
                     <div>
                       <h4 className="font-medium">AI Anomaly Detection</h4>
                       <p className="text-sm text-muted-foreground">
-                        Enable intelligent threat detection and behavior analysis
+                        Enable intelligent threat detection and behavior
+                        analysis
                       </p>
                     </div>
-                    <Switch 
+                    <Switch
                       checked={systemSettings.aiAnomalyDetection}
-                      onCheckedChange={(checked) => handleSettingChange('aiAnomalyDetection', checked)}
+                      onCheckedChange={(checked) =>
+                        handleSettingChange("aiAnomalyDetection", checked)
+                      }
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="font-medium">Geo-fence Alerts</h4>
                       <p className="text-sm text-muted-foreground">
-                        Send automatic notifications when tourists enter restricted zones
+                        Send automatic notifications when tourists enter
+                        restricted zones
                       </p>
                     </div>
-                    <Switch 
+                    <Switch
                       checked={systemSettings.geoFenceAlerts}
-                      onCheckedChange={(checked) => handleSettingChange('geoFenceAlerts', checked)}
+                      onCheckedChange={(checked) =>
+                        handleSettingChange("geoFenceAlerts", checked)
+                      }
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="font-medium">Auto E-FIR Generation</h4>
                       <p className="text-sm text-muted-foreground">
-                        Automatically generate electronic FIRs for emergency incidents
+                        Automatically generate electronic FIRs for emergency
+                        incidents
                       </p>
                     </div>
-                    <Switch 
+                    <Switch
                       checked={systemSettings.autoEFIR}
-                      onCheckedChange={(checked) => handleSettingChange('autoEFIR', checked)}
+                      onCheckedChange={(checked) =>
+                        handleSettingChange("autoEFIR", checked)
+                      }
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="font-medium">Multilingual Support</h4>
@@ -546,12 +665,14 @@ const AdminDashboard = () => {
                         Enable support for multiple Indian languages
                       </p>
                     </div>
-                    <Switch 
+                    <Switch
                       checked={systemSettings.multilingualSupport}
-                      onCheckedChange={(checked) => handleSettingChange('multilingualSupport', checked)}
+                      onCheckedChange={(checked) =>
+                        handleSettingChange("multilingualSupport", checked)
+                      }
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="font-medium">Offline Mode</h4>
@@ -559,12 +680,14 @@ const AdminDashboard = () => {
                         Enable offline functionality for poor connectivity areas
                       </p>
                     </div>
-                    <Switch 
+                    <Switch
                       checked={systemSettings.offlineMode}
-                      onCheckedChange={(checked) => handleSettingChange('offlineMode', checked)}
+                      onCheckedChange={(checked) =>
+                        handleSettingChange("offlineMode", checked)
+                      }
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="font-medium">Emergency Broadcast</h4>
@@ -572,9 +695,11 @@ const AdminDashboard = () => {
                         Send emergency alerts to all tourists in affected areas
                       </p>
                     </div>
-                    <Switch 
+                    <Switch
                       checked={systemSettings.emergencyBroadcast}
-                      onCheckedChange={(checked) => handleSettingChange('emergencyBroadcast', checked)}
+                      onCheckedChange={(checked) =>
+                        handleSettingChange("emergencyBroadcast", checked)
+                      }
                     />
                   </div>
                 </div>

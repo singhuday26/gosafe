@@ -1,17 +1,38 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { 
-  Shield, MapPin, AlertTriangle, Users, Phone, Clock, 
-  Battery, Signal, Navigation, AlertCircle, CheckCircle 
+import {
+  Shield,
+  MapPin,
+  AlertTriangle,
+  Users,
+  Phone,
+  Clock,
+  Battery,
+  Signal,
+  Navigation,
+  AlertCircle,
+  CheckCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { BlockchainService, calculateSafetyScore, checkGeoFenceStatus, mockGeoFences } from "@/lib/blockchain";
+import {
+  BlockchainService,
+  calculateSafetyScore,
+  checkGeoFenceStatus,
+  mockGeoFences,
+} from "@/lib/blockchain";
+import MapView from "@/components/MapView";
 
 const TouristDashboard = () => {
   const navigate = useNavigate();
@@ -19,28 +40,35 @@ const TouristDashboard = () => {
   const { t } = useTranslation();
   const [currentTouristId, setCurrentTouristId] = useState<string | null>(null);
   const [safetyScore, setSafetyScore] = useState(0);
-  const [currentLocation, setCurrentLocation] = useState<{latitude: number, longitude: number} | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
   const [isSOSActive, setIsSOSActive] = useState(false);
   const [lastSOSTime, setLastSOSTime] = useState<Date | null>(null);
+  const [nearbyGeofences, setNearbyGeofences] = useState<unknown[]>([]);
+  const [escalationType, setEscalationType] = useState<"police" | "ranger">(
+    "police"
+  );
 
   useEffect(() => {
     // Check if user has valid Digital ID
-    const touristId = localStorage.getItem('currentTouristId');
+    const touristId = localStorage.getItem("currentTouristId");
     if (!touristId) {
-      navigate('/register');
+      navigate("/register");
       return;
     }
 
     const blockchain = BlockchainService.getInstance();
     const digitalID = blockchain.validateDigitalID(touristId);
-    
-    if (!digitalID || digitalID.status !== 'active') {
+
+    if (!digitalID || digitalID.status !== "active") {
       toast({
         title: "Invalid Digital ID",
         description: "Please register for a new Digital Tourist ID.",
         variant: "destructive",
       });
-      navigate('/register');
+      navigate("/register");
       return;
     }
 
@@ -53,14 +81,14 @@ const TouristDashboard = () => {
         (position) => {
           setCurrentLocation({
             latitude: position.coords.latitude,
-            longitude: position.coords.longitude
+            longitude: position.coords.longitude,
           });
         },
         () => {
           // Use mock Delhi coordinates if location access denied
           setCurrentLocation({
             latitude: 28.6139,
-            longitude: 77.2090
+            longitude: 77.209,
           });
         }
       );
@@ -73,36 +101,53 @@ const TouristDashboard = () => {
     setIsSOSActive(true);
     setLastSOSTime(new Date());
 
+    // Check geofences for escalation logic
+    const geoFenceStatus = checkGeoFenceStatus(
+      currentLocation.latitude,
+      currentLocation.longitude
+    );
+    const currentEscalation =
+      geoFenceStatus?.type === "danger" ? "ranger" : "police";
+    setEscalationType(currentEscalation);
+
     const blockchain = BlockchainService.getInstance();
     const sosAlert = blockchain.createSOSAlert({
       touristId: currentTouristId,
       location: {
         latitude: currentLocation.latitude,
         longitude: currentLocation.longitude,
-        address: "Tourist Location Area, Delhi, India" // Mock address
+        address: "Tourist Location Area, Delhi, India", // Mock address
       },
-      type: 'panic',
-      message: "Emergency SOS triggered by tourist"
+      type: "panic",
+      message: `Emergency SOS triggered by tourist. Escalation: ${currentEscalation}${
+        geoFenceStatus ? ` (${geoFenceStatus.name})` : ""
+      }`,
     });
 
     toast({
       title: "SOS Alert Triggered!",
-      description: "Emergency services have been notified. Help is on the way.",
+      description: `Emergency services notified. ${
+        currentEscalation === "ranger" ? "Rangers" : "Police"
+      } dispatched to your location.`,
       variant: "destructive",
     });
 
     // Auto-disable SOS after 30 seconds for demo
     setTimeout(() => {
       setIsSOSActive(false);
-      blockchain.updateSOSStatus(sosAlert.id, 'responded');
+      blockchain.updateSOSStatus(sosAlert.id, "responded");
       toast({
         title: "Help is Coming",
-        description: "Local authorities are responding to your location.",
+        description: `Local ${
+          currentEscalation === "ranger" ? "rangers" : "authorities"
+        } are responding to your location.`,
       });
     }, 30000);
   };
 
-  const geoFenceStatus = currentLocation ? checkGeoFenceStatus(currentLocation.latitude, currentLocation.longitude) : null;
+  const geoFenceStatus = currentLocation
+    ? checkGeoFenceStatus(currentLocation.latitude, currentLocation.longitude)
+    : null;
 
   if (!currentTouristId) {
     return (
@@ -125,19 +170,24 @@ const TouristDashboard = () => {
               <Shield className="h-8 w-8 text-primary mr-3" />
               <div>
                 <h1 className="text-xl font-bold">Tourist Portal</h1>
-                <p className="text-sm text-muted-foreground">Digital ID: {currentTouristId}</p>
+                <p className="text-sm text-muted-foreground">
+                  Digital ID: {currentTouristId}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <Badge variant="secondary" className="bg-safety/10 text-safety border-safety/20">
+              <Badge
+                variant="secondary"
+                className="bg-safety/10 text-safety border-safety/20"
+              >
                 <CheckCircle className="mr-1 h-3 w-3" />
                 Verified
               </Badge>
               <Button
                 variant="ghost"
                 onClick={() => {
-                  localStorage.removeItem('currentTouristId');
-                  navigate('/');
+                  localStorage.removeItem("currentTouristId");
+                  navigate("/");
                 }}
               >
                 Logout
@@ -151,47 +201,176 @@ const TouristDashboard = () => {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Left Column - Safety & Status */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Interactive Map */}
+            <Card className="gradient-card shadow-soft">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <MapPin className="mr-2 h-5 w-5 text-primary" />
+                  Live Location & Safety Zones
+                </CardTitle>
+                <CardDescription>
+                  Real-time location tracking with geofence monitoring
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-64 rounded-lg border overflow-hidden">
+                  <MapView
+                    tourists={
+                      currentLocation
+                        ? [
+                            {
+                              id: currentTouristId || "current",
+                              name: "You",
+                              latitude: currentLocation.latitude,
+                              longitude: currentLocation.longitude,
+                              status: isSOSActive ? "sos" : "active",
+                            },
+                          ]
+                        : []
+                    }
+                    geofences={mockGeoFences.map((fence) => ({
+                      id: fence.id,
+                      name: fence.name,
+                      description: fence.description,
+                      coordinates: fence.coordinates,
+                      type: fence.type as
+                        | "safe"
+                        | "restricted"
+                        | "danger"
+                        | "tourist_zone",
+                      active: true,
+                    }))}
+                    sosAlerts={
+                      isSOSActive && currentLocation
+                        ? [
+                            {
+                              id: "current-sos",
+                              latitude: currentLocation.latitude,
+                              longitude: currentLocation.longitude,
+                              alert_type: "panic",
+                              tourist_name: "Current User",
+                              timestamp: new Date().toISOString(),
+                              status: "active",
+                            },
+                          ]
+                        : []
+                    }
+                    center={
+                      currentLocation
+                        ? [currentLocation.longitude, currentLocation.latitude]
+                        : undefined
+                    }
+                    zoom={14}
+                    showControls={true}
+                    interactive={true}
+                    className="w-full h-full"
+                  />
+                </div>
+
+                {/* Current Zone Status */}
+                {currentLocation && (
+                  <div className="mt-4 p-3 bg-muted rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Current Zone:</span>
+                      {(() => {
+                        const zone = checkGeoFenceStatus(
+                          currentLocation.latitude,
+                          currentLocation.longitude
+                        );
+                        if (zone) {
+                          return (
+                            <Badge
+                              variant={
+                                zone.type === "danger"
+                                  ? "destructive"
+                                  : zone.type === "restricted"
+                                  ? "secondary"
+                                  : "default"
+                              }
+                            >
+                              {zone.name}
+                            </Badge>
+                          );
+                        }
+                        return <Badge variant="outline">Open Area</Badge>;
+                      })()}
+                    </div>
+                    {escalationType === "ranger" && (
+                      <div className="mt-2 text-xs text-amber-600 bg-amber-50 p-2 rounded">
+                        ⚠️ You're in a high-risk area. Rangers will respond to
+                        emergencies.
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Safety Score */}
-            <Card className={`gradient-card shadow-soft ${safetyScore >= 80 ? 'safety-glow' : ''}`}>
+            <Card
+              className={`gradient-card shadow-soft ${
+                safetyScore >= 80 ? "safety-glow" : ""
+              }`}
+            >
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center">
                     <Shield className="mr-2 h-5 w-5 text-safety" />
                     Safety Score
                   </CardTitle>
-                  <Badge 
-                    variant="secondary" 
+                  <Badge
+                    variant="secondary"
                     className={`${
-                      safetyScore >= 80 
-                        ? 'bg-safety/10 text-safety border-safety/20' 
-                        : safetyScore >= 60 
-                        ? 'bg-warning/10 text-warning border-warning/20'
-                        : 'bg-danger/10 text-danger border-danger/20'
+                      safetyScore >= 80
+                        ? "bg-safety/10 text-safety border-safety/20"
+                        : safetyScore >= 60
+                        ? "bg-warning/10 text-warning border-warning/20"
+                        : "bg-danger/10 text-danger border-danger/20"
                     }`}
                   >
-                    {safetyScore >= 80 ? 'Safe' : safetyScore >= 60 ? 'Caution' : 'Alert'}
+                    {safetyScore >= 80
+                      ? "Safe"
+                      : safetyScore >= 60
+                      ? "Caution"
+                      : "Alert"}
                   </Badge>
                 </div>
-                <CardDescription>AI-powered real-time safety assessment</CardDescription>
+                <CardDescription>
+                  AI-powered real-time safety assessment
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="text-center">
-                    <div className="text-4xl font-bold text-safety mb-2">{safetyScore.toFixed(1)}</div>
+                    <div className="text-4xl font-bold text-safety mb-2">
+                      {safetyScore.toFixed(1)}
+                    </div>
                     <Progress value={safetyScore} className="w-full" />
                   </div>
                   <div className="grid grid-cols-3 gap-4 text-center">
                     <div>
-                      <div className="text-2xl font-semibold text-safety">3</div>
-                      <div className="text-xs text-muted-foreground">Safe Zones</div>
+                      <div className="text-2xl font-semibold text-safety">
+                        3
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Safe Zones
+                      </div>
                     </div>
                     <div>
-                      <div className="text-2xl font-semibold text-warning">1</div>
-                      <div className="text-xs text-muted-foreground">Caution Areas</div>
+                      <div className="text-2xl font-semibold text-warning">
+                        1
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Caution Areas
+                      </div>
                     </div>
                     <div>
-                      <div className="text-2xl font-semibold text-danger">0</div>
-                      <div className="text-xs text-muted-foreground">Danger Zones</div>
+                      <div className="text-2xl font-semibold text-danger">
+                        0
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Danger Zones
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -205,47 +384,71 @@ const TouristDashboard = () => {
                   <MapPin className="mr-2 h-5 w-5 text-primary" />
                   Location & Geo-fencing
                 </CardTitle>
-                <CardDescription>Current location and zone monitoring</CardDescription>
+                <CardDescription>
+                  Current location and zone monitoring
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {currentLocation && (
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <div className="text-sm text-muted-foreground">Latitude</div>
-                      <div className="font-mono text-sm">{currentLocation.latitude.toFixed(6)}</div>
+                      <div className="text-sm text-muted-foreground">
+                        Latitude
+                      </div>
+                      <div className="font-mono text-sm">
+                        {currentLocation.latitude.toFixed(6)}
+                      </div>
                     </div>
                     <div>
-                      <div className="text-sm text-muted-foreground">Longitude</div>
-                      <div className="font-mono text-sm">{currentLocation.longitude.toFixed(6)}</div>
+                      <div className="text-sm text-muted-foreground">
+                        Longitude
+                      </div>
+                      <div className="font-mono text-sm">
+                        {currentLocation.longitude.toFixed(6)}
+                      </div>
                     </div>
                   </div>
                 )}
-                
+
                 {geoFenceStatus && (
-                  <div className={`p-3 rounded-lg border ${
-                    geoFenceStatus.type === 'safe' 
-                      ? 'bg-safety/10 border-safety/20' 
-                      : geoFenceStatus.type === 'restricted'
-                      ? 'bg-warning/10 border-warning/20'
-                      : 'bg-danger/10 border-danger/20'
-                  }`}>
+                  <div
+                    className={`p-3 rounded-lg border ${
+                      geoFenceStatus.type === "safe"
+                        ? "bg-safety/10 border-safety/20"
+                        : geoFenceStatus.type === "restricted"
+                        ? "bg-warning/10 border-warning/20"
+                        : "bg-danger/10 border-danger/20"
+                    }`}
+                  >
                     <div className="flex items-center mb-2">
                       <Navigation className="mr-2 h-4 w-4" />
-                      <span className="font-semibold">Current Zone: {geoFenceStatus.name}</span>
+                      <span className="font-semibold">
+                        Current Zone: {geoFenceStatus.name}
+                      </span>
                     </div>
-                    <p className="text-sm text-muted-foreground">{geoFenceStatus.description}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {geoFenceStatus.description}
+                    </p>
                   </div>
                 )}
 
                 <div className="space-y-2">
                   <h4 className="font-semibold text-sm">Nearby Zones</h4>
                   {mockGeoFences.map((fence) => (
-                    <div key={fence.id} className="flex items-center justify-between p-2 bg-muted/50 rounded">
+                    <div
+                      key={fence.id}
+                      className="flex items-center justify-between p-2 bg-muted/50 rounded"
+                    >
                       <div className="flex items-center">
-                        <div className={`w-3 h-3 rounded-full mr-2 ${
-                          fence.type === 'safe' ? 'bg-safety' : 
-                          fence.type === 'restricted' ? 'bg-warning' : 'bg-danger'
-                        }`}></div>
+                        <div
+                          className={`w-3 h-3 rounded-full mr-2 ${
+                            fence.type === "safe"
+                              ? "bg-safety"
+                              : fence.type === "restricted"
+                              ? "bg-warning"
+                              : "bg-danger"
+                          }`}
+                        ></div>
                         <span className="text-sm">{fence.name}</span>
                       </div>
                       <Badge variant="outline" className="text-xs">
@@ -269,18 +472,28 @@ const TouristDashboard = () => {
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 bg-safety rounded-full"></div>
-                    <div className="text-sm">Entered safe zone: Tourist Hub Area</div>
-                    <div className="text-xs text-muted-foreground ml-auto">2 min ago</div>
+                    <div className="text-sm">
+                      Entered safe zone: Tourist Hub Area
+                    </div>
+                    <div className="text-xs text-muted-foreground ml-auto">
+                      2 min ago
+                    </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 bg-primary rounded-full"></div>
                     <div className="text-sm">Location updated successfully</div>
-                    <div className="text-xs text-muted-foreground ml-auto">5 min ago</div>
+                    <div className="text-xs text-muted-foreground ml-auto">
+                      5 min ago
+                    </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 bg-warning rounded-full"></div>
-                    <div className="text-sm">Safety score updated: 94.2/100</div>
-                    <div className="text-xs text-muted-foreground ml-auto">10 min ago</div>
+                    <div className="text-sm">
+                      Safety score updated: 94.2/100
+                    </div>
+                    <div className="text-xs text-muted-foreground ml-auto">
+                      10 min ago
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -290,7 +503,11 @@ const TouristDashboard = () => {
           {/* Right Column - Emergency & Controls */}
           <div className="space-y-6">
             {/* Emergency SOS */}
-            <Card className={`gradient-card shadow-soft ${isSOSActive ? 'emergency-pulse shadow-emergency' : ''}`}>
+            <Card
+              className={`gradient-card shadow-soft ${
+                isSOSActive ? "emergency-pulse shadow-emergency" : ""
+              }`}
+            >
               <CardHeader>
                 <CardTitle className="flex items-center text-danger">
                   <AlertTriangle className="mr-2 h-5 w-5" />
@@ -304,9 +521,9 @@ const TouristDashboard = () => {
                 <Button
                   size="lg"
                   className={`w-full ${
-                    isSOSActive 
-                      ? 'bg-danger/80 hover:bg-danger text-white' 
-                      : 'bg-danger hover:bg-danger/90 text-white shadow-emergency'
+                    isSOSActive
+                      ? "bg-danger/80 hover:bg-danger text-white"
+                      : "bg-danger hover:bg-danger/90 text-white shadow-emergency"
                   }`}
                   onClick={handleSOS}
                   disabled={isSOSActive}
@@ -352,7 +569,10 @@ const TouristDashboard = () => {
                     <Signal className="mr-2 h-4 w-4 text-primary" />
                     <span className="text-sm">Network</span>
                   </div>
-                  <Badge variant="secondary" className="bg-safety/10 text-safety border-safety/20">
+                  <Badge
+                    variant="secondary"
+                    className="bg-safety/10 text-safety border-safety/20"
+                  >
                     Strong
                   </Badge>
                 </div>
@@ -361,7 +581,10 @@ const TouristDashboard = () => {
                     <MapPin className="mr-2 h-4 w-4 text-primary" />
                     <span className="text-sm">GPS</span>
                   </div>
-                  <Badge variant="secondary" className="bg-safety/10 text-safety border-safety/20">
+                  <Badge
+                    variant="secondary"
+                    className="bg-safety/10 text-safety border-safety/20"
+                  >
                     Active
                   </Badge>
                 </div>
@@ -377,20 +600,36 @@ const TouristDashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full justify-start" size="sm">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  size="sm"
+                >
                   <Phone className="mr-2 h-4 w-4" />
                   Primary: +91-98765-43210
                 </Button>
-                <Button variant="outline" className="w-full justify-start" size="sm">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  size="sm"
+                >
                   <Phone className="mr-2 h-4 w-4" />
                   Secondary: +91-87654-32109
                 </Button>
                 <Separator />
-                <Button variant="outline" className="w-full justify-start" size="sm">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  size="sm"
+                >
                   <Shield className="mr-2 h-4 w-4" />
                   Local Police: 100
                 </Button>
-                <Button variant="outline" className="w-full justify-start" size="sm">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  size="sm"
+                >
                   <AlertCircle className="mr-2 h-4 w-4" />
                   Tourism Helpline: 1363
                 </Button>
@@ -406,15 +645,27 @@ const TouristDashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-start"
+                >
                   <MapPin className="mr-2 h-4 w-4" />
                   Share Live Location
                 </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-start"
+                >
                   <Shield className="mr-2 h-4 w-4" />
                   View Safety Tips
                 </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-start"
+                >
                   <Phone className="mr-2 h-4 w-4" />
                   Contact Guide
                 </Button>
