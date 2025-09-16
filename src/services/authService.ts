@@ -249,7 +249,7 @@ export class AuthService {
       .insert([touristPayload])
       .select()
       .single();
-    
+
     if (touristError) {
       throw new Error(touristError.message);
     }

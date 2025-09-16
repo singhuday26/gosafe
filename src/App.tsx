@@ -23,6 +23,11 @@ const GeoFenceEditor = lazy(() => import("./pages/GeoFenceEditor"));
 const Help = lazy(() => import("./pages/Help"));
 const Contact = lazy(() => import("./pages/Contact"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const AboutSIH = lazy(() => import("./pages/AboutSIH"));
+const SOSGuide = lazy(() => import("./pages/SOSGuide"));
+const SafetyGuidelines = lazy(() => import("./pages/SafetyGuidelines"));
+const TouristSupport = lazy(() => import("./pages/TouristSupport"));
+const EmergencyContacts = lazy(() => import("./pages/EmergencyContacts"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -112,6 +117,14 @@ const App = () => (
               />
               <Route path="/help" element={<Help />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/about-sih" element={<AboutSIH />} />
+              <Route path="/sos-guide" element={<SOSGuide />} />
+              <Route path="/safety-guidelines" element={<SafetyGuidelines />} />
+              <Route path="/tourist-support" element={<TouristSupport />} />
+              <Route
+                path="/emergency-contacts"
+                element={<EmergencyContacts />}
+              />
               <Route path="/privacy" element={<NotFound />} />
               <Route path="/terms" element={<NotFound />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
