@@ -3,6 +3,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { Shield, ArrowLeft, HelpCircle, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ChatBotWrapper } from "@/components/ChatBotWrapper";
 
 interface AuthLayoutProps {
   children?: React.ReactNode;
@@ -86,6 +87,9 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
         <div className="absolute -top-1/2 -right-1/2 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-1/2 -left-1/2 w-96 h-96 bg-secondary/5 rounded-full blur-3xl"></div>
       </div>
+
+      {/* Chatbot for guests */}
+      <ChatBotWrapper forceRole="guest" enabled={true} />
 
       {/* Footer */}
       <footer className="bg-card/80 backdrop-blur-sm border-t">

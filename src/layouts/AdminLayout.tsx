@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { ChatBotWrapper } from "@/components/ChatBotWrapper";
 
 interface AdminLayoutProps {
   children?: React.ReactNode;
@@ -259,6 +260,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         {/* Main Content */}
         <main className="flex-1 min-h-screen">{children || <Outlet />}</main>
       </div>
+
+      {/* Chatbot */}
+      <ChatBotWrapper forceRole="admin" enabled={true} />
 
       {/* Footer */}
       <footer className="bg-card border-t">

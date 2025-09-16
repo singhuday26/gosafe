@@ -1,4 +1,5 @@
-import { supabase } from "../lib/supabase";
+import { supabase as supabaseDb } from "../lib/supabase";
+import { supabase as supabaseAuth } from "@/integrations/supabase/client";
 
 export interface AuthUser {
   id: string;
@@ -78,7 +79,7 @@ export class AuthService {
         throw new Error("Invalid email format");
       }
 
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabaseAuth.auth.signInWithPassword({
         email: credentials.email.trim(),
         password: credentials.password,
       });
@@ -136,7 +137,7 @@ export class AuthService {
         throw new Error("Invalid email format");
       }
 
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await supabaseAuth.auth.signUp({
         email: userData.email.trim(),
         password: userData.password,
         options: {
@@ -181,9 +182,80 @@ export class AuthService {
     }
   }
 
+  // New: Register Tourist with extended profile and optional document
+  async registerTourist(args: {
+    email: string;
+    password: string;
+    name: string;
+    role?: "tourist";
+    emergencyContactsJson: string; // serialized array
+    documentUrl?: string;
+    documentHash?: string;
+  }): Promise<AuthUser> {
+    const {
+      email,
+      password,
+      name,
+      role = "tourist",
+      emergencyContactsJson,
+      documentUrl,
+      documentHash,
+    } = args;
+
+    // Create auth user with metadata role
+    const { data, error } = await supabaseAuth.auth.signUp({
+      email: email.trim(),
+      password,
+      options: { data: { role, name } },
+    });
+    if (error || !data.user) {
+      throw new Error(error?.message || "Failed to register");
+    }
+
+    // Create profile row
+    interface ProfilePayload {
+      user_id: string;
+      name: string;
+      role: "tourist" | "admin" | "authority";
+      is_verified: boolean;
+      emergency_contacts: string;
+      document_url: string | null;
+      digital_id: string | null;
+      created_at: string;
+      updated_at: string;
+    }
+    const profilePayload: ProfilePayload = {
+      user_id: data.user.id,
+      name,
+      role,
+      is_verified: false,
+      emergency_contacts: emergencyContactsJson,
+      document_url: documentUrl || null,
+      digital_id: documentHash || null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    const { error: profileError } = await supabaseDb
+      .from("user_profiles")
+      .insert([profilePayload]);
+    if (profileError) {
+      throw new Error(profileError.message);
+    }
+
+    return {
+      id: data.user.id,
+      email,
+      name,
+      role,
+      isVerified: false,
+      digitalId: profilePayload.digital_id || undefined,
+    };
+  }
+
   async logout(): Promise<void> {
     try {
-      const { error } = await supabase.auth.signOut();
+      const { error } = await supabaseAuth.auth.signOut();
       if (error) {
         throw new Error(error.message);
       }
@@ -201,7 +273,7 @@ export class AuthService {
       const {
         data: { user },
         error,
-      } = await supabase.auth.getUser();
+      } = await supabaseAuth.auth.getUser();
 
       if (error || !user) {
         return null;
@@ -223,53 +295,46 @@ export class AuthService {
     }
   }
 
-  async resetPassword(email: string): Promise<void> {
+  // New API: Send password reset email
+  async forgotPassword(email: string): Promise<void> {
     try {
-      // Validate input
       if (!email?.trim()) {
         throw new Error("Email is required");
       }
-
-      // Basic email format validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         throw new Error("Invalid email format");
       }
 
-      const { error } = await supabase.auth.resetPasswordForEmail(
+      const redirectTo = `${window.location.origin}/auth/reset-password`;
+      const { error } = await supabaseAuth.auth.resetPasswordForEmail(
         email.trim(),
-        {
-          redirectTo: `${window.location.origin}/reset-password`,
-        }
+        { redirectTo }
       );
-
       if (error) {
         throw new Error(error.message);
       }
     } catch (error) {
       throw new Error(
-        `Password reset failed: ${
+        `Password reset request failed: ${
           error instanceof Error ? error.message : "Unknown error"
         }`
       );
     }
   }
 
-  async updatePassword(newPassword: string): Promise<void> {
+  // New API: Complete password reset (after user followed email link)
+  async resetPassword(newPassword: string): Promise<void> {
     try {
-      // Validate input
       if (!newPassword?.trim()) {
         throw new Error("New password is required");
       }
-
-      if (newPassword.length < 6) {
-        throw new Error("Password must be at least 6 characters long");
+      if (newPassword.length < 8) {
+        throw new Error("Password must be at least 8 characters long");
       }
-
-      const { error } = await supabase.auth.updateUser({
+      const { error } = await supabaseAuth.auth.updateUser({
         password: newPassword,
       });
-
       if (error) {
         throw new Error(error.message);
       }
@@ -289,7 +354,7 @@ export class AuthService {
         return false;
       }
 
-      const { data, error } = await supabase
+      const { data, error } = await supabaseDb
         .from("user_profiles")
         .select("is_verified")
         .eq("digital_id", digitalId.trim())
@@ -311,7 +376,7 @@ export class AuthService {
       throw new Error("User ID is required");
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseDb
       .from("user_profiles")
       .select("*")
       .eq("user_id", userId)
@@ -341,7 +406,7 @@ export class AuthService {
       throw new Error("User ID is required for profile creation");
     }
 
-    const { error } = await supabase.from("user_profiles").insert([
+    const { error } = await supabaseDb.from("user_profiles").insert([
       {
         ...profileData,
         user_id: profileData.user_id.trim(),
