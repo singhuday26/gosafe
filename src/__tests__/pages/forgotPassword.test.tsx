@@ -69,7 +69,8 @@ describe("Forgot & Reset Password Flow", () => {
     fireEvent.click(button);
 
     await waitFor(() => {
-      expect(screen.getByText(/valid email/i)).toBeTruthy();
+      // Look for the actual text that should be there
+      expect(screen.getByText("Please enter a valid email")).toBeTruthy();
     });
   });
 

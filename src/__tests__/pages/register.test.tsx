@@ -10,7 +10,7 @@ jest.mock("@/services/authService", () => {
       return new AuthServiceMock();
     }
     async registerTourist() {
-      return { id: "user-123" };
+      return { id: "user-123", digitalId: "digital-123" };
     }
   }
   return { AuthService: AuthServiceMock };
@@ -39,8 +39,14 @@ describe("RegisterPage", () => {
     fireEvent.change(screen.getByLabelText(/full name/i), {
       target: { value: "John Doe" },
     });
+    fireEvent.change(screen.getByLabelText(/phone/i), {
+      target: { value: "+919876543210" },
+    });
     fireEvent.change(screen.getByLabelText(/email/i), {
       target: { value: "john@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText(/nationality/i), {
+      target: { value: "Indian" },
     });
     fireEvent.change(screen.getByLabelText(/password/i), {
       target: { value: "password123" },
@@ -56,8 +62,14 @@ describe("RegisterPage", () => {
     fireEvent.change(screen.getByLabelText(/full name/i), {
       target: { value: "John Doe" },
     });
+    fireEvent.change(screen.getByLabelText(/phone/i), {
+      target: { value: "+919876543210" },
+    });
     fireEvent.change(screen.getByLabelText(/email/i), {
       target: { value: "john@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText(/nationality/i), {
+      target: { value: "Indian" },
     });
     fireEvent.change(screen.getByLabelText(/password/i), {
       target: { value: "password123" },
@@ -82,8 +94,14 @@ describe("RegisterPage", () => {
     fireEvent.change(screen.getByLabelText(/full name/i), {
       target: { value: "John Doe" },
     });
+    fireEvent.change(screen.getByLabelText(/phone/i), {
+      target: { value: "+919876543210" },
+    });
     fireEvent.change(screen.getByLabelText(/email/i), {
       target: { value: "john@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText(/nationality/i), {
+      target: { value: "Indian" },
     });
     fireEvent.change(screen.getByLabelText(/password/i), {
       target: { value: "password123" },
