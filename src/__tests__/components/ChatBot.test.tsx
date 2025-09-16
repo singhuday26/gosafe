@@ -15,6 +15,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { I18nextProvider } from "react-i18next";
 import { ChatBot } from "../../components/ChatBot";
+import { supabase } from "../../integrations/supabase/client";
 import { useAuth } from "../../contexts/AuthContext";
 import i18n from "../../i18n";
 import type { User } from "@supabase/supabase-js";
@@ -87,6 +88,12 @@ describe("ChatBot Component", () => {
       writable: true,
       value: true,
     });
+
+    // Default mock for AI invoke
+    (supabase.functions.invoke as unknown as jest.Mock).mockResolvedValue({
+      data: { response: "Mocked assistant reply", sessionId: "sess-1" },
+      error: null,
+    });
   });
 
   afterEach(() => {
@@ -152,21 +159,11 @@ describe("ChatBot Component", () => {
       const chatButton = screen.getByLabelText(/open chat assistant/i);
       fireEvent.click(chatButton);
 
-      await waitFor(() => {
-        const input = screen.getByPlaceholderText(/type your message/i);
-        expect(input).toBeInTheDocument();
-
-        // Type a message
-        fireEvent.change(input, { target: { value: "Hello chatbot" } });
-        expect((input as HTMLInputElement).value).toBe("Hello chatbot");
-
-        // Send message
-        const sendButton = screen.getByRole("button", { name: /send/i });
-        fireEvent.click(sendButton);
-
-        // Message should appear in chat
-        expect(screen.getByText("Hello chatbot")).toBeInTheDocument();
-      });
+      const input = await screen.findByPlaceholderText(/type your message/i);
+      fireEvent.change(input, { target: { value: "Hello chatbot" } });
+      const sendButton = screen.getByRole("button", { name: /send/i });
+      fireEvent.click(sendButton);
+      expect(await screen.findByText("Hello chatbot")).toBeInTheDocument();
     });
 
     it("sends message on Enter key press", async () => {
@@ -175,14 +172,10 @@ describe("ChatBot Component", () => {
       const chatButton = screen.getByLabelText(/open chat assistant/i);
       fireEvent.click(chatButton);
 
-      await waitFor(() => {
-        const input = screen.getByPlaceholderText(/type your message/i);
-
-        fireEvent.change(input, { target: { value: "Test message" } });
-        fireEvent.keyPress(input, { key: "Enter", code: "Enter" });
-
-        expect(screen.getByText("Test message")).toBeInTheDocument();
-      });
+      const input = await screen.findByPlaceholderText(/type your message/i);
+      fireEvent.change(input, { target: { value: "Test message" } });
+      fireEvent.keyDown(input, { key: "Enter", code: "Enter" });
+      expect(await screen.findByText("Test message")).toBeInTheDocument();
     });
 
     it("clears input after sending message", async () => {
@@ -191,14 +184,11 @@ describe("ChatBot Component", () => {
       const chatButton = screen.getByLabelText(/open chat assistant/i);
       fireEvent.click(chatButton);
 
-      await waitFor(() => {
-        const input = screen.getByPlaceholderText(/type your message/i);
-
-        fireEvent.change(input, { target: { value: "Test message" } });
-        fireEvent.keyPress(input, { key: "Enter", code: "Enter" });
-
-        expect((input as HTMLInputElement).value).toBe("");
-      });
+      const input = await screen.findByPlaceholderText(/type your message/i);
+      fireEvent.change(input, { target: { value: "Test message" } });
+      const sendButton = screen.getByRole("button", { name: /send/i });
+      fireEvent.click(sendButton);
+      await waitFor(() => expect((input as HTMLInputElement).value).toBe(""));
     });
   });
 
@@ -281,24 +271,20 @@ describe("ChatBot Component", () => {
       const chatButton = screen.getByLabelText(/open chat assistant/i);
       fireEvent.click(chatButton);
 
-      await waitFor(() => {
-        // Send a message first
-        const input = screen.getByPlaceholderText(/type your message/i);
-        fireEvent.change(input, { target: { value: "Test message" } });
-        fireEvent.keyPress(input, { key: "Enter", code: "Enter" });
+      const input = await screen.findByPlaceholderText(/type your message/i);
+      fireEvent.change(input, { target: { value: "Test message" } });
+      const sendButton = screen.getByRole("button", { name: /send/i });
+      fireEvent.click(sendButton);
+      expect(await screen.findByText("Test message")).toBeInTheDocument();
 
-        expect(screen.getByText("Test message")).toBeInTheDocument();
-
-        // Clear chat
-        const clearButton = screen.getByLabelText(/clear chat/i);
-        fireEvent.click(clearButton);
-
-        // Only welcome message should remain
-        expect(screen.queryByText("Test message")).not.toBeInTheDocument();
-        expect(
-          screen.getByText(/Hi! I'm your GoSafe assistant/i)
-        ).toBeInTheDocument();
-      });
+      const clearButton = screen.getByLabelText(/clear chat/i);
+      fireEvent.click(clearButton);
+      await waitFor(() =>
+        expect(screen.queryByText("Test message")).not.toBeInTheDocument()
+      );
+      expect(
+        screen.getByText(/Hi! I'm your GoSafe assistant/i)
+      ).toBeInTheDocument();
     });
 
     it("allows minimizing and maximizing chat", async () => {

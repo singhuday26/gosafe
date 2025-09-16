@@ -16,6 +16,10 @@ jest.mock("@/services/authService", () => {
   return { AuthService: AuthServiceMock };
 });
 
+jest.mock("@/components/ChatBotWrapper", () => ({
+  ChatBotWrapper: () => null,
+}));
+
 function renderWithProviders(ui: React.ReactElement) {
   const qc = new QueryClient();
   return render(

@@ -6,6 +6,18 @@ import ResetPasswordPage from "@/pages/auth/reset-password";
 import { AuthService } from "@/services/authService";
 
 jest.mock("@/services/authService");
+// Avoid rendering ChatBotWrapper (it uses AuthContext); stub it in AuthLayout
+jest.mock("@/components/ChatBotWrapper", () => ({
+  ChatBotWrapper: () => null,
+}));
+// Ensure reset page doesn't wait on Supabase session check
+jest.mock("@/integrations/supabase/client", () => ({
+  supabase: {
+    auth: {
+      getSession: jest.fn().mockResolvedValue({ data: { session: null } }),
+    },
+  },
+}));
 
 const MockedAuthService = AuthService as jest.MockedClass<typeof AuthService>;
 
@@ -71,8 +83,9 @@ describe("Forgot & Reset Password Flow", () => {
       </MemoryRouter>
     );
 
-    const pwd = screen.getByLabelText("New Password");
-    const confirm = screen.getByLabelText("Confirm Password");
+    // Wait until form fields are present (after token check resolves)
+    const pwd = await screen.findByLabelText("New Password");
+    const confirm = await screen.findByLabelText("Confirm Password");
     const button = screen.getByRole("button", { name: /reset password/i });
 
     fireEvent.change(pwd, { target: { value: "password123" } });
