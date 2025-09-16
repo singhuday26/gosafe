@@ -29,7 +29,9 @@ const contactSchema = z.object({
 
 const formSchema = z.object({
   fullName: z.string().min(1, "Full name is required"),
+  phone: z.string().regex(indianPhoneRegex, "Invalid Indian phone number"),
   email: z.string().email("Invalid email address"),
+  nationality: z.string().min(1, "Nationality is required"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   contacts: z
     .array(contactSchema)
@@ -57,7 +59,9 @@ const RegisterPage: React.FC = () => {
   const defaultValues: FormValues = useMemo(
     () => ({
       fullName: "",
+      phone: "",
       email: "",
+      nationality: "",
       password: "",
       contacts: [
         { name: "", phone: "" },
@@ -74,6 +78,7 @@ const RegisterPage: React.FC = () => {
     handleSubmit,
     setValue,
     getValues,
+    watch,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -81,32 +86,32 @@ const RegisterPage: React.FC = () => {
     mode: "onChange",
   });
 
+  const values = watch();
+  const watchedContacts = watch("contacts");
+
   const nextDisabled = useMemo(() => {
     if (step === 1) {
-      const v = getValues();
       return (
-        !v.fullName ||
-        !v.email ||
-        !v.password ||
+        !values.fullName ||
+        !values.email ||
+        !values.password ||
         !!errors.fullName ||
         !!errors.email ||
         !!errors.password
       );
     }
     if (step === 2) {
-      const v = getValues();
+      const cs = values.contacts || [];
       return (
-        v.contacts.filter((c) => c.name && c.phone).length < 2 ||
-        !!errors.contacts
+        cs.filter((c) => c.name && c.phone).length < 2 || !!errors.contacts
       );
     }
     if (step === 3) {
-      const v = getValues();
       // document is optional, but if provided must be valid
       return !!errors.documentFile;
     }
     return false;
-  }, [errors, getValues, step]);
+  }, [errors, values, step]);
 
   const onDropFile = useCallback(
     (file: File) => {
@@ -204,6 +209,8 @@ const RegisterPage: React.FC = () => {
         email: values.email.trim(),
         password: values.password,
         name: values.fullName.trim(),
+        phone: values.phone.trim(),
+        nationality: values.nationality.trim(),
         role: "tourist",
         emergencyContactsJson: JSON.stringify(contacts),
         documentUrl: documentUrl || undefined,
@@ -243,8 +250,16 @@ const RegisterPage: React.FC = () => {
           <div className="font-medium">{v.fullName}</div>
         </div>
         <div>
+          <div className="text-sm text-muted-foreground">Phone</div>
+          <div className="font-medium tabular-nums">{v.phone}</div>
+        </div>
+        <div>
           <div className="text-sm text-muted-foreground">Email</div>
           <div className="font-medium">{v.email}</div>
+        </div>
+        <div>
+          <div className="text-sm text-muted-foreground">Nationality</div>
+          <div className="font-medium">{v.nationality}</div>
         </div>
         <div>
           <div className="text-sm text-muted-foreground">Contacts</div>
@@ -307,6 +322,20 @@ const RegisterPage: React.FC = () => {
                 )}
               </div>
               <div>
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="+91 98765 43210"
+                  {...register("phone")}
+                />
+                {errors.phone && (
+                  <p className="text-sm text-destructive mt-1">
+                    {errors.phone.message}
+                  </p>
+                )}
+              </div>
+              <div>
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
@@ -317,6 +346,19 @@ const RegisterPage: React.FC = () => {
                 {errors.email && (
                   <p className="text-sm text-destructive mt-1">
                     {errors.email.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <Label htmlFor="nationality">Nationality</Label>
+                <Input
+                  id="nationality"
+                  placeholder="Indian"
+                  {...register("nationality")}
+                />
+                {errors.nationality && (
+                  <p className="text-sm text-destructive mt-1">
+                    {errors.nationality.message}
                   </p>
                 )}
               </div>
@@ -351,7 +393,7 @@ const RegisterPage: React.FC = () => {
                   Add Contact
                 </Button>
               </div>
-              {getValues("contacts").map((c, index) => (
+              {(watchedContacts || []).map((c, index) => (
                 <div key={index} className="grid grid-cols-12 gap-2 items-end">
                   <div className="col-span-5">
                     <Label>Name</Label>
@@ -380,7 +422,7 @@ const RegisterPage: React.FC = () => {
                       type="button"
                       variant="ghost"
                       onClick={() => removeContact(index)}
-                      disabled={getValues("contacts").length <= 2}
+                      disabled={(watchedContacts || []).length <= 2}
                     >
                       Remove
                     </Button>

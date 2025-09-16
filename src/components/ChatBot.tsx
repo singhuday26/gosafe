@@ -224,7 +224,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({
   const getWelcomeMessage = useCallback((): ChatMessage => {
     const roleMessages = {
       tourist:
-        "Hello! I'm your GoSafe assistant. I can help with safety tips, emergency procedures, and local guidance. How can I assist you today?",
+        "Hi! I'm your GoSafe assistant. I can help with safety tips, emergency procedures, and local guidance. How can I assist you today?",
       authority:
         "Hello! I'm here to help you monitor alerts, coordinate responses, and manage tourist safety. What do you need assistance with?",
       admin:
@@ -433,6 +433,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({
               size="sm"
               onClick={() => setIsMinimized(!isMinimized)}
               className="text-white hover:bg-white/20"
+              aria-label={isMinimized ? "Maximize" : "Minimize"}
             >
               {isMinimized ? (
                 <Maximize2 className="w-4 h-4" />
@@ -564,7 +565,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({
                     ref={inputRef}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
+                    onKeyDown={handleKeyPress}
                     placeholder="Type your message..."
                     disabled={sendMessageMutation.isPending}
                     className="flex-1"
@@ -573,6 +574,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({
                     type="submit"
                     disabled={!message.trim() || sendMessageMutation.isPending}
                     className="bg-gradient-to-br from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700"
+                    aria-label="Send"
                   >
                     <Send className="w-4 h-4" />
                   </Button>

@@ -25,10 +25,15 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 
+// Provide Deno global typing for editor linting
+// deno-lint-ignore no-explicit-any
+declare const Deno: { env: { get: (key: string) => string | undefined } };
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
 interface ChatMessage {
@@ -36,22 +41,44 @@ interface ChatMessage {
   content: string;
 }
 
-serve(async (req) => {
+interface Action {
+  type: string;
+  label: string;
+  data: unknown | null;
+}
+
+serve(async (req: Request) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Only allow POST for main handler
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+      status: 405,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
+    const body = await req.json();
     const {
       message,
       sessionId,
       userId,
       userRole,
       languageCode = "en",
-    } = await req.json();
+    } = body || {};
 
-    if (!message || !userRole) {
+    // Basic input validation and normalization
+    const safeMessage = (typeof message === "string" ? message : "").trim();
+    const safeRole = (typeof userRole === "string" ? userRole : "").trim();
+    let safeUserId = (typeof userId === "string" ? userId : "").trim();
+    const safeLang =
+      (typeof languageCode === "string" ? languageCode : "en").trim() || "en";
+
+    if (!safeMessage || !safeRole) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
         {
@@ -61,8 +88,16 @@ serve(async (req) => {
       );
     }
 
+    // Enforce reasonable message size to protect backend
+    if (safeMessage.length > 4000) {
+      return new Response(JSON.stringify({ error: "Message too long" }), {
+        status: 413,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Handle guest users (no database session management)
-    if (userRole === "guest" || !userId) {
+    if (safeRole === "guest" || !safeUserId) {
       const startTime = Date.now();
 
       // System prompt for guest users
@@ -71,10 +106,10 @@ serve(async (req) => {
 
       const messages: ChatMessage[] = [
         { role: "user", content: systemPrompt },
-        { role: "user", content: message },
+        { role: "user", content: safeMessage },
       ];
 
-      // Call Gemini API
+      // Call Gemini API (unified model)
       const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
       if (!geminiApiKey) {
         return new Response(
@@ -87,7 +122,7 @@ serve(async (req) => {
       }
 
       const geminiResponse = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`,
         {
           method: "POST",
           headers: {
@@ -109,8 +144,26 @@ serve(async (req) => {
               temperature: 0.7,
               topK: 40,
               topP: 0.95,
-              maxOutputTokens: 1024,
+              maxOutputTokens: 500,
             },
+            safetySettings: [
+              {
+                category: "HARM_CATEGORY_HARASSMENT",
+                threshold: "BLOCK_MEDIUM_AND_ABOVE",
+              },
+              {
+                category: "HARM_CATEGORY_HATE_SPEECH",
+                threshold: "BLOCK_MEDIUM_AND_ABOVE",
+              },
+              {
+                category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                threshold: "BLOCK_MEDIUM_AND_ABOVE",
+              },
+              {
+                category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+                threshold: "BLOCK_MEDIUM_AND_ABOVE",
+              },
+            ],
           }),
         }
       );
@@ -152,15 +205,44 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
+    // Validate JWT for authenticated users
+    const authHeader = req.headers.get("Authorization") || "";
+    const jwt = authHeader.startsWith("Bearer ")
+      ? authHeader.substring(7).trim()
+      : "";
+    if (!jwt) {
+      return new Response(
+        JSON.stringify({ error: "Missing Authorization token" }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    const { data: authUser, error: authErr } = await supabase.auth.getUser(jwt);
+    if (
+      authErr ||
+      !authUser?.user?.id ||
+      (safeUserId && authUser.user.id !== safeUserId)
+    ) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    // Normalize userId to the verified id
+    safeUserId = authUser.user.id;
+
     // Get or create chat session
-    let currentSessionId = sessionId;
+    let currentSessionId = sessionId as string | undefined;
     if (!currentSessionId) {
       const { data: sessionData, error: sessionError } = await supabase.rpc(
         "get_or_create_chat_session",
         {
-          p_user_id: userId,
-          p_user_role: userRole,
-          p_language_code: languageCode,
+          p_user_id: safeUserId,
+          p_user_role: safeRole,
+          p_language_code: safeLang,
           p_metadata: {},
         }
       );
@@ -194,7 +276,26 @@ serve(async (req) => {
       });
     }
 
-    const sessionUuid = sessionRecord.id;
+    const sessionUuid: string = sessionRecord.id as string;
+
+    // Basic per-session rate limiting (e.g., 30 user messages/min)
+    const oneMinuteAgo = new Date(Date.now() - 60_000).toISOString();
+    const { count: recentCount } = await supabase
+      .from("ai_chat_messages")
+      .select("id", { count: "exact", head: true })
+      .eq("session_id", sessionUuid)
+      .eq("message_type", "user")
+      .gte("created_at", oneMinuteAgo);
+
+    if ((recentCount ?? 0) > 30) {
+      return new Response(
+        JSON.stringify({ error: "Rate limit exceeded. Please slow down." }),
+        {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
 
     // Store user message
     const { error: userMessageError } = await supabase
@@ -202,7 +303,7 @@ serve(async (req) => {
       .insert({
         session_id: sessionUuid,
         message_type: "user",
-        content: message,
+        content: safeMessage,
         metadata: { timestamp: new Date().toISOString() },
       });
 
@@ -226,22 +327,24 @@ serve(async (req) => {
     const messages: ChatMessage[] = [];
 
     // Enhanced system prompt based on user role
-    let systemPrompt = buildSystemPrompt(userRole, languageCode);
+    const systemPrompt = buildSystemPrompt(safeRole, safeLang);
 
     messages.push({ role: "user", content: systemPrompt });
 
     // Add chat history to context
     if (chatHistory) {
-      chatHistory.forEach((msg: any) => {
-        messages.push({
-          role: msg.message_type as "user" | "assistant",
-          content: msg.content,
-        });
-      });
+      chatHistory.forEach(
+        (msg: { message_type: "user" | "assistant"; content: string }) => {
+          messages.push({
+            role: msg.message_type as "user" | "assistant",
+            content: msg.content,
+          });
+        }
+      );
     }
 
     // Add current message
-    messages.push({ role: "user", content: message });
+    messages.push({ role: "user", content: safeMessage });
 
     const startTime = Date.now();
 
@@ -326,8 +429,8 @@ serve(async (req) => {
     // Parse response and extract actions
     const { responseMessage, actions } = parseResponseForActions(
       rawResponse,
-      userRole,
-      message
+      safeRole,
+      safeMessage
     );
 
     // Store AI response with actions
@@ -453,8 +556,8 @@ function parseResponseForActions(
   response: string,
   role: string,
   userMessage: string
-): { responseMessage: string; actions: any[] } {
-  const actions: any[] = [];
+): { responseMessage: string; actions: Action[] } {
+  const actions: Action[] = [];
   let cleanedMessage = response;
 
   // Extract action patterns: [ACTION:type:label]

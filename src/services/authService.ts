@@ -187,6 +187,8 @@ export class AuthService {
     email: string;
     password: string;
     name: string;
+    phone?: string;
+    nationality?: string;
     role?: "tourist";
     emergencyContactsJson: string; // serialized array
     documentUrl?: string;
@@ -196,6 +198,8 @@ export class AuthService {
       email,
       password,
       name,
+      phone,
+      nationality,
       role = "tourist",
       emergencyContactsJson,
       documentUrl,
@@ -212,33 +216,43 @@ export class AuthService {
       throw new Error(error?.message || "Failed to register");
     }
 
-    // Create profile row
-    interface ProfilePayload {
-      user_id: string;
-      name: string;
-      role: "tourist" | "admin" | "authority";
-      is_verified: boolean;
-      emergency_contacts: string;
-      document_url: string | null;
-      digital_id: string | null;
-      created_at: string;
-      updated_at: string;
-    }
-    const profilePayload: ProfilePayload = {
+    // Create basic profile
+    const profilePayload = {
       user_id: data.user.id,
-      name,
+      full_name: name,
+      phone_number: phone || null,
       role,
-      is_verified: false,
-      emergency_contacts: emergencyContactsJson,
-      document_url: documentUrl || null,
-      digital_id: documentHash || null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
     };
 
     const { error: profileError } = await supabaseDb
-      .from("user_profiles")
+      .from("profiles")
       .insert([profilePayload]);
+    if (profileError) {
+      throw new Error(profileError.message);
+    }
+
+    // Create digital tourist ID with tourist-specific data
+    const touristPayload = {
+      tourist_name: name,
+      aadhaar_number: "", // Will be updated later if provided
+      passport_number: nationality || "",
+      trip_itinerary: "Tourist registration",
+      emergency_contacts: JSON.parse(emergencyContactsJson),
+      valid_from: new Date().toISOString(),
+      valid_to: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // Valid for 1 year
+      blockchain_hash: documentHash || `hash_${data.user.id}_${Date.now()}`,
+      status: "active",
+    };
+
+    const { data: touristData, error: touristError } = await supabaseDb
+      .from("digital_tourist_ids")
+      .insert([touristPayload])
+      .select()
+      .single();
+
+    if (touristError) {
+      throw new Error(touristError.message);
+    }
     if (profileError) {
       throw new Error(profileError.message);
     }
@@ -249,7 +263,7 @@ export class AuthService {
       name,
       role,
       isVerified: false,
-      digitalId: profilePayload.digital_id || undefined,
+      digitalId: touristData?.id || undefined,
     };
   }
 
@@ -355,7 +369,7 @@ export class AuthService {
       }
 
       const { data, error } = await supabaseDb
-        .from("user_profiles")
+        .from("profiles")
         .select("is_verified")
         .eq("digital_id", digitalId.trim())
         .single();
@@ -377,7 +391,7 @@ export class AuthService {
     }
 
     const { data, error } = await supabaseDb
-      .from("user_profiles")
+      .from("profiles")
       .select("*")
       .eq("user_id", userId)
       .single();
@@ -406,7 +420,7 @@ export class AuthService {
       throw new Error("User ID is required for profile creation");
     }
 
-    const { error } = await supabaseDb.from("user_profiles").insert([
+    const { error } = await supabaseDb.from("profiles").insert([
       {
         ...profileData,
         user_id: profileData.user_id.trim(),

@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { DashboardButtons } from "../components/DashboardButtons";
 import { FEATURES } from "../data/features";
-import "@testing-library/jest-dom/extend-expect";
+import "@testing-library/jest-dom";
 
 describe("DashboardButtons", () => {
   it("renders all feature buttons", () => {
