@@ -12,7 +12,9 @@ import "@/i18n";
 // Lazy load route components
 const Home = lazy(() => import("./pages/Home"));
 const Auth = lazy(() => import("./pages/Auth"));
-const TouristRegister = lazy(() => import("./pages/TouristRegister"));
+const TouristRegister = lazy(() => import("./pages/auth/register"));
+const ForgotPassword = lazy(() => import("./pages/auth/forgot-password"));
+const ResetPassword = lazy(() => import("./pages/auth/reset-password"));
 const TouristDashboard = lazy(() => import("./pages/TouristDashboard"));
 const AuthorityLogin = lazy(() => import("./pages/AuthorityLogin"));
 const AuthorityDashboard = lazy(() => import("./pages/AuthorityDashboard"));
@@ -53,6 +55,12 @@ const App = () => (
               <Route path="/" element={<Home />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/auth/callback" element={<Auth />} />
+              <Route path="/auth/register" element={<TouristRegister />} />
+              <Route
+                path="/auth/forgot-password"
+                element={<ForgotPassword />}
+              />
+              <Route path="/auth/reset-password" element={<ResetPassword />} />
               <Route
                 path="/dashboard"
                 element={

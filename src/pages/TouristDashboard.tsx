@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   Shield,
@@ -37,9 +37,11 @@ import MapComponent from "@/components/MapComponent";
 
 import MapView from "@/components/MapView";
 
-
 const TouristDashboard = () => {
   const navigate = useNavigate();
+  const location = useLocation() as {
+    state?: { justRegistered?: boolean; qrValue?: string; name?: string };
+  };
   const { toast } = useToast();
   const { t } = useTranslation();
   const [currentTouristId, setCurrentTouristId] = useState<string | null>(null);
@@ -99,6 +101,10 @@ const TouristDashboard = () => {
     }
   }, [navigate, toast]);
 
+  const justRegistered = Boolean(location.state?.justRegistered);
+  const qrValue =
+    location.state?.qrValue || localStorage.getItem("currentTouristId") || "";
+
   const handleSOS = () => {
     if (!currentTouristId || !currentLocation) return;
 
@@ -127,7 +133,6 @@ const TouristDashboard = () => {
       message: `Emergency SOS triggered by tourist. Escalation: ${currentEscalation}${
         geoFenceStatus ? ` (${geoFenceStatus.name})` : ""
       }`,
-
     });
 
     toast({
@@ -204,6 +209,31 @@ const TouristDashboard = () => {
       </header>
 
       <div className="container mx-auto px-4 py-6">
+        {justRegistered && qrValue && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Welcome! Your Digital ID</CardTitle>
+              <CardDescription>
+                Scan this QR to quickly verify your identity
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex items-center gap-6">
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
+                  qrValue
+                )}`}
+                alt="Digital ID QR"
+                className="rounded border"
+                width={180}
+                height={180}
+              />
+              <div>
+                <div className="text-sm text-muted-foreground">Digital ID</div>
+                <div className="font-mono break-all">{qrValue}</div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Left Column - Safety & Status */}
           <div className="lg:col-span-2 space-y-6">

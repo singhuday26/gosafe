@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { ChatBotWrapper } from "@/components/ChatBotWrapper";
 
 interface TouristLayoutProps {
   children?: React.ReactNode;
@@ -182,6 +183,9 @@ export const TouristLayout: React.FC<TouristLayoutProps> = ({ children }) => {
 
       {/* Main Content */}
       <main className="flex-1">{children || <Outlet />}</main>
+
+      {/* Chatbot */}
+      <ChatBotWrapper forceRole="tourist" enabled={true} />
 
       {/* Footer */}
       <footer className="bg-card border-t mt-auto">
