@@ -1,8 +1,13 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, MapPin, AlertTriangle, User, Phone } from "lucide-react";
+import {
+  touristService,
+  type ExtendedSOSAlert,
+} from "@/services/touristService";
+import { useToast } from "@/hooks/use-toast";
 
 interface Alert {
   id: string;
@@ -21,20 +26,132 @@ interface Alert {
 }
 
 interface AlertQueueProps {
-  alerts: Alert[];
+  alerts?: Alert[];
   onAssign?: (alertId: string) => void;
   onResolve?: (alertId: string) => void;
   onViewDetails?: (alert: Alert) => void;
   className?: string;
+  useRealData?: boolean;
 }
 
 export const AlertQueue: React.FC<AlertQueueProps> = ({
-  alerts,
+  alerts: propAlerts,
   onAssign,
   onResolve,
   onViewDetails,
   className = "",
+  useRealData = true,
 }) => {
+  const [realAlerts, setRealAlerts] = useState<Alert[]>([]);
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+
+  // Convert Supabase SOS alert to Alert format
+  const convertSOSAlert = (sosAlert: ExtendedSOSAlert): Alert => ({
+    id: sosAlert.id,
+    type:
+      sosAlert.alert_type === "panic"
+        ? "sos"
+        : (sosAlert.alert_type as Alert["type"]),
+    priority:
+      sosAlert.alert_type === "panic"
+        ? "critical"
+        : sosAlert.alert_type === "medical"
+        ? "high"
+        : "medium",
+    timestamp: new Date(sosAlert.timestamp),
+    location: {
+      latitude: sosAlert.latitude,
+      longitude: sosAlert.longitude,
+      address: sosAlert.address || undefined,
+    },
+    touristId: sosAlert.tourist_id,
+    touristName:
+      sosAlert.digital_tourist_ids?.tourist_name || "Unknown Tourist",
+    message: sosAlert.message || `${sosAlert.alert_type} alert triggered`,
+    status: sosAlert.status as Alert["status"],
+  });
+
+  // Fetch real alerts from Supabase
+  const fetchAlerts = React.useCallback(async () => {
+    setLoading(true);
+    try {
+      const sosAlerts = await touristService.getActiveSOSAlerts();
+      const convertedAlerts = sosAlerts.map(convertSOSAlert);
+      setRealAlerts(convertedAlerts);
+    } catch (error) {
+      console.error("Failed to fetch alerts:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load alerts",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
+
+  // Set up real-time subscription
+  useEffect(() => {
+    if (!useRealData) return;
+
+    fetchAlerts();
+
+    const subscription = touristService.subscribeToSOSAlerts((newAlert) => {
+      const convertedAlert = convertSOSAlert(newAlert as ExtendedSOSAlert);
+      setRealAlerts((prev) => [convertedAlert, ...prev]);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [useRealData, fetchAlerts]);
+
+  // Handle alert actions with real Supabase updates
+  const handleAssign = async (alertId: string) => {
+    try {
+      await touristService.updateSOSAlertStatus(alertId, "responded");
+      setRealAlerts((prev) =>
+        prev.map((alert) =>
+          alert.id === alertId
+            ? { ...alert, status: "assigned" as const }
+            : alert
+        )
+      );
+      toast({
+        title: "Alert Assigned",
+        description: "Alert has been assigned to response team",
+      });
+      onAssign?.(alertId);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to assign alert",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleResolve = async (alertId: string) => {
+    try {
+      await touristService.updateSOSAlertStatus(alertId, "resolved");
+      setRealAlerts((prev) => prev.filter((alert) => alert.id !== alertId));
+      toast({
+        title: "Alert Resolved",
+        description: "Alert has been marked as resolved",
+      });
+      onResolve?.(alertId);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to resolve alert",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const alerts = useRealData ? realAlerts : propAlerts || [];
+
   const getPriorityColor = (priority: Alert["priority"]) => {
     switch (priority) {
       case "critical":
@@ -76,6 +193,20 @@ export const AlertQueue: React.FC<AlertQueueProps> = ({
     const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
     return priorityOrder[b.priority] - priorityOrder[a.priority];
   });
+
+  if (loading) {
+    return (
+      <Card className={className}>
+        <CardHeader>
+          <CardTitle>Alert Queue</CardTitle>
+        </CardHeader>
+        <CardContent className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading alerts...</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (alerts.length === 0) {
     return (
@@ -154,20 +285,20 @@ export const AlertQueue: React.FC<AlertQueueProps> = ({
 
               {/* Actions */}
               <div className="flex gap-2 pt-2">
-                {alert.status === "active" && onAssign && (
+                {alert.status === "active" && (
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => onAssign(alert.id)}
+                    onClick={() => handleAssign(alert.id)}
                   >
                     Assign
                   </Button>
                 )}
-                {alert.status !== "resolved" && onResolve && (
+                {alert.status !== "resolved" && (
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => onResolve(alert.id)}
+                    onClick={() => handleResolve(alert.id)}
                   >
                     Resolve
                   </Button>

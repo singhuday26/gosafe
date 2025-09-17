@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { touristService } from "@/services/touristService";
 
 interface StatCardProps {
   title: string;
-  value: string | number;
+  value?: string | number;
   description?: string;
   icon: React.ReactNode;
   trend?: {
@@ -18,17 +19,84 @@ interface StatCardProps {
     variant?: "default" | "secondary" | "destructive" | "outline";
   };
   className?: string;
+  dataType?:
+    | "totalTourists"
+    | "activeTourists"
+    | "totalAlerts"
+    | "activeAlerts"
+    | "safeZones"
+    | "dangerZones"
+    | "restrictedZones";
+  useRealData?: boolean;
 }
 
 export const StatCard: React.FC<StatCardProps> = ({
   title,
-  value,
+  value: propValue,
   description,
   icon,
   trend,
   badge,
   className = "",
+  dataType,
+  useRealData = true,
 }) => {
+  const [realValue, setRealValue] = useState<string | number>(propValue || 0);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!useRealData || !dataType) {
+      setRealValue(propValue || 0);
+      return;
+    }
+
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const metrics = await touristService.getSafetyMetrics();
+
+        switch (dataType) {
+          case "totalTourists":
+            setRealValue(metrics.totalTourists);
+            break;
+          case "activeTourists":
+            setRealValue(metrics.activeTourists);
+            break;
+          case "totalAlerts":
+            setRealValue(metrics.totalAlerts);
+            break;
+          case "activeAlerts":
+            setRealValue(metrics.activeAlerts);
+            break;
+          case "safeZones":
+            setRealValue(metrics.safeZones);
+            break;
+          case "dangerZones":
+            setRealValue(metrics.dangerZones);
+            break;
+          case "restrictedZones":
+            setRealValue(metrics.restrictedZones);
+            break;
+          default:
+            setRealValue(propValue || 0);
+        }
+      } catch (error) {
+        console.error("Failed to fetch stat data:", error);
+        setRealValue(propValue || 0);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+
+    // Refresh data every 30 seconds
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
+  }, [useRealData, dataType, propValue]);
+
+  const displayValue = useRealData && !loading ? realValue : propValue || 0;
+
   const getTrendIcon = () => {
     if (!trend) return null;
 
@@ -65,7 +133,13 @@ export const StatCard: React.FC<StatCardProps> = ({
         </div>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
+        <div className="text-2xl font-bold">
+          {loading ? (
+            <div className="animate-pulse bg-muted rounded h-8 w-16"></div>
+          ) : (
+            displayValue
+          )}
+        </div>
         {description && (
           <p className="text-xs text-muted-foreground mt-1">{description}</p>
         )}

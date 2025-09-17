@@ -1,5 +1,5 @@
-import { supabase as supabaseDb } from "../lib/supabase";
 import { supabase as supabaseAuth } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 
 export interface AuthUser {
   id: string;
@@ -12,17 +12,11 @@ export interface AuthUser {
 
 export interface UserProfile {
   user_id: string;
-  name?: string;
-  role?: "tourist" | "admin" | "authority";
-  is_verified?: boolean;
-  digital_id?: string;
   full_name?: string;
-  phone?: string;
-  emergency_contact?: string;
-  emergency_phone?: string;
-  nationality?: string;
-  age?: number;
-  preferences?: Record<string, string | number | boolean>;
+  role?: "tourist" | "admin" | "authority";
+  phone_number?: string;
+  organization?: string;
+  assigned_geo_fence_ids?: string[] | null;
   created_at: string;
   updated_at: string;
 }
@@ -42,14 +36,10 @@ export interface RegisterData {
 
 export interface CreateProfileData {
   user_id: string;
-  email?: string;
-  name?: string;
-  phone?: string;
+  full_name?: string;
+  phone_number?: string;
   role?: "tourist" | "admin" | "authority";
-  emergency_contact?: string;
-  emergency_phone?: string;
-  nationality?: string;
-  age?: number;
+  organization?: string;
 }
 
 export class AuthService {
@@ -85,11 +75,23 @@ export class AuthService {
       });
 
       if (error) {
+        // Check for specific error messages to provide better UX
+        if (error.message.includes("Invalid login credentials")) {
+          throw new Error("Invalid email or password");
+        }
+        if (error.message.includes("Email not confirmed")) {
+          throw new Error("EMAIL_NOT_VERIFIED");
+        }
         throw new Error(error.message);
       }
 
       if (!data.user) {
         throw new Error("Login failed");
+      }
+
+      // Check if email is verified
+      if (!data.user.email_confirmed_at) {
+        throw new Error("EMAIL_NOT_VERIFIED");
       }
 
       // Get user profile
@@ -98,17 +100,21 @@ export class AuthService {
       return {
         id: data.user.id,
         email: data.user.email || "",
-        name: profile.name || "",
+        name: profile.full_name || "",
         role: profile.role || "tourist",
-        isVerified: profile.is_verified || false,
-        digitalId: profile.digital_id,
+        isVerified: true,
+        digitalId: undefined, // Will be set separately if needed
       };
     } catch (error) {
-      throw new Error(
-        `Login failed: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+
+      // Don't wrap EMAIL_NOT_VERIFIED error
+      if (errorMessage === "EMAIL_NOT_VERIFIED") {
+        throw new Error("EMAIL_NOT_VERIFIED");
+      }
+
+      throw new Error(`Login failed: ${errorMessage}`);
     }
   }
 
@@ -141,9 +147,10 @@ export class AuthService {
         email: userData.email.trim(),
         password: userData.password,
         options: {
+          emailRedirectTo: `${window.location.origin}/auth/verify`,
           data: {
-            name: userData.name.trim(),
-            phone: userData.phone?.trim() || null,
+            full_name: userData.name.trim(),
+            phone_number: userData.phone?.trim() || null,
             role: userData.role || "tourist",
           },
         },
@@ -160,9 +167,8 @@ export class AuthService {
       // Create user profile
       await this.createUserProfile({
         user_id: data.user.id,
-        email: userData.email,
-        name: userData.name,
-        phone: userData.phone,
+        full_name: userData.name,
+        phone_number: userData.phone,
         role: userData.role || "tourist",
       });
 
@@ -210,21 +216,27 @@ export class AuthService {
     const { data, error } = await supabaseAuth.auth.signUp({
       email: email.trim(),
       password,
-      options: { data: { role, name } },
+      options: {
+        data: {
+          role,
+          full_name: name,
+          phone_number: phone || null,
+        },
+      },
     });
     if (error || !data.user) {
       throw new Error(error?.message || "Failed to register");
     }
 
     // Create basic profile
-    const profilePayload = {
+    const profilePayload: Database["public"]["Tables"]["profiles"]["Insert"] = {
       user_id: data.user.id,
       full_name: name,
       phone_number: phone || null,
       role,
     };
 
-    const { error: profileError } = await supabaseDb
+    const { error: profileError } = await supabaseAuth
       .from("profiles")
       .insert([profilePayload]);
     if (profileError) {
@@ -232,19 +244,22 @@ export class AuthService {
     }
 
     // Create digital tourist ID with tourist-specific data
-    const touristPayload = {
-      tourist_name: name,
-      aadhaar_number: "", // Will be updated later if provided
-      passport_number: nationality || "",
-      trip_itinerary: "Tourist registration",
-      emergency_contacts: JSON.parse(emergencyContactsJson),
-      valid_from: new Date().toISOString(),
-      valid_to: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // Valid for 1 year
-      blockchain_hash: documentHash || `hash_${data.user.id}_${Date.now()}`,
-      status: "active",
-    };
+    const touristPayload: Database["public"]["Tables"]["digital_tourist_ids"]["Insert"] =
+      {
+        tourist_name: name,
+        aadhaar_number: "", // Will be updated later if provided
+        passport_number: nationality || "",
+        trip_itinerary: "Tourist registration",
+        emergency_contacts: JSON.parse(emergencyContactsJson),
+        valid_from: new Date().toISOString(),
+        valid_to: new Date(
+          Date.now() + 365 * 24 * 60 * 60 * 1000
+        ).toISOString(), // Valid for 1 year
+        blockchain_hash: documentHash || `hash_${data.user.id}_${Date.now()}`,
+        status: "active",
+      };
 
-    const { data: touristData, error: touristError } = await supabaseDb
+    const { data: touristData, error: touristError } = await supabaseAuth
       .from("digital_tourist_ids")
       .insert([touristPayload])
       .select()
@@ -252,9 +267,6 @@ export class AuthService {
 
     if (touristError) {
       throw new Error(touristError.message);
-    }
-    if (profileError) {
-      throw new Error(profileError.message);
     }
 
     return {
@@ -298,10 +310,10 @@ export class AuthService {
       return {
         id: user.id,
         email: user.email || "",
-        name: profile.name || "",
+        name: profile.full_name || "",
         role: profile.role || "tourist",
-        isVerified: profile.is_verified || false,
-        digitalId: profile.digital_id,
+        isVerified: true,
+        digitalId: undefined, // Will be set separately if needed
       };
     } catch (error) {
       console.error("Failed to get current user:", error);
@@ -361,6 +373,73 @@ export class AuthService {
     }
   }
 
+  // New API: Resend verification email
+  async resendVerification(email: string): Promise<void> {
+    try {
+      if (!email?.trim()) {
+        throw new Error("Email is required");
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        throw new Error("Invalid email format");
+      }
+
+      const { error } = await supabaseAuth.auth.resend({
+        type: "signup",
+        email: email.trim(),
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/verify`,
+        },
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+    } catch (error) {
+      throw new Error(
+        `Failed to resend verification email: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    }
+  }
+
+  // New API: Check if user email is verified
+  async isEmailVerified(email: string): Promise<boolean> {
+    try {
+      if (!email?.trim()) {
+        return false;
+      }
+
+      const {
+        data: { user },
+      } = await supabaseAuth.auth.getUser();
+      if (!user || user.email !== email.trim()) {
+        return false;
+      }
+
+      return !!user.email_confirmed_at;
+    } catch (error) {
+      console.error("Failed to check email verification:", error);
+      return false;
+    }
+  }
+
+  // New API: Get role-based redirect URL
+  getRedirectUrlForRole(role: string): string {
+    switch (role) {
+      case "tourist":
+        return "/tourist/dashboard";
+      case "authority":
+        return "/authority/dashboard";
+      case "admin":
+        return "/admin/dashboard";
+      default:
+        return "/dashboard";
+    }
+  }
+
   async verifyDigitalId(digitalId: string): Promise<boolean> {
     try {
       // Validate input
@@ -368,17 +447,17 @@ export class AuthService {
         return false;
       }
 
-      const { data, error } = await supabaseDb
-        .from("profiles")
-        .select("is_verified")
-        .eq("digital_id", digitalId.trim())
+      const { data, error } = await supabaseAuth
+        .from("digital_tourist_ids")
+        .select("status")
+        .eq("id", digitalId.trim())
         .single();
 
       if (error) {
         return false;
       }
 
-      return data?.is_verified || false;
+      return data?.status === "active";
     } catch (error) {
       console.error("Digital ID verification failed:", error);
       return false;
@@ -390,7 +469,7 @@ export class AuthService {
       throw new Error("User ID is required");
     }
 
-    const { data, error } = await supabaseDb
+    const { data, error } = await supabaseAuth
       .from("profiles")
       .select("*")
       .eq("user_id", userId)
@@ -401,15 +480,26 @@ export class AuthService {
       // Return default profile if not found
       return {
         user_id: userId,
-        name: "",
+        full_name: "",
         role: "tourist",
-        is_verified: false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
     }
 
-    return data;
+    // Type assertion to ensure role compatibility
+    const profile: UserProfile = {
+      user_id: data.user_id,
+      full_name: data.full_name,
+      role: (data.role as "tourist" | "admin" | "authority") || "tourist",
+      phone_number: data.phone_number,
+      organization: data.organization,
+      assigned_geo_fence_ids: data.assigned_geo_fence_ids,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+    };
+
+    return profile;
   }
 
   private async createUserProfile(
@@ -420,18 +510,15 @@ export class AuthService {
       throw new Error("User ID is required for profile creation");
     }
 
-    const { error } = await supabaseDb.from("profiles").insert([
-      {
-        ...profileData,
-        user_id: profileData.user_id.trim(),
-        email: profileData.email?.trim() || null,
-        name: profileData.name?.trim() || null,
-        phone: profileData.phone?.trim() || null,
-        emergency_contact: profileData.emergency_contact?.trim() || null,
-        emergency_phone: profileData.emergency_phone?.trim() || null,
-        nationality: profileData.nationality?.trim() || null,
-      },
-    ]);
+    const payload: Database["public"]["Tables"]["profiles"]["Insert"] = {
+      user_id: profileData.user_id.trim(),
+      full_name: profileData.full_name?.trim() || null,
+      phone_number: profileData.phone_number?.trim() || null,
+      role: profileData.role || "tourist",
+      organization: profileData.organization?.trim() || null,
+    };
+
+    const { error } = await supabaseAuth.from("profiles").insert([payload]);
 
     if (error) {
       console.error("Failed to create user profile:", error);

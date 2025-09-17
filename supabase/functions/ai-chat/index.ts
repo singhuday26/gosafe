@@ -21,7 +21,6 @@
  * - Audit logging for all interactions
  */
 
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 
@@ -45,6 +44,14 @@ interface Action {
   type: string;
   label: string;
   data: unknown | null;
+}
+
+interface ApiResponse {
+  response: string;
+  message?: string; // For compatibility
+  sessionId: string | null;
+  responseTime: number;
+  actions?: Action[];
 }
 
 serve(async (req: Request) => {
@@ -170,7 +177,11 @@ serve(async (req: Request) => {
 
       if (!geminiResponse.ok) {
         const errorText = await geminiResponse.text();
-        console.error("Gemini API error:", errorText);
+        console.error("Gemini API error (guest):", {
+          status: geminiResponse.status,
+          statusText: geminiResponse.statusText,
+          error: errorText,
+        });
         return new Response(
           JSON.stringify({ error: "Failed to generate response" }),
           {
@@ -180,7 +191,19 @@ serve(async (req: Request) => {
         );
       }
 
-      const geminiData = await geminiResponse.json();
+      let geminiData;
+      try {
+        geminiData = await geminiResponse.json();
+      } catch (parseError) {
+        console.error("Failed to parse Gemini response (guest):", parseError);
+        return new Response(
+          JSON.stringify({ error: "Invalid AI response format" }),
+          {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
       const aiResponse =
         geminiData.candidates?.[0]?.content?.parts?.[0]?.text ||
         "Sorry, I could not generate a response.";
@@ -226,6 +249,10 @@ serve(async (req: Request) => {
       !authUser?.user?.id ||
       (safeUserId && authUser.user.id !== safeUserId)
     ) {
+      console.error(
+        "Authentication error:",
+        authErr?.message || "Invalid user"
+      );
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -237,90 +264,108 @@ serve(async (req: Request) => {
     // Get or create chat session
     let currentSessionId = sessionId as string | undefined;
     if (!currentSessionId) {
-      const { data: sessionData, error: sessionError } = await supabase.rpc(
-        "get_or_create_chat_session",
-        {
-          p_user_id: safeUserId,
-          p_user_role: safeRole,
-          p_language_code: safeLang,
-          p_metadata: {},
-        }
-      );
+      // Create session directly since RPC might not exist
+      const sessionIdStr = `session_${Date.now()}_${Math.random()
+        .toString(36)
+        .substring(2, 10)}`;
+
+      const { data: sessionData, error: sessionError } = await supabase
+        .from("ai_chat_sessions")
+        .insert({
+          session_id: sessionIdStr,
+          user_id: safeUserId,
+          user_role: safeRole,
+          language_code: safeLang,
+          metadata: {},
+        })
+        .select()
+        .single();
 
       if (sessionError) {
-        console.error("Session error:", sessionError);
+        console.error("Session creation error:", sessionError);
+        // Fallback: continue without session persistence
+        currentSessionId = sessionIdStr;
+      } else {
+        currentSessionId = sessionData.session_id;
+      }
+    }
+
+    // Get session UUID for foreign key relationship
+    let sessionUuid: string | null = null;
+
+    if (currentSessionId) {
+      const { data: sessionRecord, error: sessionLookupError } = await supabase
+        .from("ai_chat_sessions")
+        .select("id")
+        .eq("session_id", currentSessionId)
+        .single();
+
+      if (!sessionLookupError && sessionRecord) {
+        sessionUuid = sessionRecord.id as string;
+      }
+    }
+
+    // Continue without session if not found (graceful degradation)
+    if (!sessionUuid) {
+      console.warn("No session UUID found, continuing without persistence");
+    }
+
+    // Basic per-session rate limiting (e.g., 30 user messages/min)
+    if (sessionUuid) {
+      const oneMinuteAgo = new Date(Date.now() - 60_000).toISOString();
+      const { count: recentCount } = await supabase
+        .from("ai_chat_messages")
+        .select("id", { count: "exact", head: true })
+        .eq("session_id", sessionUuid)
+        .eq("message_type", "user")
+        .gte("created_at", oneMinuteAgo);
+
+      if ((recentCount ?? 0) > 30) {
         return new Response(
-          JSON.stringify({ error: "Failed to create session" }),
+          JSON.stringify({ error: "Rate limit exceeded. Please slow down." }),
           {
-            status: 500,
+            status: 429,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           }
         );
       }
-
-      currentSessionId = sessionData[0]?.session_id;
     }
 
-    // Get session UUID for foreign key relationship
-    const { data: sessionRecord, error: sessionLookupError } = await supabase
-      .from("ai_chat_sessions")
-      .select("id")
-      .eq("session_id", currentSessionId)
-      .single();
+    // Store user message (if session exists)
+    if (sessionUuid) {
+      const { error: userMessageError } = await supabase
+        .from("ai_chat_messages")
+        .insert({
+          session_id: sessionUuid,
+          message_type: "user",
+          content: safeMessage,
+          metadata: { timestamp: new Date().toISOString() },
+        });
 
-    if (sessionLookupError) {
-      console.error("Session lookup error:", sessionLookupError);
-      return new Response(JSON.stringify({ error: "Session not found" }), {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      if (userMessageError) {
+        console.error("User message storage error:", userMessageError);
+      }
     }
 
-    const sessionUuid: string = sessionRecord.id as string;
+    // Get recent chat history for context (if session exists)
+    let chatHistory: Array<{
+      message_type: "user" | "assistant";
+      content: string;
+    }> = [];
 
-    // Basic per-session rate limiting (e.g., 30 user messages/min)
-    const oneMinuteAgo = new Date(Date.now() - 60_000).toISOString();
-    const { count: recentCount } = await supabase
-      .from("ai_chat_messages")
-      .select("id", { count: "exact", head: true })
-      .eq("session_id", sessionUuid)
-      .eq("message_type", "user")
-      .gte("created_at", oneMinuteAgo);
+    if (sessionUuid) {
+      const { data: historyData, error: historyError } = await supabase
+        .from("ai_chat_messages")
+        .select("message_type, content")
+        .eq("session_id", sessionUuid)
+        .order("created_at", { ascending: true })
+        .limit(10);
 
-    if ((recentCount ?? 0) > 30) {
-      return new Response(
-        JSON.stringify({ error: "Rate limit exceeded. Please slow down." }),
-        {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    // Store user message
-    const { error: userMessageError } = await supabase
-      .from("ai_chat_messages")
-      .insert({
-        session_id: sessionUuid,
-        message_type: "user",
-        content: safeMessage,
-        metadata: { timestamp: new Date().toISOString() },
-      });
-
-    if (userMessageError) {
-      console.error("User message error:", userMessageError);
-    }
-
-    // Get recent chat history for context
-    const { data: chatHistory, error: historyError } = await supabase
-      .from("ai_chat_messages")
-      .select("message_type, content")
-      .eq("session_id", sessionUuid)
-      .order("created_at", { ascending: true })
-      .limit(10);
-
-    if (historyError) {
-      console.error("History error:", historyError);
+      if (historyError) {
+        console.error("History retrieval error:", historyError);
+      } else {
+        chatHistory = historyData || [];
+      }
     }
 
     // Build conversation context with enhanced system prompts
@@ -332,7 +377,7 @@ serve(async (req: Request) => {
     messages.push({ role: "user", content: systemPrompt });
 
     // Add chat history to context
-    if (chatHistory) {
+    if (chatHistory.length > 0) {
       chatHistory.forEach(
         (msg: { message_type: "user" | "assistant"; content: string }) => {
           messages.push({
@@ -409,7 +454,11 @@ serve(async (req: Request) => {
 
     if (!geminiResponse.ok) {
       const errorText = await geminiResponse.text();
-      console.error("Gemini API error:", errorText);
+      console.error("Gemini API error:", {
+        status: geminiResponse.status,
+        statusText: geminiResponse.statusText,
+        error: errorText,
+      });
       return new Response(
         JSON.stringify({ error: "Failed to generate response" }),
         {
@@ -419,7 +468,19 @@ serve(async (req: Request) => {
       );
     }
 
-    const geminiData = await geminiResponse.json();
+    let geminiData;
+    try {
+      geminiData = await geminiResponse.json();
+    } catch (parseError) {
+      console.error("Failed to parse Gemini response:", parseError);
+      return new Response(
+        JSON.stringify({ error: "Invalid AI response format" }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
     const rawResponse =
       geminiData.candidates?.[0]?.content?.parts?.[0]?.text ||
       "Sorry, I could not generate a response.";
@@ -433,39 +494,40 @@ serve(async (req: Request) => {
       safeMessage
     );
 
-    // Store AI response with actions
-    const { error: aiMessageError } = await supabase
-      .from("ai_chat_messages")
-      .insert({
-        session_id: sessionUuid,
-        message_type: "assistant",
-        content: responseMessage,
-        response_time_ms: responseTime,
-        metadata: {
-          model: "gemini-1.5-flash-latest",
-          timestamp: new Date().toISOString(),
-          actions: actions,
-          userRole: userRole,
-          language: languageCode,
-        },
-      });
+    // Store AI response with actions (if session exists)
+    if (sessionUuid) {
+      const { error: aiMessageError } = await supabase
+        .from("ai_chat_messages")
+        .insert({
+          session_id: sessionUuid,
+          message_type: "assistant",
+          content: responseMessage,
+          response_time_ms: responseTime,
+          metadata: {
+            model: "gemini-1.5-flash-latest",
+            timestamp: new Date().toISOString(),
+            actions: actions,
+            userRole: safeRole,
+            language: safeLang,
+          },
+        });
 
-    if (aiMessageError) {
-      console.error("AI message error:", aiMessageError);
+      if (aiMessageError) {
+        console.error("AI message storage error:", aiMessageError);
+      }
     }
 
-    return new Response(
-      JSON.stringify({
-        response: responseMessage,
-        message: responseMessage, // For compatibility
-        sessionId: currentSessionId,
-        responseTime: responseTime,
-        actions: actions,
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    const apiResponse: ApiResponse = {
+      response: responseMessage,
+      message: responseMessage, // For compatibility
+      sessionId: currentSessionId || null,
+      responseTime: responseTime,
+      actions: actions,
+    };
+
+    return new Response(JSON.stringify(apiResponse), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (error) {
     console.error("Error in ai-chat function:", error);
     return new Response(JSON.stringify({ error: "Internal server error" }), {
@@ -570,12 +632,14 @@ function parseResponseForActions(
     // Remove action from message
     cleanedMessage = cleanedMessage.replace(fullMatch, "").trim();
 
-    // Add to actions array
-    actions.push({
-      type,
-      label,
-      data: null,
-    });
+    // Add to actions array with validation
+    if (type && label) {
+      actions.push({
+        type: type.toLowerCase(),
+        label: label.trim(),
+        data: null,
+      });
+    }
   }
 
   // Detect emergency keywords and auto-suggest SOS

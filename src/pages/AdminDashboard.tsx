@@ -13,7 +13,6 @@ import {
   CheckCircle,
   Globe,
   Lock,
-
   Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -42,6 +41,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { BlockchainService, mockGeoFences } from "@/lib/blockchain";
 import GeoFenceEditor from "@/components/GeoFenceEditor";
+import { PoliceDashboard } from "@/components/dashboard/PoliceDashboard";
+import { TourismDashboard } from "@/components/dashboard/TourismDashboard";
 
 // Define GeoFence type locally since we need it for state management
 interface GeoFence {
@@ -109,7 +110,6 @@ const AdminDashboard = () => {
     localStorage.removeItem("adminAuth");
     setIsAuthenticated(false);
     navigate("/");
-
   };
 
   // GeoFence management functions
@@ -127,7 +127,6 @@ const AdminDashboard = () => {
 
   const handleGeoFenceDelete = (id: string) => {
     setGeoFences((prev) => prev.filter((fence) => fence.id !== id));
-
   };
 
   const handleSettingChange = (setting: string, value: boolean) => {
@@ -283,12 +282,14 @@ const AdminDashboard = () => {
 
         {/* Main Admin Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full max-w-2xl grid-cols-5">
+          <TabsList className="grid w-full max-w-4xl grid-cols-7">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="geofences">Geo-fences</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
+            <TabsTrigger value="police">Police Dashboard</TabsTrigger>
+            <TabsTrigger value="tourism">Tourism Dept</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -493,9 +494,7 @@ const AdminDashboard = () => {
           </TabsContent>
 
           <TabsContent value="geofences">
-            
-            
-                        <div className="flex justify-end mb-2">
+            <div className="flex justify-end mb-2">
               <Button variant="outline" size="sm">
                 <Download className="w-4 h-4 mr-2" />
                 Export Zones
@@ -509,114 +508,6 @@ const AdminDashboard = () => {
               center={[77.209, 28.6139]}
               zoom={10}
             />
-
-            
-            
-            
-            
-            <GeoFenceEditor
-              geoFences={geoFences}
-              onGeoFenceCreate={handleGeoFenceCreate}
-              onGeoFenceUpdate={handleGeoFenceUpdate}
-              onGeoFenceDelete={handleGeoFenceDelete}
-              center={[77.209, 28.6139]}
-              zoom={10}
-            />
-=======
-            <Card className="gradient-card shadow-soft">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <MapPin className="mr-2 h-5 w-5 text-primary" />
-                  Geo-fence Management
-                </CardTitle>
-                <CardDescription>
-                  Configure safety zones and restricted areas
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div className="flex gap-4 mb-6">
-                    <Button
-                      onClick={() => navigate("/admin/geofences")}
-                      className="gradient-primary text-white"
-                    >
-                      <MapPin className="mr-2 h-4 w-4" />
-                      Interactive Geofence Editor
-                    </Button>
-                    <Button variant="outline">
-                      <Download className="mr-2 h-4 w-4" />
-                      Export Zones
-                    </Button>
-                  </div>
-
-                  <div className="grid lg:grid-cols-2 gap-6">
-                    <div>
-                      <h4 className="font-semibold mb-4">
-                        Existing Geo-fences
-                      </h4>
-                      <div className="space-y-3">
-                        {mockGeoFences.map((fence) => (
-                          <div
-                            key={fence.id}
-                            className="flex items-center justify-between p-3 border rounded-lg"
-                          >
-                            <div className="flex items-center">
-                              <div
-                                className={`w-3 h-3 rounded-full mr-3 ${
-                                  fence.type === "safe"
-                                    ? "bg-safety"
-                                    : fence.type === "restricted"
-                                    ? "bg-warning"
-                                    : "bg-danger"
-                                }`}
-                              ></div>
-                              <div>
-                                <p className="font-medium">{fence.name}</p>
-                                <p className="text-sm text-muted-foreground">
-                                  {fence.description}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge variant="outline">{fence.type}</Badge>
-                              <Button size="sm" variant="outline">
-                                Edit
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 className="font-semibold mb-4">Add New Geo-fence</h4>
-                      <div className="space-y-4">
-                        <div>
-                          <Label>Zone Name</Label>
-                          <Input placeholder="Enter zone name" />
-                        </div>
-                        <div>
-                          <Label>Zone Type</Label>
-                          <select className="w-full px-3 py-2 border rounded-md">
-                            <option>Safe Zone</option>
-                            <option>Restricted Area</option>
-                            <option>Danger Zone</option>
-                          </select>
-                        </div>
-                        <div>
-                          <Label>Description</Label>
-                          <Textarea placeholder="Describe the zone and any special conditions" />
-                        </div>
-                        <Button className="w-full gradient-primary text-white">
-                          Create Geo-fence
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
           </TabsContent>
 
           <TabsContent value="analytics">
@@ -781,6 +672,14 @@ const AdminDashboard = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="police">
+            <PoliceDashboard />
+          </TabsContent>
+
+          <TabsContent value="tourism">
+            <TourismDashboard />
           </TabsContent>
         </Tabs>
       </div>

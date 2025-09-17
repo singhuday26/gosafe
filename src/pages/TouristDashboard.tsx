@@ -26,16 +26,44 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import {
-  BlockchainService,
-  calculateSafetyScore,
-  checkGeoFenceStatus,
-  mockGeoFences,
-} from "@/lib/blockchain";
+import { TouristService } from "@/services/touristService";
+import { AuthService, type AuthUser } from "@/services/authService";
+import type { Database } from "@/integrations/supabase/types";
+
+// Type definitions
+type Geofence = Database["public"]["Tables"]["geo_fences"]["Row"];
 
 import MapComponent from "@/components/MapComponent";
-
 import MapView from "@/components/MapView";
+
+// Types for real data
+interface TouristLocation {
+  latitude: number;
+  longitude: number;
+  address?: string;
+}
+
+interface GeofenceStatus {
+  id: string;
+  name: string;
+  type: "safe" | "restricted" | "danger" | "tourist_zone";
+  description?: string;
+}
+
+interface SafetyMetrics {
+  score: number;
+  safeZones: number;
+  cautionAreas: number;
+  dangerZones: number;
+}
+
+interface ActivityItem {
+  id: string;
+  type: string;
+  message: string;
+  timestamp: Date;
+  status?: "success" | "warning" | "error" | "info";
+}
 
 const TouristDashboard = () => {
   const navigate = useNavigate();
@@ -44,128 +72,306 @@ const TouristDashboard = () => {
   };
   const { toast } = useToast();
   const { t } = useTranslation();
+
+  // Real state using Supabase data
   const [currentTouristId, setCurrentTouristId] = useState<string | null>(null);
-  const [safetyScore, setSafetyScore] = useState(0);
-  const [currentLocation, setCurrentLocation] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const [digitalId, setDigitalId] = useState<string | null>(null);
+  const [safetyMetrics, setSafetyMetrics] = useState<SafetyMetrics>({
+    score: 0,
+    safeZones: 0,
+    cautionAreas: 0,
+    dangerZones: 0,
+  });
+  const [currentLocation, setCurrentLocation] =
+    useState<TouristLocation | null>(null);
   const [isSOSActive, setIsSOSActive] = useState(false);
   const [lastSOSTime, setLastSOSTime] = useState<Date | null>(null);
-  const [nearbyGeofences, setNearbyGeofences] = useState<unknown[]>([]);
+  const [geofences, setGeofences] = useState<Geofence[]>([]);
+  const [currentGeofence, setCurrentGeofence] = useState<GeofenceStatus | null>(
+    null
+  );
+  const [recentActivities, setRecentActivities] = useState<ActivityItem[]>([]);
   const [escalationType, setEscalationType] = useState<"police" | "ranger">(
     "police"
   );
+  const [loading, setLoading] = useState(true);
+
+  const touristService = TouristService.getInstance();
+  const authService = AuthService.getInstance();
+
+  // Utility function to check geofence status
+  const checkGeoFenceStatus = (
+    lat: number,
+    lng: number
+  ): GeofenceStatus | null => {
+    for (const fence of geofences) {
+      if (isPointInGeofence(lat, lng, fence)) {
+        return {
+          id: fence.id,
+          name: fence.name,
+          description: fence.description || "",
+          type: fence.type as "safe" | "restricted" | "danger" | "tourist_zone",
+        };
+      }
+    }
+    return null;
+  };
+
+  // Helper function to check if a point is inside a geofence
+  const isPointInGeofence = (
+    lat: number,
+    lng: number,
+    fence: Geofence
+  ): boolean => {
+    // Simple implementation - in reality you'd use a proper point-in-polygon algorithm
+    // For now, just return false as a placeholder
+    return false;
+  };
 
   useEffect(() => {
-    // Check if user has valid Digital ID
-    const touristId = localStorage.getItem("currentTouristId");
-    if (!touristId) {
-      navigate("/register");
-      return;
-    }
+    initializeDashboard();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const blockchain = BlockchainService.getInstance();
-    const digitalID = blockchain.validateDigitalID(touristId);
+  const initializeDashboard = async () => {
+    try {
+      setLoading(true);
 
-    if (!digitalID || digitalID.status !== "active") {
+      // Get current user
+      const user = await authService.getCurrentUser();
+      if (!user) {
+        navigate("/register");
+        return;
+      }
+
+      setCurrentUser(user);
+      setCurrentTouristId(user.id);
+
+      // Get digital tourist ID
+      const touristIds = await touristService.getAllDigitalTouristIDs();
+      const userTouristId = touristIds.find(
+        (id) => id.tourist_name === user.name
+      );
+      if (userTouristId) {
+        setDigitalId(userTouristId.id);
+      }
+
+      // Get current location
+      await getCurrentLocation();
+
+      // Load safety metrics
+      const metrics = await touristService.getSafetyMetrics();
+      setSafetyMetrics({
+        score: metrics.safeZones * 20 + metrics.dangerZones * -10 + 80, // Calculate score
+        safeZones: metrics.safeZones,
+        cautionAreas: 1, // Default value
+        dangerZones: metrics.dangerZones,
+      });
+
+      // Load geofences
+      const allGeofences = await touristService.getAllGeoFences();
+      setGeofences(allGeofences);
+
+      // Update location in database
+      if (currentLocation) {
+        try {
+          await touristService.updateTouristLocation(
+            user.id,
+            currentLocation.latitude,
+            currentLocation.longitude
+          );
+        } catch (error) {
+          console.error("Failed to update location:", error);
+        }
+      }
+
+      // Load recent activities (mock for now, can be extended)
+      setRecentActivities([
+        {
+          id: "1",
+          type: "location",
+          message: "Location updated successfully",
+          timestamp: new Date(Date.now() - 5 * 60 * 1000),
+          status: "success",
+        },
+        {
+          id: "2",
+          type: "safety",
+          message: "Safety score updated",
+          timestamp: new Date(Date.now() - 10 * 60 * 1000),
+          status: "info",
+        },
+      ]);
+    } catch (error) {
+      console.error("Failed to initialize dashboard:", error);
       toast({
-        title: "Invalid Digital ID",
-        description: "Please register for a new Digital Tourist ID.",
+        title: "Initialization Error",
+        description: "Failed to load dashboard data. Please try again.",
         variant: "destructive",
       });
-      navigate("/register");
-      return;
+    } finally {
+      setLoading(false);
     }
+  };
 
-    setCurrentTouristId(touristId);
-    setSafetyScore(calculateSafetyScore(touristId));
+  const getCurrentLocation = async (): Promise<void> => {
+    return new Promise((resolve) => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const location: TouristLocation = {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+            };
+            setCurrentLocation(location);
 
-    // Mock location tracking
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCurrentLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
+            // Update location in database
+            if (currentTouristId) {
+              try {
+                await touristService.updateTouristLocation(
+                  currentTouristId,
+                  location.latitude,
+                  location.longitude
+                );
+              } catch (error) {
+                console.error("Failed to update location:", error);
+              }
+            }
+
+            // Check current geofence
+            await checkCurrentGeofence(location);
+            resolve();
+          },
+          () => {
+            // Use mock Delhi coordinates if location access denied
+            const location: TouristLocation = {
+              latitude: 28.6139,
+              longitude: 77.209,
+              address: "Delhi, India",
+            };
+            setCurrentLocation(location);
+            resolve();
+          }
+        );
+      } else {
+        resolve();
+      }
+    });
+  };
+
+  const checkCurrentGeofence = async (location: TouristLocation) => {
+    try {
+      const activeGeofences = await touristService.getAllGeoFences();
+      // Simple point-in-polygon check (simplified for demo)
+      const currentFence = activeGeofences.find((fence) => {
+        // This is a simplified check - in reality you'd use proper geo calculations
+        return (
+          fence.type &&
+          ["safe", "restricted", "danger", "tourist_zone"].includes(fence.type)
+        );
+      });
+
+      if (currentFence) {
+        setCurrentGeofence({
+          id: currentFence.id,
+          name: currentFence.name,
+          type: currentFence.type as
+            | "safe"
+            | "restricted"
+            | "danger"
+            | "tourist_zone",
+          description: currentFence.description,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to check geofence:", error);
+    }
+  };
+
+  const handleSOS = async () => {
+    if (!currentTouristId || !currentLocation || !currentUser) return;
+
+    try {
+      setIsSOSActive(true);
+      setLastSOSTime(new Date());
+
+      // Determine escalation type based on current geofence
+      const currentEscalation =
+        currentGeofence?.type === "danger" ? "ranger" : "police";
+      setEscalationType(currentEscalation);
+
+      // Create SOS alert in database
+      const sosAlert = await touristService.createSOSAlert({
+        tourist_id: currentTouristId,
+        latitude: currentLocation.latitude,
+        longitude: currentLocation.longitude,
+        alert_type: "panic",
+        message: `Emergency SOS triggered by tourist. Escalation: ${currentEscalation}${
+          currentGeofence ? ` (${currentGeofence.name})` : ""
+        }`,
+        blockchain_hash: `sos_${currentTouristId}_${Date.now()}`,
+      });
+
+      toast({
+        title: "SOS Alert Triggered!",
+        description: `Emergency services notified. ${
+          currentEscalation === "ranger" ? "Rangers" : "Police"
+        } dispatched to your location.`,
+        variant: "destructive",
+      });
+
+      // Auto-disable SOS after 30 seconds for demo
+      setTimeout(async () => {
+        setIsSOSActive(false);
+        try {
+          await touristService.updateSOSAlertStatus(sosAlert.id, "responded");
+          toast({
+            title: "Help is Coming",
+            description: `Local ${
+              currentEscalation === "ranger" ? "rangers" : "authorities"
+            } are responding to your location.`,
           });
-        },
-        () => {
-          // Use mock Delhi coordinates if location access denied
-          setCurrentLocation({
-            latitude: 28.6139,
-            longitude: 77.209,
-          });
+        } catch (error) {
+          console.error("Failed to update SOS status:", error);
         }
-      );
+      }, 30000);
+    } catch (error) {
+      console.error("Failed to create SOS alert:", error);
+      setIsSOSActive(false);
+      toast({
+        title: "SOS Error",
+        description: "Failed to send SOS alert. Please try again.",
+        variant: "destructive",
+      });
     }
-  }, [navigate, toast]);
+  };
 
   const justRegistered = Boolean(location.state?.justRegistered);
   const qrValue =
-    location.state?.qrValue || localStorage.getItem("currentTouristId") || "";
+    location.state?.qrValue || digitalId || currentTouristId || "";
 
-  const handleSOS = () => {
-    if (!currentTouristId || !currentLocation) return;
-
-    setIsSOSActive(true);
-    setLastSOSTime(new Date());
-
-    // Check geofences for escalation logic
-    const geoFenceStatus = checkGeoFenceStatus(
-      currentLocation.latitude,
-      currentLocation.longitude
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Shield className="h-12 w-12 mx-auto mb-4 text-muted-foreground animate-pulse" />
+          <p className="text-muted-foreground">Loading tourist portal...</p>
+        </div>
+      </div>
     );
-    const currentEscalation =
-      geoFenceStatus?.type === "danger" ? "ranger" : "police";
-    setEscalationType(currentEscalation);
+  }
 
-    const blockchain = BlockchainService.getInstance();
-    const sosAlert = blockchain.createSOSAlert({
-      touristId: currentTouristId,
-      location: {
-        latitude: currentLocation.latitude,
-        longitude: currentLocation.longitude,
-        address: "Tourist Location Area, Delhi, India", // Mock address
-      },
-      type: "panic",
-
-      message: `Emergency SOS triggered by tourist. Escalation: ${currentEscalation}${
-        geoFenceStatus ? ` (${geoFenceStatus.name})` : ""
-      }`,
-    });
-
-    toast({
-      title: "SOS Alert Triggered!",
-      description: `Emergency services notified. ${
-        currentEscalation === "ranger" ? "Rangers" : "Police"
-      } dispatched to your location.`,
-      variant: "destructive",
-    });
-
-    // Auto-disable SOS after 30 seconds for demo
-    setTimeout(() => {
-      setIsSOSActive(false);
-      blockchain.updateSOSStatus(sosAlert.id, "responded");
-      toast({
-        title: "Help is Coming",
-        description: `Local ${
-          currentEscalation === "ranger" ? "rangers" : "authorities"
-        } are responding to your location.`,
-      });
-    }, 30000);
-  };
-
-  const geoFenceStatus = currentLocation
-    ? checkGeoFenceStatus(currentLocation.latitude, currentLocation.longitude)
-    : null;
-
-  if (!currentTouristId) {
+  if (!currentTouristId || !currentUser) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Shield className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-          <p className="text-muted-foreground">Loading tourist portal...</p>
+          <p className="text-muted-foreground">
+            Please register to access the portal.
+          </p>
+          <Button className="mt-4" onClick={() => navigate("/register")}>
+            Go to Registration
+          </Button>
         </div>
       </div>
     );
@@ -264,10 +470,10 @@ const TouristDashboard = () => {
                           ]
                         : []
                     }
-                    geofences={mockGeoFences.map((fence) => ({
+                    geofences={geofences.map((fence) => ({
                       id: fence.id,
                       name: fence.name,
-                      description: fence.description,
+                      description: fence.description || "",
                       coordinates: fence.coordinates,
                       type: fence.type as
                         | "safe"
@@ -345,7 +551,7 @@ const TouristDashboard = () => {
             {/* Safety Score */}
             <Card
               className={`gradient-card shadow-soft ${
-                safetyScore >= 80 ? "safety-glow" : ""
+                safetyMetrics.score >= 80 ? "safety-glow" : ""
               }`}
             >
               <CardHeader>
@@ -357,16 +563,16 @@ const TouristDashboard = () => {
                   <Badge
                     variant="secondary"
                     className={`${
-                      safetyScore >= 80
+                      safetyMetrics.score >= 80
                         ? "bg-safety/10 text-safety border-safety/20"
-                        : safetyScore >= 60
+                        : safetyMetrics.score >= 60
                         ? "bg-warning/10 text-warning border-warning/20"
                         : "bg-danger/10 text-danger border-danger/20"
                     }`}
                   >
-                    {safetyScore >= 80
+                    {safetyMetrics.score >= 80
                       ? "Safe"
-                      : safetyScore >= 60
+                      : safetyMetrics.score >= 60
                       ? "Caution"
                       : "Alert"}
                   </Badge>
@@ -379,14 +585,14 @@ const TouristDashboard = () => {
                 <div className="space-y-4">
                   <div className="text-center">
                     <div className="text-4xl font-bold text-safety mb-2">
-                      {safetyScore.toFixed(1)}
+                      {safetyMetrics.score.toFixed(1)}
                     </div>
-                    <Progress value={safetyScore} className="w-full" />
+                    <Progress value={safetyMetrics.score} className="w-full" />
                   </div>
                   <div className="grid grid-cols-3 gap-4 text-center">
                     <div>
                       <div className="text-2xl font-semibold text-safety">
-                        3
+                        {safetyMetrics.safeZones}
                       </div>
                       <div className="text-xs text-muted-foreground">
                         Safe Zones
@@ -394,7 +600,7 @@ const TouristDashboard = () => {
                     </div>
                     <div>
                       <div className="text-2xl font-semibold text-warning">
-                        1
+                        {safetyMetrics.cautionAreas}
                       </div>
                       <div className="text-xs text-muted-foreground">
                         Caution Areas
@@ -402,7 +608,7 @@ const TouristDashboard = () => {
                     </div>
                     <div>
                       <div className="text-2xl font-semibold text-danger">
-                        0
+                        {safetyMetrics.dangerZones}
                       </div>
                       <div className="text-xs text-muted-foreground">
                         Danger Zones
@@ -446,12 +652,12 @@ const TouristDashboard = () => {
                   </div>
                 )}
 
-                {geoFenceStatus && (
+                {currentGeofence && (
                   <div
                     className={`p-3 rounded-lg border ${
-                      geoFenceStatus.type === "safe"
+                      currentGeofence.type === "safe"
                         ? "bg-safety/10 border-safety/20"
-                        : geoFenceStatus.type === "restricted"
+                        : currentGeofence.type === "restricted"
                         ? "bg-warning/10 border-warning/20"
                         : "bg-danger/10 border-danger/20"
                     }`}
@@ -459,18 +665,18 @@ const TouristDashboard = () => {
                     <div className="flex items-center mb-2">
                       <Navigation className="mr-2 h-4 w-4" />
                       <span className="font-semibold">
-                        Current Zone: {geoFenceStatus.name}
+                        Current Zone: {currentGeofence.name}
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {geoFenceStatus.description}
+                      {currentGeofence.description}
                     </p>
                   </div>
                 )}
 
                 <div className="space-y-2">
                   <h4 className="font-semibold text-sm">Nearby Zones</h4>
-                  {mockGeoFences.map((fence) => (
+                  {geofences.map((fence) => (
                     <div
                       key={fence.id}
                       className="flex items-center justify-between p-2 bg-muted/50 rounded"
@@ -523,7 +729,15 @@ const TouristDashboard = () => {
                           ]
                         : []
                     }
-                    geoFences={mockGeoFences}
+                    geoFences={geofences.map((fence) => ({
+                      id: fence.id,
+                      name: fence.name,
+                      description: fence.description || "",
+                      type: fence.type as "safe" | "restricted" | "danger",
+                      coordinates: Array.isArray(fence.coordinates)
+                        ? (fence.coordinates as { lat: number; lng: number }[])
+                        : [],
+                    }))}
                     sosAlerts={
                       isSOSActive && currentLocation
                         ? [

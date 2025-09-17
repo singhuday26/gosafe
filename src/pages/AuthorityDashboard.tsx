@@ -1,17 +1,43 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  Shield, Users, AlertTriangle, MapPin, Clock, FileText, 
-  Search, Filter, RefreshCw, Phone, Eye, CheckCircle, XCircle 
+import {
+  Shield,
+  Users,
+  AlertTriangle,
+  MapPin,
+  Clock,
+  FileText,
+  Search,
+  Filter,
+  RefreshCw,
+  Phone,
+  Eye,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { BlockchainService } from "@/lib/blockchain";
+import { PoliceDashboard } from "@/components/dashboard/PoliceDashboard";
+import { TourismDashboard } from "@/components/dashboard/TourismDashboard";
 
 const AuthorityDashboard = () => {
   const navigate = useNavigate();
@@ -22,9 +48,9 @@ const AuthorityDashboard = () => {
 
   useEffect(() => {
     // Check authentication
-    const auth = localStorage.getItem('authorityAuth');
+    const auth = localStorage.getItem("authorityAuth");
     if (!auth) {
-      navigate('/authority/login');
+      navigate("/authority/login");
       return;
     }
     setAuthorityAuth(JSON.parse(auth));
@@ -37,7 +63,7 @@ const AuthorityDashboard = () => {
   const handleRefresh = async () => {
     setRefreshing(true);
     // Simulate data refresh
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     setRefreshing(false);
     toast({
       title: "Data Refreshed",
@@ -46,7 +72,7 @@ const AuthorityDashboard = () => {
   };
 
   const handleResolveAlert = (alertId: string) => {
-    blockchain.updateSOSStatus(alertId, 'resolved');
+    blockchain.updateSOSStatus(alertId, "resolved");
     toast({
       title: "Alert Resolved",
       description: "SOS alert has been marked as resolved.",
@@ -61,30 +87,30 @@ const AuthorityDashboard = () => {
   };
 
   const stats = [
-    { 
-      title: "Active Tourists", 
-      value: allTourists.filter(t => t.status === 'active').length, 
+    {
+      title: "Active Tourists",
+      value: allTourists.filter((t) => t.status === "active").length,
       icon: Users,
-      color: "text-primary"
+      color: "text-primary",
     },
-    { 
-      title: "Active Alerts", 
-      value: allAlerts.filter(a => a.status === 'active').length, 
+    {
+      title: "Active Alerts",
+      value: allAlerts.filter((a) => a.status === "active").length,
       icon: AlertTriangle,
-      color: "text-danger"
+      color: "text-danger",
     },
-    { 
-      title: "Resolved Today", 
-      value: allAlerts.filter(a => a.status === 'resolved').length, 
+    {
+      title: "Resolved Today",
+      value: allAlerts.filter((a) => a.status === "resolved").length,
       icon: CheckCircle,
-      color: "text-safety"
+      color: "text-safety",
     },
-    { 
-      title: "Response Time", 
-      value: "2.3 min", 
+    {
+      title: "Response Time",
+      value: "2.3 min",
       icon: Clock,
-      color: "text-warning"
-    }
+      color: "text-warning",
+    },
   ];
 
   if (!authorityAuth) {
@@ -92,7 +118,9 @@ const AuthorityDashboard = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Shield className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-          <p className="text-muted-foreground">Verifying authority credentials...</p>
+          <p className="text-muted-foreground">
+            Verifying authority credentials...
+          </p>
         </div>
       </div>
     );
@@ -109,20 +137,24 @@ const AuthorityDashboard = () => {
               <div>
                 <h1 className="text-xl font-bold">Authority Dashboard</h1>
                 <p className="text-sm text-muted-foreground">
-                  {authorityAuth.department} • {authorityAuth.station || 'Central Command'}
+                  {authorityAuth.department} •{" "}
+                  {authorityAuth.station || "Central Command"}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <Badge variant="secondary" className="bg-safety/10 text-safety border-safety/20">
+              <Badge
+                variant="secondary"
+                className="bg-safety/10 text-safety border-safety/20"
+              >
                 <CheckCircle className="mr-1 h-3 w-3" />
                 Online
               </Badge>
               <Button
                 variant="ghost"
                 onClick={() => {
-                  localStorage.removeItem('authorityAuth');
-                  navigate('/authority/login');
+                  localStorage.removeItem("authorityAuth");
+                  navigate("/authority/login");
                 }}
               >
                 Logout
@@ -141,7 +173,9 @@ const AuthorityDashboard = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-2xl font-bold">{stat.value}</p>
-                    <p className="text-sm text-muted-foreground">{stat.title}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {stat.title}
+                    </p>
                   </div>
                   <stat.icon className={`h-8 w-8 ${stat.color}`} />
                 </div>
@@ -153,13 +187,15 @@ const AuthorityDashboard = () => {
         {/* Main Dashboard */}
         <Tabs defaultValue="overview" className="space-y-6">
           <div className="flex items-center justify-between">
-            <TabsList className="grid w-full max-w-md grid-cols-4">
+            <TabsList className="grid w-full max-w-2xl grid-cols-6">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="tourists">Tourists</TabsTrigger>
               <TabsTrigger value="alerts">Alerts</TabsTrigger>
               <TabsTrigger value="map">Map View</TabsTrigger>
+              <TabsTrigger value="police">Police Operations</TabsTrigger>
+              <TabsTrigger value="tourism">Tourism Data</TabsTrigger>
             </TabsList>
-            
+
             <div className="flex items-center gap-2">
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -174,9 +210,9 @@ const AuthorityDashboard = () => {
                 <Filter className="h-4 w-4 mr-2" />
                 Filter
               </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={handleRefresh}
                 disabled={refreshing}
               >
@@ -198,49 +234,62 @@ const AuthorityDashboard = () => {
                   <AlertTriangle className="mr-2 h-5 w-5" />
                   Live SOS Alerts
                 </CardTitle>
-                <CardDescription>Real-time emergency alerts requiring immediate attention</CardDescription>
+                <CardDescription>
+                  Real-time emergency alerts requiring immediate attention
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                {allAlerts.filter(alert => alert.status === 'active').length === 0 ? (
+                {allAlerts.filter((alert) => alert.status === "active")
+                  .length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <CheckCircle className="h-12 w-12 mx-auto mb-2 text-safety" />
                     <p>No active alerts. All tourists are safe.</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {allAlerts.filter(alert => alert.status === 'active').map((alert) => {
-                      const tourist = allTourists.find(t => t.id === alert.touristId);
-                      return (
-                        <div key={alert.id} className="flex items-center justify-between p-4 border rounded-lg bg-danger/5 border-danger/20">
-                          <div className="flex items-center gap-4">
-                            <div className="w-3 h-3 bg-danger rounded-full animate-pulse"></div>
-                            <div>
-                              <p className="font-semibold">{tourist?.touristName || 'Unknown Tourist'}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {alert.location.address} • {alert.timestamp.toLocaleTimeString()}
-                              </p>
+                    {allAlerts
+                      .filter((alert) => alert.status === "active")
+                      .map((alert) => {
+                        const tourist = allTourists.find(
+                          (t) => t.id === alert.touristId
+                        );
+                        return (
+                          <div
+                            key={alert.id}
+                            className="flex items-center justify-between p-4 border rounded-lg bg-danger/5 border-danger/20"
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className="w-3 h-3 bg-danger rounded-full animate-pulse"></div>
+                              <div>
+                                <p className="font-semibold">
+                                  {tourist?.touristName || "Unknown Tourist"}
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  {alert.location.address} •{" "}
+                                  {alert.timestamp.toLocaleTimeString()}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button size="sm" variant="outline">
+                                <MapPin className="h-4 w-4 mr-1" />
+                                Locate
+                              </Button>
+                              <Button size="sm" variant="outline">
+                                <Phone className="h-4 w-4 mr-1" />
+                                Contact
+                              </Button>
+                              <Button
+                                size="sm"
+                                className="bg-safety hover:bg-safety/90 text-white"
+                                onClick={() => handleResolveAlert(alert.id)}
+                              >
+                                Resolve
+                              </Button>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Button size="sm" variant="outline">
-                              <MapPin className="h-4 w-4 mr-1" />
-                              Locate
-                            </Button>
-                            <Button size="sm" variant="outline">
-                              <Phone className="h-4 w-4 mr-1" />
-                              Contact
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              className="bg-safety hover:bg-safety/90 text-white"
-                              onClick={() => handleResolveAlert(alert.id)}
-                            >
-                              Resolve
-                            </Button>
-                          </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
                   </div>
                 )}
               </CardContent>
@@ -255,14 +304,20 @@ const AuthorityDashboard = () => {
                 <CardContent>
                   <div className="space-y-3">
                     {allTourists.slice(0, 5).map((tourist) => (
-                      <div key={tourist.id} className="flex items-center justify-between">
+                      <div
+                        key={tourist.id}
+                        className="flex items-center justify-between"
+                      >
                         <div>
                           <p className="font-medium">{tourist.touristName}</p>
                           <p className="text-sm text-muted-foreground">
                             ID: {tourist.id.slice(0, 16)}...
                           </p>
                         </div>
-                        <Badge variant="secondary" className="bg-safety/10 text-safety border-safety/20">
+                        <Badge
+                          variant="secondary"
+                          className="bg-safety/10 text-safety border-safety/20"
+                        >
                           {tourist.status}
                         </Badge>
                       </div>
@@ -323,42 +378,53 @@ const AuthorityDashboard = () => {
                   </TableHeader>
                   <TableBody>
                     {allTourists
-                      .filter(tourist => 
-                        searchQuery === '' || 
-                        tourist.touristName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        tourist.id.toLowerCase().includes(searchQuery.toLowerCase())
+                      .filter(
+                        (tourist) =>
+                          searchQuery === "" ||
+                          tourist.touristName
+                            .toLowerCase()
+                            .includes(searchQuery.toLowerCase()) ||
+                          tourist.id
+                            .toLowerCase()
+                            .includes(searchQuery.toLowerCase())
                       )
                       .map((tourist) => (
-                      <TableRow key={tourist.id}>
-                        <TableCell className="font-medium">{tourist.touristName}</TableCell>
-                        <TableCell className="font-mono text-sm">{tourist.id.slice(0, 16)}...</TableCell>
-                        <TableCell>
-                          <Badge 
-                            variant="secondary" 
-                            className={
-                              tourist.status === 'active' 
-                                ? 'bg-safety/10 text-safety border-safety/20'
-                                : 'bg-warning/10 text-warning border-warning/20'
-                            }
-                          >
-                            {tourist.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{tourist.validTo.toLocaleDateString()}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Button size="sm" variant="outline">
-                              <Eye className="h-4 w-4 mr-1" />
-                              View
-                            </Button>
-                            <Button size="sm" variant="outline">
-                              <MapPin className="h-4 w-4 mr-1" />
-                              Track
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                        <TableRow key={tourist.id}>
+                          <TableCell className="font-medium">
+                            {tourist.touristName}
+                          </TableCell>
+                          <TableCell className="font-mono text-sm">
+                            {tourist.id.slice(0, 16)}...
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="secondary"
+                              className={
+                                tourist.status === "active"
+                                  ? "bg-safety/10 text-safety border-safety/20"
+                                  : "bg-warning/10 text-warning border-warning/20"
+                              }
+                            >
+                              {tourist.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {tourist.validTo.toLocaleDateString()}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Button size="sm" variant="outline">
+                                <Eye className="h-4 w-4 mr-1" />
+                                View
+                              </Button>
+                              <Button size="sm" variant="outline">
+                                <MapPin className="h-4 w-4 mr-1" />
+                                Track
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -391,27 +457,40 @@ const AuthorityDashboard = () => {
                   </TableHeader>
                   <TableBody>
                     {allAlerts.map((alert) => {
-                      const tourist = allTourists.find(t => t.id === alert.touristId);
+                      const tourist = allTourists.find(
+                        (t) => t.id === alert.touristId
+                      );
                       return (
                         <TableRow key={alert.id}>
-                          <TableCell className="font-mono text-sm">{alert.id.slice(0, 12)}...</TableCell>
-                          <TableCell>{tourist?.touristName || 'Unknown'}</TableCell>
+                          <TableCell className="font-mono text-sm">
+                            {alert.id.slice(0, 12)}...
+                          </TableCell>
                           <TableCell>
-                            <Badge variant="secondary" className="bg-danger/10 text-danger border-danger/20">
+                            {tourist?.touristName || "Unknown"}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="secondary"
+                              className="bg-danger/10 text-danger border-danger/20"
+                            >
                               {alert.type}
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-sm">{alert.location.address}</TableCell>
-                          <TableCell className="text-sm">{alert.timestamp.toLocaleTimeString()}</TableCell>
+                          <TableCell className="text-sm">
+                            {alert.location.address}
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {alert.timestamp.toLocaleTimeString()}
+                          </TableCell>
                           <TableCell>
-                            <Badge 
+                            <Badge
                               variant="secondary"
                               className={
-                                alert.status === 'active' 
-                                  ? 'bg-danger/10 text-danger border-danger/20'
-                                  : alert.status === 'responded'
-                                  ? 'bg-warning/10 text-warning border-warning/20'
-                                  : 'bg-safety/10 text-safety border-safety/20'
+                                alert.status === "active"
+                                  ? "bg-danger/10 text-danger border-danger/20"
+                                  : alert.status === "responded"
+                                  ? "bg-warning/10 text-warning border-warning/20"
+                                  : "bg-safety/10 text-safety border-safety/20"
                               }
                             >
                               {alert.status}
@@ -419,17 +498,19 @@ const AuthorityDashboard = () => {
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
-                              <Button 
-                                size="sm" 
+                              <Button
+                                size="sm"
                                 variant="outline"
-                                onClick={() => handleGenerateEFIR(tourist, alert)}
+                                onClick={() =>
+                                  handleGenerateEFIR(tourist, alert)
+                                }
                               >
                                 <FileText className="h-4 w-4 mr-1" />
                                 E-FIR
                               </Button>
-                              {alert.status === 'active' && (
-                                <Button 
-                                  size="sm" 
+                              {alert.status === "active" && (
+                                <Button
+                                  size="sm"
                                   className="bg-safety hover:bg-safety/90 text-white"
                                   onClick={() => handleResolveAlert(alert.id)}
                                 >
@@ -462,17 +543,28 @@ const AuthorityDashboard = () => {
                 <div className="h-96 bg-muted/20 rounded-lg flex items-center justify-center">
                   <div className="text-center">
                     <MapPin className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">Interactive Map</h3>
+                    <h3 className="text-lg font-semibold mb-2">
+                      Interactive Map
+                    </h3>
                     <p className="text-muted-foreground mb-4">
                       Real-time tourist tracking with geo-fence boundaries
                     </p>
                     <Badge variant="outline">
-                      Map integration would be implemented with Mapbox/Google Maps
+                      Map integration would be implemented with Mapbox/Google
+                      Maps
                     </Badge>
                   </div>
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="police">
+            <PoliceDashboard />
+          </TabsContent>
+
+          <TabsContent value="tourism">
+            <TourismDashboard />
           </TabsContent>
         </Tabs>
       </div>

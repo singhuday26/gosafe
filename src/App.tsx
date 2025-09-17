@@ -12,8 +12,11 @@ import "@/i18n";
 // Lazy load route components
 const Home = lazy(() => import("./pages/Home"));
 const Auth = lazy(() => import("./pages/Auth"));
+const Login = lazy(() => import("./pages/auth/Login"));
+const SignUp = lazy(() => import("./pages/auth/SignUp"));
+const EmailVerify = lazy(() => import("./pages/auth/EmailVerify"));
 const TouristRegister = lazy(() => import("./pages/auth/register"));
-const ForgotPassword = lazy(() => import("./pages/auth/forgot-password"));
+const ForgotPassword = lazy(() => import("./pages/auth/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/auth/reset-password"));
 const TouristDashboard = lazy(() => import("./pages/TouristDashboard"));
 const AuthorityLogin = lazy(() => import("./pages/AuthorityLogin"));
@@ -28,6 +31,12 @@ const SOSGuide = lazy(() => import("./pages/SOSGuide"));
 const SafetyGuidelines = lazy(() => import("./pages/SafetyGuidelines"));
 const TouristSupport = lazy(() => import("./pages/TouristSupport"));
 const EmergencyContacts = lazy(() => import("./pages/EmergencyContacts"));
+const Demo = lazy(() => import("./pages/Demo"));
+const About = lazy(() => import("./pages/About"));
+const TravelResources = lazy(() => import("./pages/TravelResources"));
+const RegionalInfo = lazy(() => import("./pages/RegionalInfo"));
+const CulturalGuidelines = lazy(() => import("./pages/CulturalGuidelines"));
+const SupabaseTest = lazy(() => import("./components/SupabaseConnectionTest"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -59,6 +68,9 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/auth/login" element={<Login />} />
+              <Route path="/auth/signup" element={<SignUp />} />
+              <Route path="/auth/verify" element={<EmailVerify />} />
               <Route path="/auth/callback" element={<Auth />} />
               <Route path="/auth/register" element={<TouristRegister />} />
               <Route
@@ -118,6 +130,14 @@ const App = () => (
               <Route path="/help" element={<Help />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/about-sih" element={<AboutSIH />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/demo" element={<Demo />} />
+              <Route path="/travel-resources" element={<TravelResources />} />
+              <Route path="/regional-info" element={<RegionalInfo />} />
+              <Route
+                path="/cultural-guidelines"
+                element={<CulturalGuidelines />}
+              />
               <Route path="/sos-guide" element={<SOSGuide />} />
               <Route path="/safety-guidelines" element={<SafetyGuidelines />} />
               <Route path="/tourist-support" element={<TouristSupport />} />
@@ -125,6 +145,7 @@ const App = () => (
                 path="/emergency-contacts"
                 element={<EmergencyContacts />}
               />
+              <Route path="/supabase-test" element={<SupabaseTest />} />
               <Route path="/privacy" element={<NotFound />} />
               <Route path="/terms" element={<NotFound />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
