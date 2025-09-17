@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { ChatBotWrapper } from "@/components/ChatBotWrapper";
+import { AnomalyDetectionProvider } from "@/components/AnomalyDetectionProvider";
 import "@/i18n";
 
 // Lazy load route components
@@ -37,6 +38,9 @@ const TravelResources = lazy(() => import("./pages/TravelResources"));
 const RegionalInfo = lazy(() => import("./pages/RegionalInfo"));
 const CulturalGuidelines = lazy(() => import("./pages/CulturalGuidelines"));
 const SupabaseTest = lazy(() => import("./components/SupabaseConnectionTest"));
+const BlockchainTouristRegistration = lazy(
+  () => import("./pages/BlockchainTouristRegistration")
+);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -60,101 +64,114 @@ const LoadingSpinner = () => (
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Suspense fallback={<LoadingSpinner />}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/auth/login" element={<Login />} />
-              <Route path="/auth/signup" element={<SignUp />} />
-              <Route path="/auth/verify" element={<EmailVerify />} />
-              <Route path="/auth/callback" element={<Auth />} />
-              <Route path="/auth/register" element={<TouristRegister />} />
-              <Route
-                path="/auth/forgot-password"
-                element={<ForgotPassword />}
-              />
-              <Route path="/auth/reset-password" element={<ResetPassword />} />
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute requiredRole="">
-                    <Home />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/register"
-                element={
-                  <ProtectedRoute requiredRole="tourist">
-                    <TouristRegister />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/tourist"
-                element={
-                  <ProtectedRoute requiredRole="tourist">
-                    <TouristDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="/authority/login" element={<AuthorityLogin />} />
-              <Route
-                path="/authority"
-                element={
-                  <ProtectedRoute requiredRole="authority">
-                    <AuthorityDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin"
-                element={
-                  <ProtectedRoute requiredRole="admin">
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/geofences"
-                element={
-                  <ProtectedRoute requiredRole="admin">
-                    <GeoFenceEditor />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="/help" element={<Help />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/about-sih" element={<AboutSIH />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/demo" element={<Demo />} />
-              <Route path="/travel-resources" element={<TravelResources />} />
-              <Route path="/regional-info" element={<RegionalInfo />} />
-              <Route
-                path="/cultural-guidelines"
-                element={<CulturalGuidelines />}
-              />
-              <Route path="/sos-guide" element={<SOSGuide />} />
-              <Route path="/safety-guidelines" element={<SafetyGuidelines />} />
-              <Route path="/tourist-support" element={<TouristSupport />} />
-              <Route
-                path="/emergency-contacts"
-                element={<EmergencyContacts />}
-              />
-              <Route path="/supabase-test" element={<SupabaseTest />} />
-              <Route path="/privacy" element={<NotFound />} />
-              <Route path="/terms" element={<NotFound />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-          <ChatBotWrapper />
-        </BrowserRouter>
-      </TooltipProvider>
+      <AnomalyDetectionProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Suspense fallback={<LoadingSpinner />}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/auth/login" element={<Login />} />
+                <Route path="/auth/signup" element={<SignUp />} />
+                <Route path="/auth/verify" element={<EmailVerify />} />
+                <Route path="/auth/callback" element={<Auth />} />
+                <Route path="/auth/authority" element={<AuthorityLogin />} />
+                <Route path="/auth/register" element={<TouristRegister />} />
+                <Route
+                  path="/auth/forgot-password"
+                  element={<ForgotPassword />}
+                />
+                <Route
+                  path="/auth/reset-password"
+                  element={<ResetPassword />}
+                />
+                <Route
+                  path="/blockchain-tourist-registration"
+                  element={<BlockchainTouristRegistration />}
+                />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <TouristDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/register"
+                  element={
+                    <ProtectedRoute requiredRole="tourist">
+                      <TouristRegister />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/tourist"
+                  element={
+                    <ProtectedRoute requiredRole="tourist">
+                      <TouristDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/authority/login" element={<AuthorityLogin />} />
+                <Route
+                  path="/authority"
+                  element={
+                    <ProtectedRoute requiredRole="authority">
+                      <AuthorityDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute requiredRole="admin">
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/geofences"
+                  element={
+                    <ProtectedRoute requiredRole="admin">
+                      <GeoFenceEditor />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/help" element={<Help />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/about-sih" element={<AboutSIH />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/demo" element={<Demo />} />
+                <Route path="/travel-resources" element={<TravelResources />} />
+                <Route path="/regional-info" element={<RegionalInfo />} />
+                <Route
+                  path="/cultural-guidelines"
+                  element={<CulturalGuidelines />}
+                />
+                <Route path="/sos-guide" element={<SOSGuide />} />
+                <Route
+                  path="/safety-guidelines"
+                  element={<SafetyGuidelines />}
+                />
+                <Route path="/tourist-support" element={<TouristSupport />} />
+                <Route
+                  path="/emergency-contacts"
+                  element={<EmergencyContacts />}
+                />
+                <Route path="/supabase-test" element={<SupabaseTest />} />
+                <Route path="/privacy" element={<NotFound />} />
+                <Route path="/terms" element={<NotFound />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+            <ChatBotWrapper />
+          </BrowserRouter>
+        </TooltipProvider>
+      </AnomalyDetectionProvider>
     </AuthProvider>
   </QueryClientProvider>
 );

@@ -93,6 +93,33 @@ const EmailVerify = () => {
           setUserEmail(data.user.email || "");
           setVerificationState("success");
 
+          // Create user profile after successful verification
+          try {
+            const userData = data.user.user_metadata || {};
+            const profileData = {
+              user_id: data.user.id,
+              full_name: userData.full_name || "",
+              role: userData.role || "tourist",
+              phone_number: userData.phone_number || "",
+              organization: userData.organization || "",
+            };
+
+            const { error: profileError } = await supabase
+              .from("profiles")
+              .insert([profileData]);
+
+            if (profileError && profileError.code !== "23505") {
+              // Ignore duplicate key errors
+              console.error(
+                "Error creating profile after verification:",
+                profileError
+              );
+            }
+          } catch (profileCreateError) {
+            console.error("Error in profile creation:", profileCreateError);
+            // Don't fail verification if profile creation fails
+          }
+
           toast({
             title: "Email Verified Successfully!",
             description: "Your account is now active. You can sign in.",

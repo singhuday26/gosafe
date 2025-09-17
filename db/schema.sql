@@ -54,15 +54,53 @@ CREATE TABLE IF NOT EXISTS sos_alerts (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Tourist Locations (GPS tracking)
-CREATE TABLE IF NOT EXISTS tourist_locations (
+-- Tourist Routes (planned itineraries)
+CREATE TABLE IF NOT EXISTS routes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tourist_id UUID REFERENCES digital_tourist_ids(id) ON DELETE CASCADE,
+  route_name TEXT NOT NULL,
+  planned_waypoints JSONB NOT NULL, -- Array of {lat, lng, name, estimated_time} objects
+  start_date TIMESTAMP WITH TIME ZONE NOT NULL,
+  end_date TIMESTAMP WITH TIME ZONE NOT NULL,
+  status TEXT CHECK (status IN ('planned', 'active', 'completed', 'cancelled')) DEFAULT 'planned',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enhanced Tourist Locations (for anomaly detection)
+CREATE TABLE IF NOT EXISTS locations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tourist_id UUID REFERENCES digital_tourist_ids(id) ON DELETE CASCADE,
   latitude DECIMAL(10, 8) NOT NULL,
   longitude DECIMAL(11, 8) NOT NULL,
   accuracy_meters INTEGER,
+  speed_kmh DECIMAL(5, 2),
+  heading DECIMAL(5, 2),
+  altitude_meters DECIMAL(7, 2),
+  battery_level INTEGER CHECK (battery_level >= 0 AND battery_level <= 100),
+  network_type TEXT,
   timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Anomalies Detection Table
+CREATE TABLE IF NOT EXISTS anomalies (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tourist_id UUID REFERENCES digital_tourist_ids(id) ON DELETE CASCADE,
+  anomaly_type TEXT CHECK (anomaly_type IN ('sudden_drop_off', 'prolonged_inactivity', 'route_deviation', 'silent_distress', 'risk_zone_entry')) NOT NULL,
+  severity_score INTEGER CHECK (severity_score >= 0 AND severity_score <= 100) NOT NULL,
+  severity_level TEXT CHECK (severity_level IN ('low', 'medium', 'high', 'critical')) NOT NULL,
+  location_lat DECIMAL(10, 8),
+  location_lng DECIMAL(11, 8),
+  details JSONB NOT NULL, -- {distance_km, time_gap_minutes, risk_factors, etc.}
+  status TEXT CHECK (status IN ('detected', 'investigating', 'resolved', 'false_positive')) DEFAULT 'detected',
+  notified_contacts BOOLEAN DEFAULT FALSE,
+  escalated_to_sos BOOLEAN DEFAULT FALSE,
+  assigned_officer_id UUID REFERENCES profiles(id),
+  timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  resolved_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Geo-fences
@@ -169,7 +207,7 @@ CREATE TABLE IF NOT EXISTS ai_chat_messages (
 -- Helpful functions for backend operations
 
 -- Generate case number for missing persons
-CREATE OR REPLACE FUNCTION public.generate_case_number()
+CREATE OR REPLACE FUNCTION generate_case_number()
 RETURNS TEXT AS $$
 DECLARE
   year_suffix TEXT;
@@ -238,6 +276,9 @@ ALTER TABLE digital_tourist_ids ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sos_alerts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tourist_locations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE geo_fences ENABLE ROW LEVEL SECURITY;
+ALTER TABLE routes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE locations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE anomalies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE missing_persons ENABLE ROW LEVEL SECURITY;
 ALTER TABLE case_updates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tourist_clusters ENABLE ROW LEVEL SECURITY;

@@ -1,17 +1,30 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { User, Session } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
+interface UserData {
+  full_name?: string;
+  phone_number?: string;
+  role?: string;
+  organization?: string;
+  blockchain_id?: string;
+  blockchain_hash?: string;
+}
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   userRole: string | null;
   loading: boolean;
-  signUp: (email: string, password: string, userData?: any) => Promise<{ error: any }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<{ error: any }>;
+  signUp: (
+    email: string,
+    password: string,
+    userData?: UserData
+  ) => Promise<{ error: Error | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signOut: () => Promise<{ error: Error | null }>;
+  resetPassword: (email: string) => Promise<{ error: Error | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,122 +32,115 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth event:', event, session?.user?.email);
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        // Fetch user role when user is authenticated
-        if (session?.user) {
-          setTimeout(async () => {
-            try {
-              // First try to get role from user metadata (for immediate access)
-              const roleFromMetadata = session.user.user_metadata?.role;
-              if (roleFromMetadata) {
-                setUserRole(roleFromMetadata);
-              }
-
-              // Then try to get from profiles table (this will be the authoritative source)
-              const { data: profile, error } = await supabase
-                .from('profiles')
-                .select('role')
-                .eq('user_id', session.user.id)
-                .maybeSingle();
-              
-              if (error && error.code !== '42P17') { // Ignore recursion errors for now
-                console.error('Error fetching user role:', error);
-              } else if (profile?.role) {
-                setUserRole(profile.role);
-              } else if (!roleFromMetadata) {
-                // Fallback to default role if no profile exists yet
-                setUserRole('tourist'); 
-              }
-            } catch (error) {
-              console.error('Error in role fetch:', error);
-              // Use role from metadata or default
-              const roleFromMetadata = session.user.user_metadata?.role;
-              setUserRole(roleFromMetadata || 'tourist');
-            }
-          }, 0);
-        } else {
-          setUserRole(null);
-        }
-        
-        setLoading(false);
+  // Helper function to fetch user role
+  const fetchUserRole = async (user: User) => {
+    try {
+      // First try to get role from user metadata (for immediate access)
+      const roleFromMetadata = user.user_metadata?.role;
+      if (roleFromMetadata) {
+        setUserRole(roleFromMetadata);
+        return;
       }
-    );
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+      // Then try to get from profiles table (this will be the authoritative source)
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (error && error.code !== "42P17") {
+        // Ignore recursion errors for now
+        console.error("Error fetching user role:", error);
+        setUserRole("tourist"); // Default fallback
+      } else if (profile?.role) {
+        setUserRole(profile.role);
+      } else {
+        setUserRole("tourist"); // Default fallback
+      }
+    } catch (error) {
+      console.error("Error in role fetch:", error);
+      // Use role from metadata or default
+      const roleFromMetadata = user.user_metadata?.role;
+      setUserRole(roleFromMetadata || "tourist");
+    }
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    // Set up auth state listener FIRST
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth event:", event, session?.user?.email);
+
+      if (!isMounted) return;
+
       setSession(session);
       setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        // Fetch user role for existing session
-        setTimeout(async () => {
-          try {
-            // First try to get role from user metadata
-            const roleFromMetadata = session.user.user_metadata?.role;
-            if (roleFromMetadata) {
-              setUserRole(roleFromMetadata);
-            }
 
-            // Then try to get from profiles table
-            const { data: profile, error } = await supabase
-              .from('profiles')
-              .select('role')
-              .eq('user_id', session.user.id)
-              .maybeSingle();
-            
-            if (error && error.code !== '42P17') { // Ignore recursion errors
-              console.error('Error fetching user role:', error);
-            } else if (profile?.role) {
-              setUserRole(profile.role);
-            } else if (!roleFromMetadata) {
-              setUserRole('tourist');
-            }
-          } catch (error) {
-            console.error('Error in role fetch:', error);
-            const roleFromMetadata = session.user.user_metadata?.role;
-            setUserRole(roleFromMetadata || 'tourist');
-          }
-          setLoading(false);
-        }, 0);
+      // Fetch user role when user is authenticated
+      if (session?.user) {
+        await fetchUserRole(session.user);
       } else {
-        setLoading(false);
+        setUserRole(null);
       }
+
+      setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    // THEN check for existing session
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!isMounted) return;
+
+      setSession(session);
+      setUser(session?.user ?? null);
+
+      // Fetch user role for existing session
+      if (session?.user) {
+        await fetchUserRole(session.user);
+      }
+
+      setLoading(false);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
-  const signUp = async (email: string, password: string, userData?: any) => {
+  const signUp = async (
+    email: string,
+    password: string,
+    userData?: UserData
+  ) => {
     try {
       // Use the actual deployed URL for email redirect
-      const redirectUrl = `${window.location.origin}/auth/callback`;
-      
+      const redirectUrl = `${window.location.origin}/auth/verify`;
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: redirectUrl,
-          data: userData
-        }
+          data: userData,
+        },
       });
 
       if (error) {
@@ -146,45 +152,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { error };
       }
 
-      // Create profile if sign up successful and user is confirmed
-      if (data.user && !error) {
-        // Only try to create profile if user is confirmed (for immediate signups)
-        // For email confirmation flows, this will be handled after email verification
-        if (data.user.email_confirmed_at || !data.user.confirmation_sent_at) {
-          const profileData = {
-            user_id: data.user.id,
-            full_name: userData?.full_name || '',
-            role: userData?.role || 'tourist',
-            phone_number: userData?.phone_number || '',
-            organization: userData?.organization || '',
-          };
+      // For email confirmation flow, don't create profile immediately
+      // Profile will be created after email verification
+      if (data.user && !data.user.email_confirmed_at) {
+        toast({
+          title: "Sign Up Successful",
+          description:
+            "Please check your email to verify your account before signing in.",
+        });
+      } else if (data.user && data.user.email_confirmed_at) {
+        // If email is already confirmed (rare case), create profile immediately
+        const profileData = {
+          user_id: data.user.id,
+          full_name: userData?.full_name || "",
+          role: userData?.role || "tourist",
+          phone_number: userData?.phone_number || "",
+          organization: userData?.organization || "",
+        };
 
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .insert([profileData]);
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .insert([profileData]);
 
-          if (profileError) {
-            console.error('Error creating profile:', profileError);
-            // Don't show this as an error to user since signup was successful
-          }
+        if (profileError && profileError.code !== "23505") {
+          // Ignore duplicate key errors
+          console.error("Error creating profile:", profileError);
         }
+
+        toast({
+          title: "Account Created Successfully",
+          description: "You can now sign in to your account.",
+        });
       }
 
-      toast({
-        title: "Sign Up Successful",
-        description: data.user?.email_confirmed_at 
-          ? "Account created successfully!" 
-          : "Please check your email to verify your account.",
-      });
-
       return { error: null };
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
       toast({
         title: "Sign Up Error",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
-      return { error };
+      return {
+        error: error instanceof Error ? error : new Error(errorMessage),
+      };
     }
   };
 
@@ -210,13 +222,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       return { error: null };
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
       toast({
         title: "Sign In Error",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
-      return { error };
+      return {
+        error: error instanceof Error ? error : new Error(errorMessage),
+      };
     }
   };
 
@@ -229,25 +245,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           description: error.message,
           variant: "destructive",
         });
+        return { error };
       } else {
         toast({
           title: "Signed Out",
           description: "You have been successfully signed out.",
         });
+        return { error: null };
       }
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
       toast({
         title: "Sign Out Error",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
+      return {
+        error: error instanceof Error ? error : new Error(errorMessage),
+      };
     }
   };
 
   const resetPassword = async (email: string) => {
     try {
       const redirectUrl = `${window.location.origin}/auth/reset-password`;
-      
+
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl,
       });
@@ -267,13 +290,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       return { error: null };
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
       toast({
         title: "Password Reset Error",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
-      return { error };
+      return {
+        error: error instanceof Error ? error : new Error(errorMessage),
+      };
     }
   };
 

@@ -36,7 +36,7 @@ const Auth = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { signIn, signUp, resetPassword, user, loading } = useAuth();
+  const { signIn, signUp, resetPassword, user, userRole, loading } = useAuth();
 
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -77,9 +77,17 @@ const Auth = () => {
 
     const { error } = await signIn(signInEmail, signInPassword);
 
-    if (!error) {
-      const returnUrl = searchParams.get("returnUrl") || "/dashboard";
-      navigate(returnUrl);
+    if (!error && user) {
+      // Redirect based on user role
+      const roleRedirects = {
+        tourist: "/tourist",
+        authority: "/authority",
+        admin: "/admin",
+      };
+
+      const redirectPath =
+        roleRedirects[userRole as keyof typeof roleRedirects] || "/tourist";
+      navigate(redirectPath);
     }
 
     setIsLoading(false);

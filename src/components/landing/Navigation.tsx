@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Shield, Menu, X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
 import LanguageSelector from "@/components/LanguageSelector";
 import { useTranslation } from "react-i18next";
 import {
@@ -23,7 +22,6 @@ import {
 
 const Navigation: React.FC = () => {
   const navigate = useNavigate();
-  const { user, userRole } = useAuth();
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -133,25 +131,9 @@ const Navigation: React.FC = () => {
               Help Center
             </Button>
 
-            {user ? (
-              <Button
-                size="sm"
-                onClick={() => {
-                  const dashboardMap: { [key: string]: string } = {
-                    tourist: "/tourist",
-                    authority: "/authority",
-                    admin: "/admin",
-                  };
-                  navigate(dashboardMap[userRole || "tourist"] || "/tourist");
-                }}
-              >
-                My Dashboard
-              </Button>
-            ) : (
-              <Button size="sm" onClick={() => navigate("/auth")}>
-                Sign In / Register
-              </Button>
-            )}
+            <Button size="sm" onClick={() => navigate("/auth")}>
+              Sign In / Register
+            </Button>
           </div>
 
           {/* Mobile Menu */}
@@ -208,30 +190,12 @@ const Navigation: React.FC = () => {
                       Help Center
                     </Button>
 
-                    {user ? (
-                      <Button
-                        className="w-full"
-                        onClick={() => {
-                          const dashboardMap: { [key: string]: string } = {
-                            tourist: "/tourist",
-                            authority: "/authority",
-                            admin: "/admin",
-                          };
-                          handleNavigation(
-                            dashboardMap[userRole || "tourist"] || "/tourist"
-                          );
-                        }}
-                      >
-                        My Dashboard
-                      </Button>
-                    ) : (
-                      <Button
-                        className="w-full"
-                        onClick={() => handleNavigation("/auth")}
-                      >
-                        Sign In / Register
-                      </Button>
-                    )}
+                    <Button
+                      className="w-full"
+                      onClick={() => handleNavigation("/auth")}
+                    >
+                      Sign In / Register
+                    </Button>
                   </div>
                 </div>
               </SheetContent>

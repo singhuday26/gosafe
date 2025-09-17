@@ -233,25 +233,192 @@ export class TouristService {
     }
   }
 
-  // Tourist Locations
-  async updateTouristLocation(
+  // Anomaly-triggered SOS Alerts
+  async createAnomalySOSAlert(
     touristId: string,
-    latitude: number,
-    longitude: number
-  ): Promise<boolean> {
+    anomalyType: string,
+    severityLevel: "low" | "medium" | "high" | "critical",
+    location: { lat: number; lng: number },
+    details: Record<string, unknown>,
+    recommendations: string[]
+  ): Promise<SOSAlert | null> {
     try {
-      const { error } = await supabase.from("tourist_locations").insert({
+      // Generate blockchain hash for the anomaly alert
+      const blockchainHash = `anomaly_${Date.now()}_${Math.random()
+        .toString(36)
+        .substr(2, 9)}`;
+
+      const alertData: Database["public"]["Tables"]["sos_alerts"]["Insert"] = {
         tourist_id: touristId,
-        latitude,
-        longitude,
-        timestamp: new Date().toISOString(),
-      });
+        alert_type: `anomaly_${anomalyType}`,
+        message: `AI Anomaly Detected: ${anomalyType
+          .replace("_", " ")
+          .toUpperCase()} - Severity: ${severityLevel.toUpperCase()}`,
+        latitude: location.lat,
+        longitude: location.lng,
+        blockchain_hash: blockchainHash,
+        status: severityLevel === "critical" ? "active" : "active", // All anomalies start as active
+        address: `Lat: ${location.lat.toFixed(6)}, Lng: ${location.lng.toFixed(
+          6
+        )}`,
+      };
+
+      const alert = await this.createSOSAlert(alertData);
+
+      if (alert) {
+        // Log anomaly details for tracking
+        console.log(`Anomaly SOS Alert created:`, {
+          alertId: alert.id,
+          touristId,
+          anomalyType,
+          severityLevel,
+          recommendations,
+        });
+
+        // Trigger additional emergency protocols for critical anomalies
+        if (severityLevel === "critical") {
+          await this.triggerEmergencyProtocol(
+            touristId,
+            anomalyType,
+            location,
+            recommendations
+          );
+        }
+      }
+
+      return alert;
+    } catch (error) {
+      console.error("Error creating anomaly SOS alert:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Trigger emergency protocols for critical anomalies
+   */
+  private async triggerEmergencyProtocol(
+    touristId: string,
+    anomalyType: string,
+    location: { lat: number; lng: number },
+    recommendations: string[]
+  ): Promise<void> {
+    try {
+      // Get tourist details for emergency contact
+      const tourist = await this.getDigitalTouristID(touristId);
+
+      if (tourist) {
+        // Create additional emergency alert with tourist details
+        const emergencyAlert: Database["public"]["Tables"]["sos_alerts"]["Insert"] =
+          {
+            tourist_id: touristId,
+            alert_type: "emergency_anomaly_critical",
+            message: `CRITICAL EMERGENCY: ${
+              tourist.tourist_name
+            } - ${anomalyType.replace("_", " ").toUpperCase()}`,
+            latitude: location.lat,
+            longitude: location.lng,
+            blockchain_hash: `emergency_${Date.now()}_${Math.random()
+              .toString(36)
+              .substr(2, 9)}`,
+            status: "active",
+            address: `Emergency Location: ${location.lat.toFixed(
+              6
+            )}, ${location.lng.toFixed(6)}`,
+          };
+
+        await this.createSOSAlert(emergencyAlert);
+
+        // Here you could integrate with:
+        // - Emergency notification systems
+        // - Local authorities alert system
+        // - Tourist's emergency contacts
+        // - Nearby police stations
+        console.log(
+          `Emergency protocol triggered for tourist ${tourist.tourist_name}`
+        );
+      }
+    } catch (error) {
+      console.error("Error triggering emergency protocol:", error);
+    }
+  }
+
+  /**
+   * Get anomaly-specific alerts
+   */
+  async getAnomalyAlerts(): Promise<ExtendedSOSAlert[]> {
+    try {
+      const { data, error } = await supabase
+        .from("sos_alerts")
+        .select(
+          `
+          *,
+          digital_tourist_ids (
+            tourist_name
+          )
+        `
+        )
+        .like("alert_type", "anomaly_%")
+        .order("timestamp", { ascending: false });
 
       if (error) throw error;
-      return true;
+      return data || [];
     } catch (error) {
-      console.error("Error updating tourist location:", error);
-      return false;
+      console.error("Error fetching anomaly alerts:", error);
+      return [];
+    }
+  }
+
+  /**
+   * Get critical anomaly alerts that require immediate attention
+   */
+  async getCriticalAnomalyAlerts(): Promise<ExtendedSOSAlert[]> {
+    try {
+      const { data, error } = await supabase
+        .from("sos_alerts")
+        .select(
+          `
+          *,
+          digital_tourist_ids (
+            tourist_name
+          )
+        `
+        )
+        .eq("alert_type", "anomaly_silent_distress")
+        .eq("status", "active")
+        .order("timestamp", { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error("Error fetching critical anomaly alerts:", error);
+      return [];
+    }
+  }
+
+  /**
+   * Auto-resolve anomaly alerts based on time and conditions
+   */
+  async autoResolveAnomalyAlerts(): Promise<void> {
+    try {
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+
+      // Auto-resolve non-critical anomaly alerts older than 1 hour
+      const { error } = await supabase
+        .from("sos_alerts")
+        .update({
+          status: "resolved",
+          updated_at: new Date().toISOString(),
+        })
+        .like("alert_type", "anomaly_%")
+        .not("alert_type", "eq", "anomaly_silent_distress") // Don't auto-resolve critical alerts
+        .lt("created_at", oneHourAgo)
+        .eq("status", "active");
+
+      if (error) throw error;
+
+      console.log("Auto-resolved old anomaly alerts");
+    } catch (error) {
+      console.error("Error auto-resolving anomaly alerts:", error);
     }
   }
 

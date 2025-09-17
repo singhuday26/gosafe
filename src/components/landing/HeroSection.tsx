@@ -12,11 +12,7 @@ const HeroSection: React.FC = () => {
   const { t } = useTranslation();
 
   const handleRegisterTourist = () => {
-    if (user) {
-      navigate("/tourist");
-    } else {
-      navigate("/auth?tab=signup");
-    }
+    navigate("/blockchain-tourist-registration");
   };
 
   const handleAuthorityLogin = () => {
@@ -52,7 +48,7 @@ const HeroSection: React.FC = () => {
 
         {/* Main Tagline */}
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-          <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          <span className="text-ne-tea-brown font-black text-5xl md:text-7xl lg:text-8xl">
             GoSafe
           </span>
           <span className="text-foreground"> — </span>
@@ -60,11 +56,14 @@ const HeroSection: React.FC = () => {
           <span className="text-foreground text-3xl md:text-5xl lg:text-6xl">
             Digital Tourist Safety
           </span>
-          <br />
-          <span className="text-muted-foreground text-2xl md:text-4xl lg:text-5xl font-medium">
-            for Northeast India
-          </span>
         </h1>
+
+        {/* Solid Motto */}
+        <div className="mb-8">
+          <p className="text-2xl md:text-3xl font-bold text-foreground italic">
+            "Your Safety, Our Priority - Protecting Every Journey"
+          </p>
+        </div>
 
         {/* Value Propositions */}
         <div className="max-w-4xl mx-auto mb-8 space-y-3">
@@ -125,13 +124,7 @@ const HeroSection: React.FC = () => {
         </div>
 
         {/* Trust Indicators */}
-        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-primary mb-2">8</div>
-            <div className="text-sm text-muted-foreground">
-              Northeast States
-            </div>
-          </div>
+        <div className="mt-16 grid grid-cols-3 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
           <div className="text-center">
             <div className="text-3xl font-bold text-primary mb-2">&lt;2min</div>
             <div className="text-sm text-muted-foreground">
