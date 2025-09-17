@@ -19,6 +19,10 @@ import {
   Globe,
   AlertTriangle,
   Loader2,
+  CreditCard,
+  Upload,
+  Check,
+  Camera,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,9 +37,18 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { BlockchainService, DigitalTouristID } from "@/lib/blockchain";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import LanguageSelector from "@/components/LanguageSelector";
 
 // Validation schemas
@@ -50,16 +63,46 @@ const personalInfoSchema = z.object({
   gender: z.enum(["male", "female", "other"], {
     errorMap: () => ({ message: "Please select gender" }),
   }),
+  address: z
+    .string()
+    .min(10, "Full address is required (minimum 10 characters)"),
 });
 
+const blockchainInfoSchema = z
+  .object({
+    walletAddress: z.string().optional(),
+    preferredBlockchain: z.enum(
+      ["ethereum", "polygon", "binance", "generate_new"],
+      {
+        errorMap: () => ({ message: "Please select blockchain preference" }),
+      }
+    ),
+    backupEmail: z.string().email("Valid backup email is required"),
+    securityPin: z
+      .string()
+      .min(6, "Security PIN must be at least 6 digits")
+      .max(8, "Security PIN cannot exceed 8 digits"),
+    confirmSecurityPin: z.string(),
+  })
+  .refine((data) => data.securityPin === data.confirmSecurityPin, {
+    message: "Security PINs don't match",
+    path: ["confirmSecurityPin"],
+  });
+
 const documentSchema = z.object({
-  aadhaarNumber: z
-    .string()
-    .regex(/^\d{12}$/, "Aadhaar number must be 12 digits"),
-  passportNumber: z.string().optional(),
-  documentType: z.enum(["aadhaar", "passport", "both"], {
+  documentType: z.enum(["aadhaar", "passport", "voter_id", "driving_license"], {
     errorMap: () => ({ message: "Please select document type" }),
   }),
+  documentNumber: z.string().min(6, "Document number is required"),
+  aadhaarNumber: z
+    .string()
+    .regex(/^\d{12}$/, "Aadhaar number must be 12 digits")
+    .optional(),
+  passportNumber: z.string().optional(),
+  voterIdNumber: z.string().optional(),
+  drivingLicenseNumber: z.string().optional(),
+  documentFile: z.instanceof(File).optional(),
+  documentBackFile: z.instanceof(File).optional(),
 });
 
 const emergencyContactSchema = z.object({
@@ -69,13 +112,17 @@ const emergencyContactSchema = z.object({
     .string()
     .regex(/^(?:\+?91[-\s]?)?[6-9]\d{9}$/, "Invalid Indian phone number"),
   email: z.string().email("Invalid email address").optional().or(z.literal("")),
+  address: z.string().min(5, "Contact address is required"),
 });
 
 const tripInfoSchema = z.object({
   destination: z.string().min(1, "Destination is required"),
-  purpose: z.enum(["tourism", "business", "education", "medical", "other"], {
-    errorMap: () => ({ message: "Please select trip purpose" }),
-  }),
+  purpose: z.enum(
+    ["tourism", "business", "education", "medical", "religious", "other"],
+    {
+      errorMap: () => ({ message: "Please select trip purpose" }),
+    }
+  ),
   duration: z
     .number()
     .min(1, "Duration must be at least 1 day")
@@ -84,10 +131,15 @@ const tripInfoSchema = z.object({
   plannedActivities: z
     .string()
     .min(10, "Please provide planned activities (minimum 10 characters)"),
+  estimatedBudget: z.string().min(1, "Estimated budget is required"),
+  transportMode: z.enum(["flight", "train", "bus", "car", "other"], {
+    errorMap: () => ({ message: "Please select transport mode" }),
+  }),
 });
 
 const formSchema = z.object({
   personalInfo: personalInfoSchema,
+  blockchainInfo: blockchainInfoSchema,
   documents: documentSchema,
   emergencyContacts: z
     .array(emergencyContactSchema)
@@ -114,8 +166,12 @@ const BlockchainTouristRegistration: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [generatedID, setGeneratedID] = useState<DigitalTouristID | null>(null);
   const [qrCode, setQrCode] = useState<string | null>(null);
+  const [documentPreview, setDocumentPreview] = useState<string | null>(null);
+  const [documentBackPreview, setDocumentBackPreview] = useState<string | null>(
+    null
+  );
 
-  const totalSteps = 6; // Personal Info, Documents, Emergency Contacts, Trip Info, Review, Blockchain Registration
+  const totalSteps = 7; // Personal Info, Blockchain Setup, Documents, Emergency Contacts, Trip Info, Review, Registration Complete
 
   const {
     register,
@@ -136,15 +192,28 @@ const BlockchainTouristRegistration: React.FC = () => {
         nationality: "",
         dateOfBirth: "",
         gender: undefined,
+        address: "",
+      },
+      blockchainInfo: {
+        walletAddress: "",
+        preferredBlockchain: "generate_new",
+        backupEmail: "",
+        securityPin: "",
+        confirmSecurityPin: "",
       },
       documents: {
+        documentType: "aadhaar",
+        documentNumber: "",
         aadhaarNumber: "",
         passportNumber: "",
-        documentType: "aadhaar",
+        voterIdNumber: "",
+        drivingLicenseNumber: "",
+        documentFile: undefined,
+        documentBackFile: undefined,
       },
       emergencyContacts: [
-        { name: "", relationship: "", phone: "", email: "" },
-        { name: "", relationship: "", phone: "", email: "" },
+        { name: "", relationship: "", phone: "", email: "", address: "" },
+        { name: "", relationship: "", phone: "", email: "", address: "" },
       ],
       tripInfo: {
         destination: "",
@@ -152,6 +221,8 @@ const BlockchainTouristRegistration: React.FC = () => {
         duration: 1,
         accommodation: "",
         plannedActivities: "",
+        estimatedBudget: "",
+        transportMode: undefined,
       },
       termsAccepted: false,
       dataConsent: false,
@@ -458,8 +529,7 @@ const BlockchainTouristRegistration: React.FC = () => {
                 )}
               </div>
 
-              {(watchedValues.documents?.documentType === "passport" ||
-                watchedValues.documents?.documentType === "both") && (
+              {watchedValues.documents?.documentType === "passport" && (
                 <div className="space-y-2">
                   <Label htmlFor="passportNumber">Passport Number</Label>
                   <Input

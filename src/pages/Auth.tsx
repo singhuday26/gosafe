@@ -29,18 +29,30 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import LanguageSelector from "@/components/LanguageSelector";
+import { useToast } from "@/hooks/use-toast";
 
 const Auth = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { signIn, signUp, resetPassword, user, userRole, loading } = useAuth();
+  const {
+    signIn,
+    signUp,
+    resetPassword,
+    user,
+    userRole,
+    loading,
+    resendVerification,
+  } = useAuth();
+  const { toast } = useToast();
 
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showVerificationNotice, setShowVerificationNotice] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState("");
 
   // Sign In Form
   const [signInEmail, setSignInEmail] = useState("");
@@ -65,11 +77,25 @@ const Auth = () => {
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (user && !loading) {
-      const returnUrl = searchParams.get("returnUrl") || "/";
-      navigate(returnUrl);
+    if (user && !loading && userRole) {
+      const returnUrl = searchParams.get("returnUrl");
+
+      if (returnUrl) {
+        // If there's a specific return URL, use it
+        navigate(returnUrl);
+      } else {
+        // Otherwise, redirect based on user role
+        const dashboardMap: { [key: string]: string } = {
+          tourist: "/tourist",
+          authority: "/authority",
+          admin: "/admin",
+        };
+
+        const redirectPath = dashboardMap[userRole] || "/tourist";
+        navigate(redirectPath);
+      }
     }
-  }, [user, loading, navigate, searchParams]);
+  }, [user, userRole, loading, navigate, searchParams]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,17 +103,20 @@ const Auth = () => {
 
     const { error } = await signIn(signInEmail, signInPassword);
 
-    if (!error && user) {
-      // Redirect based on user role
-      const roleRedirects = {
-        tourist: "/tourist",
-        authority: "/authority",
-        admin: "/admin",
-      };
-
-      const redirectPath =
-        roleRedirects[userRole as keyof typeof roleRedirects] || "/tourist";
-      navigate(redirectPath);
+    if (!error) {
+      // Success - the auth state listener will handle the redirect
+      toast({
+        title: "Sign In Successful",
+        description: "Redirecting to your dashboard...",
+      });
+      // The useEffect above will handle the actual redirection
+    } else {
+      // Check if error is related to email verification
+      if (error.message.includes("Email verification required")) {
+        setVerificationEmail(signInEmail);
+        setShowVerificationNotice(true);
+      }
+      // Other errors are already handled in the AuthContext
     }
 
     setIsLoading(false);
@@ -127,6 +156,19 @@ const Auth = () => {
     setIsLoading(false);
   };
 
+  const handleResendVerification = async () => {
+    setIsLoading(true);
+
+    const { error } = await resendVerification(verificationEmail);
+
+    if (!error) {
+      setShowVerificationNotice(false);
+      setVerificationEmail("");
+    }
+
+    setIsLoading(false);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 flex items-center justify-center">
@@ -160,7 +202,45 @@ const Auth = () => {
         </CardHeader>
 
         <CardContent>
-          {showResetForm ? (
+          {showVerificationNotice ? (
+            <div className="space-y-4">
+              <div className="text-center">
+                <Mail className="h-12 w-12 text-orange-500 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-orange-700 mb-2">
+                  Email Verification Required
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  Please verify your email address before signing in. Check your
+                  inbox for the verification link.
+                </p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Email: <strong>{verificationEmail}</strong>
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Button
+                  onClick={handleResendVerification}
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading
+                    ? t("common.loading")
+                    : "Resend Verification Email"}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowVerificationNotice(false);
+                    setVerificationEmail("");
+                  }}
+                  className="w-full"
+                >
+                  Back to Sign In
+                </Button>
+              </div>
+            </div>
+          ) : showResetForm ? (
             <form onSubmit={handlePasswordReset} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="resetEmail">{t("auth.email")}</Label>

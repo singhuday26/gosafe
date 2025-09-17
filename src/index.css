@@ -59,37 +59,76 @@
     --ne-forest-green: 122 39% 49%; /* #4CAF50 - Arunachal Green */
     --ne-sky-blue: 204 91% 41%; /* #0288D1 - Sikkim Sky Blue */
     --ne-maroon: 350 42% 40%; /* #8E3B46 - Manipur Maroon */
-    
+
     /* NE Semantic Colors */
     --ne-primary: var(--ne-tea-brown);
     --ne-accent: var(--ne-sunset-orange);
     --ne-soft: var(--ne-mist-gray);
 
     /* Gradients - Enhanced with NE Colors */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(217 91% 45%));
-    --gradient-tourism: linear-gradient(135deg, hsl(var(--tourism)), hsl(152 69% 25%));
-    --gradient-safety: linear-gradient(135deg, hsl(var(--safety)), hsl(142 76% 30%));
-    --gradient-hero: linear-gradient(135deg, hsl(var(--ne-sky-blue)) 0%, hsl(var(--ne-forest-green)) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(var(--ne-mist-gray)) 100%);
-    
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(var(--primary)),
+      hsl(217 91% 45%)
+    );
+    --gradient-tourism: linear-gradient(
+      135deg,
+      hsl(var(--tourism)),
+      hsl(152 69% 25%)
+    );
+    --gradient-safety: linear-gradient(
+      135deg,
+      hsl(var(--safety)),
+      hsl(142 76% 30%)
+    );
+    --gradient-hero: linear-gradient(
+      135deg,
+      hsl(var(--ne-sky-blue)) 0%,
+      hsl(var(--ne-forest-green)) 100%
+    );
+    --gradient-card: linear-gradient(
+      145deg,
+      hsl(0 0% 100%) 0%,
+      hsl(var(--ne-mist-gray)) 100%
+    );
+
     /* North East Themed Gradients */
-    --gradient-ne-hero: linear-gradient(135deg, hsl(var(--ne-sky-blue)) 0%, hsl(var(--ne-forest-green)) 50%, hsl(var(--ne-tea-brown)) 100%);
-    --gradient-ne-hills: linear-gradient(180deg, hsl(var(--ne-sky-blue) / 0.2) 0%, hsl(var(--ne-forest-green) / 0.3) 100%);
-    --gradient-ne-tea: linear-gradient(135deg, hsl(var(--ne-tea-brown)) 0%, hsl(var(--ne-maroon)) 100%);
-    --gradient-ne-mist: linear-gradient(135deg, hsl(var(--ne-mist-gray)) 0%, hsl(0 0% 100%) 100%);
-    --gradient-ne-tribal: linear-gradient(90deg, 
-      hsl(var(--ne-sunset-orange) / 0.1) 0%, 
-      hsl(var(--ne-forest-green) / 0.1) 25%, 
-      hsl(var(--ne-tea-brown) / 0.1) 50%, 
-      hsl(var(--ne-maroon) / 0.1) 75%, 
-      hsl(var(--ne-sky-blue) / 0.1) 100%);
+    --gradient-ne-hero: linear-gradient(
+      135deg,
+      hsl(var(--ne-sky-blue)) 0%,
+      hsl(var(--ne-forest-green)) 50%,
+      hsl(var(--ne-tea-brown)) 100%
+    );
+    --gradient-ne-hills: linear-gradient(
+      180deg,
+      hsl(var(--ne-sky-blue) / 0.2) 0%,
+      hsl(var(--ne-forest-green) / 0.3) 100%
+    );
+    --gradient-ne-tea: linear-gradient(
+      135deg,
+      hsl(var(--ne-tea-brown)) 0%,
+      hsl(var(--ne-maroon)) 100%
+    );
+    --gradient-ne-mist: linear-gradient(
+      135deg,
+      hsl(var(--ne-mist-gray)) 0%,
+      hsl(0 0% 100%) 100%
+    );
+    --gradient-ne-tribal: linear-gradient(
+      90deg,
+      hsl(var(--ne-sunset-orange) / 0.1) 0%,
+      hsl(var(--ne-forest-green) / 0.1) 25%,
+      hsl(var(--ne-tea-brown) / 0.1) 50%,
+      hsl(var(--ne-maroon) / 0.1) 75%,
+      hsl(var(--ne-sky-blue) / 0.1) 100%
+    );
 
     /* Shadows - Enhanced with NE Colors */
     --shadow-soft: 0 2px 10px -2px hsl(var(--primary) / 0.1);
     --shadow-medium: 0 4px 20px -4px hsl(var(--primary) / 0.15);
     --shadow-strong: 0 8px 30px -8px hsl(var(--primary) / 0.2);
     --shadow-emergency: 0 4px 20px -4px hsl(var(--danger) / 0.3);
-    
+
     /* NE Themed Shadows */
     --shadow-ne-soft: 0 2px 10px -2px hsl(var(--ne-tea-brown) / 0.15);
     --shadow-ne-medium: 0 4px 20px -4px hsl(var(--ne-tea-brown) / 0.2);
@@ -153,10 +192,27 @@
     --ne-sky-blue: 204 91% 50%; /* Slightly brighter */
     --ne-maroon: 350 42% 50%; /* Slightly brighter */
 
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(217 91% 50%));
-    --gradient-hero: linear-gradient(135deg, hsl(var(--ne-sky-blue)) 0%, hsl(var(--ne-forest-green)) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(222 84% 5%) 0%, hsl(var(--ne-mist-gray)) 100%);
-    --gradient-ne-hero: linear-gradient(135deg, hsl(var(--ne-sky-blue)) 0%, hsl(var(--ne-forest-green)) 50%, hsl(var(--ne-tea-brown)) 100%);
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(var(--primary)),
+      hsl(217 91% 50%)
+    );
+    --gradient-hero: linear-gradient(
+      135deg,
+      hsl(var(--ne-sky-blue)) 0%,
+      hsl(var(--ne-forest-green)) 100%
+    );
+    --gradient-card: linear-gradient(
+      145deg,
+      hsl(222 84% 5%) 0%,
+      hsl(var(--ne-mist-gray)) 100%
+    );
+    --gradient-ne-hero: linear-gradient(
+      135deg,
+      hsl(var(--ne-sky-blue)) 0%,
+      hsl(var(--ne-forest-green)) 50%,
+      hsl(var(--ne-tea-brown)) 100%
+    );
 
     --sidebar-background: 240 6% 10%;
     --sidebar-foreground: 240 5% 96%;
@@ -274,7 +330,7 @@
   }
 
   .ne-tribal-border::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
@@ -283,16 +339,15 @@
     background: var(--gradient-ne-tribal);
     border-radius: inherit;
     padding: 2px;
-    mask: 
-      linear-gradient(#fff 0 0) content-box, 
-      linear-gradient(#fff 0 0);
-    mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
+    mask-composite: xor;
   }
 
   /* Emergency pulse animation */
   @keyframes emergency-pulse {
-    0%, 100% {
+    0%,
+    100% {
       box-shadow: 0 0 0 0 hsl(var(--danger) / 0.7);
     }
     50% {
@@ -306,7 +361,8 @@
 
   /* Safety score animations */
   @keyframes safety-glow {
-    0%, 100% {
+    0%,
+    100% {
       box-shadow: 0 0 5px hsl(var(--safety) / 0.5);
     }
     50% {

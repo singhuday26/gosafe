@@ -38,11 +38,44 @@ import { useToast } from "@/hooks/use-toast";
 import { BlockchainService } from "@/lib/blockchain";
 import { PoliceDashboard } from "@/components/dashboard/PoliceDashboard";
 import { TourismDashboard } from "@/components/dashboard/TourismDashboard";
+import { useAuth } from "@/hooks/useAuth";
+
+interface AuthorityAuth {
+  id: string;
+  name: string;
+  role: string;
+  organization: string;
+  department?: string;
+  station?: string;
+}
+
+interface Tourist {
+  id: string;
+  touristName: string;
+  blockchainHash: string;
+  currentLocation?: string;
+  status: string;
+}
+
+interface Alert {
+  id: string;
+  type: string;
+  location: {
+    latitude: number;
+    longitude: number;
+    address: string;
+  };
+  status: string;
+  timestamp: Date;
+}
 
 const AuthorityDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [authorityAuth, setAuthorityAuth] = useState<any>(null);
+  const { signOut } = useAuth();
+  const [authorityAuth, setAuthorityAuth] = useState<AuthorityAuth | null>(
+    null
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshing, setRefreshing] = useState(false);
 
@@ -79,7 +112,7 @@ const AuthorityDashboard = () => {
     });
   };
 
-  const handleGenerateEFIR = (tourist: any, alert: any) => {
+  const handleGenerateEFIR = (tourist: Tourist, alert: Alert) => {
     toast({
       title: "E-FIR Generated",
       description: `Electronic FIR created for tourist ${tourist.touristName}`,
@@ -152,9 +185,17 @@ const AuthorityDashboard = () => {
               </Badge>
               <Button
                 variant="ghost"
-                onClick={() => {
-                  localStorage.removeItem("authorityAuth");
-                  navigate("/authority/login");
+                onClick={async () => {
+                  try {
+                    await signOut();
+                    localStorage.removeItem("authorityAuth");
+                    navigate("/authority/login");
+                  } catch (error) {
+                    console.error("Logout error:", error);
+                    // Fallback to local logout if signOut fails
+                    localStorage.removeItem("authorityAuth");
+                    navigate("/authority/login");
+                  }
                 }}
               >
                 Logout

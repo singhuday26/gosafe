@@ -61,9 +61,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     const setLoadingTimeout = () => {
       authTimeout = setTimeout(() => {
         if (isMounted) {
-          console.log(
-            "AuthProvider: Loading timeout reached, setting loading to false"
-          );
+          console.log("AuthProvider: Loading timeout reached, setting loading to false");
           setLoading(false);
         }
       }, 5000); // 5 second timeout
@@ -95,42 +93,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     });
 
     // THEN check for existing session
-    supabase.auth
-      .getSession()
-      .then(async ({ data: { session }, error }) => {
-        console.log("AuthProvider: Initial session check", {
-          session: !!session,
-          error,
-        });
+    supabase.auth.getSession().then(async ({ data: { session }, error }) => {
+      console.log("AuthProvider: Initial session check", { session: !!session, error });
+      
+      if (!isMounted) return;
 
-        if (!isMounted) return;
+      if (authTimeout) {
+        clearTimeout(authTimeout);
+      }
 
-        if (authTimeout) {
-          clearTimeout(authTimeout);
-        }
-
-        if (error) {
-          console.error("AuthProvider: Error getting session:", error);
-          setLoading(false);
-          return;
-        }
-
-        setSession(session);
-        setUser(session?.user ?? null);
-
-        // Fetch user role for existing session
-        if (session?.user) {
-          await fetchUserRole(session.user);
-        }
-
+      if (error) {
+        console.error("AuthProvider: Error getting session:", error);
         setLoading(false);
-      })
-      .catch((error) => {
-        console.error("AuthProvider: Failed to get session:", error);
-        if (isMounted) {
-          setLoading(false);
-        }
-      });
+        return;
+      }
+
+      setSession(session);
+      setUser(session?.user ?? null);
+
+      // Fetch user role for existing session
+      if (session?.user) {
+        await fetchUserRole(session.user);
+      }
+
+      setLoading(false);
+    }).catch((error) => {
+      console.error("AuthProvider: Failed to get session:", error);
+      if (isMounted) {
+        setLoading(false);
+      }
+    });
 
     // Set timeout as fallback
     setLoadingTimeout();
@@ -150,18 +142,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     userData?: UserData
   ) => {
     try {
-      // Use multiple redirect URLs to catch different scenarios
       const appUrl = getAppUrl();
       const redirectUrl = `${appUrl}/auth/verify`;
-      const fallbackUrl = `${appUrl}/auth/verification-handler`;
-
-      console.log("SignUp - Attempting to register user:", {
-        email,
-        redirectUrl,
-        fallbackUrl,
-        appUrl,
-        userData: { ...userData, password: "[HIDDEN]" },
-      });
 
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -172,24 +154,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         },
       });
 
-      console.log("SignUp - Supabase response:", {
-        data: data
-          ? {
-              user: data.user
-                ? {
-                    id: data.user.id,
-                    email: data.user.email,
-                    email_confirmed_at: data.user.email_confirmed_at,
-                  }
-                : null,
-              session: data.session ? "present" : "null",
-            }
-          : null,
-        error: error ? { message: error.message, status: error.status } : null,
-      });
-
       if (error) {
-        console.error("SignUp - Supabase error:", error);
         toast({
           title: "Sign Up Error",
           description: error.message,
@@ -198,48 +163,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         return { error };
       }
 
-      // For email confirmation flow, don't create profile immediately
-      // Profile will be created after email verification
       if (data.user && !data.user.email_confirmed_at) {
-        console.log(
-          "SignUp - Email verification required for user:",
-          data.user.id
-        );
         toast({
           title: "Sign Up Successful",
           description:
-            "Please check your email to verify your account before signing in. If you don't receive an email within a few minutes, check your spam folder.",
+            "Please check your email to verify your account before signing in.",
           duration: 8000,
-        });
-      } else if (data.user && data.user.email_confirmed_at) {
-        console.log("SignUp - Email already confirmed, creating profile");
-        // If email is already confirmed (rare case), create profile immediately
-        const profileData = {
-          user_id: data.user.id,
-          full_name: userData?.full_name || "",
-          role: userData?.role || "tourist",
-          phone_number: userData?.phone_number || "",
-          organization: userData?.organization || "",
-        };
-
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .insert([profileData]);
-
-        if (profileError && profileError.code !== "23505") {
-          // Ignore duplicate key errors
-          console.error("Error creating profile:", profileError);
-        }
-
-        toast({
-          title: "Account Created Successfully",
-          description: "You can now sign in to your account.",
         });
       }
 
       return { error: null };
     } catch (error) {
-      console.error("SignUp - Unexpected error:", error);
       const errorMessage =
         error instanceof Error ? error.message : "An unexpected error occurred";
       toast({
@@ -269,22 +203,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         return { error };
       }
 
-      // Check if email is verified
       if (data.user && !data.user.email_confirmed_at) {
-        // Email not verified - sign out immediately and show verification message
         await supabase.auth.signOut();
-
         toast({
           title: "Email Verification Required",
           description:
-            "Please verify your email address before signing in. Check your inbox for the verification link.",
+            "Please verify your email address before signing in.",
           variant: "destructive",
         });
-
         return {
-          error: new Error(
-            "Email verification required. Please check your email and verify your account before signing in."
-          ),
+          error: new Error("Email verification required"),
         };
       }
 
@@ -376,12 +304,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const resendVerification = async (email: string) => {
     try {
-      console.log("ResendVerification - Attempting to resend to:", email);
-      console.log(
-        "ResendVerification - Redirect URL:",
-        `${getAppUrl()}/auth/verify`
-      );
-
       const { error } = await supabase.auth.resend({
         type: "signup",
         email: email,
@@ -390,12 +312,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         },
       });
 
-      console.log("ResendVerification - Supabase response:", {
-        error: error ? { message: error.message, status: error.status } : null,
-      });
-
       if (error) {
-        console.error("ResendVerification - Error:", error);
         toast({
           title: "Error Sending Verification Email",
           description: error.message,
@@ -406,14 +323,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       toast({
         title: "Verification Email Sent",
-        description:
-          "Please check your email for the verification link. If you don't receive it within a few minutes, check your spam folder.",
+        description: "Please check your email for the verification link.",
         duration: 8000,
       });
 
       return { error: null };
     } catch (error) {
-      console.error("ResendVerification - Unexpected error:", error);
       const errorMessage =
         error instanceof Error ? error.message : "An unexpected error occurred";
       toast({
@@ -439,12 +354,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     resendVerification,
   };
 
-  console.log(
-    "AuthProvider: Rendering with loading:",
-    loading,
-    "user:",
-    !!user
-  );
+  console.log("AuthProvider: Rendering with loading:", loading, "user:", !!user);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

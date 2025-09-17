@@ -43,6 +43,7 @@ import { BlockchainService, mockGeoFences } from "@/lib/blockchain";
 import GeoFenceEditor from "@/components/GeoFenceEditor";
 import { PoliceDashboard } from "@/components/dashboard/PoliceDashboard";
 import { TourismDashboard } from "@/components/dashboard/TourismDashboard";
+import { useAuth } from "@/hooks/useAuth";
 
 // Define GeoFence type locally since we need it for state management
 interface GeoFence {
@@ -56,6 +57,7 @@ interface GeoFence {
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { signOut } = useAuth();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminPassword, setAdminPassword] = useState("");
   const [geoFences, setGeoFences] = useState<GeoFence[]>([]);
@@ -106,10 +108,19 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("adminAuth");
-    setIsAuthenticated(false);
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      localStorage.removeItem("adminAuth");
+      setIsAuthenticated(false);
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Fallback to local logout if signOut fails
+      localStorage.removeItem("adminAuth");
+      setIsAuthenticated(false);
+      navigate("/");
+    }
   };
 
   // GeoFence management functions

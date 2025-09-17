@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Card,
   CardContent,
@@ -17,7 +17,7 @@ import {
   Activity,
   BarChart3,
 } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/lib/supabase";
 
 interface TourismStats {
@@ -56,11 +56,7 @@ export const TourismDashboard: React.FC = () => {
   const [destinations, setDestinations] = useState<DestinationData[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchTourismData();
-  }, []);
-
-  const fetchTourismData = async () => {
+  const fetchTourismData = useCallback(async () => {
     setLoading(true);
     try {
       await Promise.all([fetchTourismStats(), fetchDestinationData()]);
@@ -68,7 +64,11 @@ export const TourismDashboard: React.FC = () => {
       console.error("Error fetching tourism data:", error);
     }
     setLoading(false);
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchTourismData();
+  }, [fetchTourismData]);
 
   const fetchTourismStats = async () => {
     try {

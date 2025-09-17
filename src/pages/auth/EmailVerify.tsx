@@ -44,10 +44,102 @@ const EmailVerify = () => {
   useEffect(() => {
     const handleEmailVerification = async () => {
       try {
-        // Get the tokens from URL parameters
+        console.log("EmailVerify - Current URL:", window.location.href);
+        console.log("EmailVerify - Search params:", window.location.search);
+        console.log("EmailVerify - Hash:", window.location.hash);
+
+        // First, check if we have auth tokens in the URL (from redirect)
+        const urlParams = new URLSearchParams(window.location.search);
+        const hashParams = new URLSearchParams(
+          window.location.hash.replace("#", "")
+        );
+
+        const accessToken =
+          urlParams.get("access_token") || hashParams.get("access_token");
+        const refreshToken =
+          urlParams.get("refresh_token") || hashParams.get("refresh_token");
+
+        if (accessToken && refreshToken) {
+          console.log("EmailVerify - Found auth tokens, setting session");
+
+          // Set the session using the tokens from the URL
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+
+          if (error) {
+            console.error("EmailVerify - Session error:", error);
+            setVerificationState("error");
+            setErrorMessage(error.message);
+            return;
+          }
+
+          if (data.user) {
+            console.log(
+              "EmailVerify - User verified via tokens:",
+              data.user.email
+            );
+            setUserEmail(data.user.email || "");
+            setVerificationState("success");
+
+            // Create user profile after successful verification
+            try {
+              const userData = data.user.user_metadata || {};
+              const profileData = {
+                user_id: data.user.id,
+                full_name: userData.full_name || "",
+                role: userData.role || "tourist",
+                phone_number: userData.phone_number || "",
+                organization: userData.organization || "",
+              };
+
+              const { error: profileError } = await supabase
+                .from("profiles")
+                .insert([profileData]);
+
+              if (profileError && profileError.code !== "23505") {
+                console.error(
+                  "Error creating profile after verification:",
+                  profileError
+                );
+              }
+            } catch (profileCreateError) {
+              console.error("Error in profile creation:", profileCreateError);
+            }
+
+            toast({
+              title: "Email Verified Successfully!",
+              description:
+                "Your account is now active. Redirecting to dashboard...",
+              duration: 5000,
+            });
+
+            // Redirect to appropriate dashboard
+            setTimeout(() => {
+              const userRole = data.user?.user_metadata?.role || "tourist";
+              const dashboardPath =
+                userRole === "admin"
+                  ? "/admin"
+                  : userRole === "authority"
+                  ? "/authority"
+                  : "/tourist";
+              navigate(dashboardPath);
+            }, 2000);
+
+            return;
+          }
+        }
+
+        // If no tokens, try the traditional token_hash method
         const token_hash = searchParams.get("token_hash");
         const type = searchParams.get("type");
-        const next = searchParams.get("next") || "/";
+
+        console.log(
+          "EmailVerify - Traditional verification - Token hash:",
+          token_hash
+        );
+        console.log("EmailVerify - Traditional verification - Type:", type);
 
         // If no token_hash, this might be a direct visit
         if (!token_hash || type !== "email") {
@@ -128,7 +220,7 @@ const EmailVerify = () => {
 
           // Redirect to login page after a short delay
           setTimeout(() => {
-            navigate("/auth/login?message=email_verified");
+            navigate("/auth?tab=signin&message=email_verified");
           }, 2000);
         } else {
           setVerificationState("error");
@@ -145,11 +237,11 @@ const EmailVerify = () => {
   }, [searchParams, navigate, toast]);
 
   const handleResendVerification = () => {
-    navigate("/auth/login?action=resend");
+    navigate("/auth?tab=signin&action=resend");
   };
 
   const handleBackToLogin = () => {
-    navigate("/auth/login");
+    navigate("/auth?tab=signin");
   };
 
   const renderContent = () => {
@@ -191,9 +283,19 @@ const EmailVerify = () => {
                 Redirecting to login page in a moment...
               </AlertDescription>
             </Alert>
-            <Button onClick={handleBackToLogin} className="w-full">
-              Continue to Login
-            </Button>
+            <div className="space-y-2">
+              <Button onClick={handleBackToLogin} className="w-full">
+                Continue to Login
+              </Button>
+              {import.meta.env.DEV && (
+                <div className="text-xs text-muted-foreground p-2 bg-muted rounded">
+                  <p>Debug Info:</p>
+                  <p>• User ID: {userEmail}</p>
+                  <p>• Verification successful</p>
+                  <p>• Profile created</p>
+                </div>
+              )}
+            </div>
           </CardContent>
         );
 

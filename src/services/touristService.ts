@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
 export type DigitalTouristID =
@@ -422,19 +422,29 @@ export class TouristService {
     }
   }
 
-  async getLatestTouristLocations(): Promise<TouristLocation[]> {
+  async updateTouristLocation(
+    touristId: string,
+    latitude: number,
+    longitude: number
+  ): Promise<boolean> {
     try {
-      const { data, error } = await supabase
+      const locationData: Database["public"]["Tables"]["tourist_locations"]["Insert"] =
+        {
+          tourist_id: touristId,
+          latitude,
+          longitude,
+          timestamp: new Date().toISOString(),
+        };
+
+      const { error } = await supabase
         .from("tourist_locations")
-        .select("*")
-        .order("timestamp", { ascending: false })
-        .limit(100); // Get latest 100 locations
+        .insert([locationData]);
 
       if (error) throw error;
-      return data || [];
+      return true;
     } catch (error) {
-      console.error("Error fetching tourist locations:", error);
-      return [];
+      console.error("Error updating tourist location:", error);
+      return false;
     }
   }
 

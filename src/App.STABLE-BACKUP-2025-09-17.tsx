@@ -1,18 +1,18 @@
 /*
  * GoSafe App.tsx - STABLE VERSION
- *
+ * 
  * ✅ WORKING STATE: September 17, 2025
  * - Authentication working with timeout protection
  * - All navigation routes restored and functional
  * - No infinite loading or white screen issues
  * - Fast refresh working properly
- *
+ * 
  * ⚠️ CAUTION: Do not modify this file without creating a backup
  * Backup saved as: App.working-backup.tsx
- *
+ * 
  * Temporarily disabled (can be re-enabled when needed):
  * - ChatBotWrapper (was causing reload issues)
- * - AnomalyDetectionProvider (was causing reload issues)
+ * - AnomalyDetectionProvider (was causing reload issues)  
  * - @/i18n internationalization (was causing conflicts)
  */
 
@@ -165,26 +165,17 @@ const App = () => {
                 {/* Navigation Routes - Restoring missing links */}
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
-                <Route
-                  path="/safety-guidelines"
-                  element={<SafetyGuidelines />}
-                />
+                <Route path="/safety-guidelines" element={<SafetyGuidelines />} />
                 <Route path="/sos-guide" element={<SOSGuide />} />
                 <Route path="/travel-resources" element={<TravelResources />} />
-                <Route
-                  path="/emergency-contacts"
-                  element={<EmergencyContacts />}
-                />
+                <Route path="/emergency-contacts" element={<EmergencyContacts />} />
                 <Route path="/regional-info" element={<RegionalInfo />} />
-                <Route
-                  path="/cultural-guidelines"
-                  element={<CulturalGuidelines />}
-                />
+                <Route path="/cultural-guidelines" element={<CulturalGuidelines />} />
                 <Route path="/tourist-support" element={<TouristSupport />} />
                 <Route path="/help" element={<Help />} />
                 <Route path="/demo" element={<Demo />} />
                 <Route path="/about-sih" element={<AboutSIH />} />
-
+                
                 {/* Additional routes that were present before */}
                 <Route
                   path="/register"
@@ -209,7 +200,7 @@ const App = () => {
                 <Route path="/supabase-test" element={<SupabaseTest />} />
                 <Route path="/privacy" element={<NotFound />} />
                 <Route path="/terms" element={<NotFound />} />
-
+                
                 {/* Catch-all route - keep at the end */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

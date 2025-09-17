@@ -29,6 +29,7 @@ import { useToast } from "@/hooks/use-toast";
 import { TouristService } from "@/services/touristService";
 import { AuthService, type AuthUser } from "@/services/authService";
 import type { Database } from "@/integrations/supabase/types";
+import { useAuth } from "@/hooks/useAuth";
 
 // Type definitions
 type Geofence = Database["public"]["Tables"]["geo_fences"]["Row"];
@@ -72,6 +73,7 @@ const TouristDashboard = () => {
   };
   const { toast } = useToast();
   const { t } = useTranslation();
+  const { signOut } = useAuth();
 
   // Real state using Supabase data
   const [currentTouristId, setCurrentTouristId] = useState<string | null>(null);
@@ -288,6 +290,23 @@ const TouristDashboard = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      // Clear any local storage items
+      localStorage.removeItem("currentTouristId");
+      // Navigate to home page (auth context will handle redirect to login if needed)
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast({
+        title: "Logout Error",
+        description: "There was an issue logging out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleSOS = async () => {
     if (!currentTouristId || !currentLocation || !currentUser) return;
 
@@ -400,13 +419,7 @@ const TouristDashboard = () => {
                 <CheckCircle className="mr-1 h-3 w-3" />
                 Verified
               </Badge>
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  localStorage.removeItem("currentTouristId");
-                  navigate("/");
-                }}
-              >
+              <Button variant="ghost" onClick={handleLogout}>
                 Logout
               </Button>
             </div>

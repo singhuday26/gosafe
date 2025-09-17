@@ -21,21 +21,57 @@ CREATE TABLE IF NOT EXISTS profiles (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Digital Tourist IDs
+-- Enhanced Digital Tourist IDs with blockchain integration
 CREATE TABLE IF NOT EXISTS digital_tourist_ids (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tourist_name TEXT NOT NULL,
-  aadhaar_number TEXT UNIQUE NOT NULL,
+  email TEXT NOT NULL,
+  phone_number TEXT NOT NULL,
+  nationality TEXT NOT NULL,
+  date_of_birth DATE NOT NULL,
+  gender TEXT CHECK (gender IN ('male', 'female', 'other')) NOT NULL,
+  address TEXT NOT NULL,
+  
+  -- Document information
+  document_type TEXT CHECK (document_type IN ('aadhaar', 'passport', 'voter_id', 'driving_license')) NOT NULL,
+  document_number TEXT NOT NULL,
+  aadhaar_number TEXT UNIQUE,
   passport_number TEXT,
-  trip_itinerary TEXT NOT NULL,
-  emergency_contacts JSONB NOT NULL,
+  voter_id_number TEXT,
+  driving_license_number TEXT,
+  document_front_url TEXT,
+  document_back_url TEXT,
+  
+  -- Blockchain information
+  blockchain_id TEXT UNIQUE NOT NULL,
+  blockchain_type TEXT CHECK (blockchain_type IN ('ethereum', 'polygon', 'binance', 'generated')) DEFAULT 'generated',
+  wallet_address TEXT,
+  backup_email TEXT NOT NULL,
+  security_pin_hash TEXT NOT NULL, -- Hashed security PIN
+  
+  -- Emergency contacts (stored as JSONB)
+  emergency_contacts JSONB NOT NULL, -- Array of contact objects
+  
+  -- Registration metadata
   issued_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   valid_from TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  valid_to TIMESTAMP WITH TIME ZONE NOT NULL,
+  valid_to TIMESTAMP WITH TIME ZONE DEFAULT (NOW() + INTERVAL '1' YEAR),
   blockchain_hash TEXT UNIQUE NOT NULL,
-  status TEXT CHECK (status IN ('active', 'expired', 'revoked')) DEFAULT 'active',
+  status TEXT CHECK (status IN ('active', 'expired', 'revoked', 'pending_verification')) DEFAULT 'active',
+  
+  -- Audit fields
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  
+  -- Constraints
+  CONSTRAINT valid_aadhaar_format CHECK (
+    document_type != 'aadhaar' OR 
+    (aadhaar_number IS NOT NULL AND length(aadhaar_number) = 12)
+  ),
+  CONSTRAINT emergency_contacts_format CHECK (
+    jsonb_array_length(emergency_contacts) >= 2 AND 
+    jsonb_array_length(emergency_contacts) <= 3
+  )
 );
 
 -- SOS Alerts
