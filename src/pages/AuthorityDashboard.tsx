@@ -473,100 +473,311 @@ const AuthorityDashboard = () => {
           </TabsContent>
 
           <TabsContent value="alerts">
-            <Card className="gradient-card shadow-soft">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <AlertTriangle className="mr-2 h-5 w-5 text-danger" />
-                  Alert Management
-                </CardTitle>
-                <CardDescription>
-                  Manage and respond to tourist emergency alerts
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Alert ID</TableHead>
-                      <TableHead>Tourist</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Location</TableHead>
-                      <TableHead>Time</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {allAlerts.map((alert) => {
-                      const tourist = allTourists.find(
-                        (t) => t.id === alert.touristId
-                      );
-                      return (
-                        <TableRow key={alert.id}>
-                          <TableCell className="font-mono text-sm">
-                            {alert.id.slice(0, 12)}...
-                          </TableCell>
-                          <TableCell>
-                            {tourist?.touristName || "Unknown"}
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant="secondary"
-                              className="bg-danger/10 text-danger border-danger/20"
+            <div className="space-y-6">
+              {/* Active SOS Alerts with Enhanced Details */}
+              <Card className="gradient-card shadow-soft border-danger/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-danger">
+                    <AlertTriangle className="mr-2 h-5 w-5" />
+                    Active SOS Emergency Alerts
+                  </CardTitle>
+                  <CardDescription>
+                    Critical emergency situations requiring immediate response
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {allAlerts.filter((alert) => alert.status === "active")
+                    .length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <CheckCircle className="h-12 w-12 mx-auto mb-2 text-safety" />
+                      <p>No active emergency alerts. All tourists are safe.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {allAlerts
+                        .filter((alert) => alert.status === "active")
+                        .map((alert) => {
+                          const tourist = allTourists.find(
+                            (t) => t.id === alert.touristId
+                          );
+                          return (
+                            <Card
+                              key={alert.id}
+                              className="border-danger/30 bg-danger/5"
                             >
-                              {alert.type}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-sm">
-                            {alert.location.address}
-                          </TableCell>
-                          <TableCell className="text-sm">
-                            {alert.timestamp.toLocaleTimeString()}
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant="secondary"
-                              className={
-                                alert.status === "active"
-                                  ? "bg-danger/10 text-danger border-danger/20"
-                                  : alert.status === "responded"
-                                  ? "bg-warning/10 text-warning border-warning/20"
-                                  : "bg-safety/10 text-safety border-safety/20"
-                              }
-                            >
-                              {alert.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() =>
-                                  handleGenerateEFIR(tourist, alert)
+                              <CardContent className="p-6">
+                                <div className="grid lg:grid-cols-3 gap-6">
+                                  {/* Tourist Information */}
+                                  <div className="space-y-4">
+                                    <div>
+                                      <h3 className="font-semibold text-lg text-danger">
+                                        {tourist?.touristName ||
+                                          "Unknown Tourist"}
+                                      </h3>
+                                      <p className="text-sm text-muted-foreground">
+                                        ID: {alert.touristId.slice(0, 16)}...
+                                      </p>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                      <div className="flex items-center justify-between">
+                                        <span className="text-sm font-medium">
+                                          Risk Level:
+                                        </span>
+                                        <Badge variant="destructive">
+                                          High Risk Zone
+                                        </Badge>
+                                      </div>
+                                      <div className="flex items-center justify-between">
+                                        <span className="text-sm font-medium">
+                                          Alert Type:
+                                        </span>
+                                        <Badge
+                                          variant="secondary"
+                                          className="bg-danger/10 text-danger"
+                                        >
+                                          {alert.type.toUpperCase()}
+                                        </Badge>
+                                      </div>
+                                      <div className="flex items-center justify-between">
+                                        <span className="text-sm font-medium">
+                                          Time:
+                                        </span>
+                                        <span className="text-sm text-muted-foreground">
+                                          {alert.timestamp.toLocaleTimeString()}
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    <div className="flex gap-2">
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="flex-1"
+                                      >
+                                        <Phone className="h-4 w-4 mr-1" />
+                                        Call Tourist
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="flex-1"
+                                      >
+                                        <Eye className="h-4 w-4 mr-1" />
+                                        View Details
+                                      </Button>
+                                    </div>
+                                  </div>
+
+                                  {/* Location & Map */}
+                                  <div className="space-y-4">
+                                    <div>
+                                      <h4 className="font-medium mb-2">
+                                        Location Details
+                                      </h4>
+                                      <p className="text-sm text-muted-foreground mb-2">
+                                        {alert.location.address}
+                                      </p>
+                                      <div className="text-xs text-muted-foreground">
+                                        <div>
+                                          Lat:{" "}
+                                          {alert.location.latitude.toFixed(6)}
+                                        </div>
+                                        <div>
+                                          Lng:{" "}
+                                          {alert.location.longitude.toFixed(6)}
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {/* Mini Map Placeholder */}
+                                    <div className="h-32 bg-muted/20 rounded-lg flex items-center justify-center border-2 border-dashed border-danger/30">
+                                      <div className="text-center">
+                                        <MapPin className="h-8 w-8 text-danger mx-auto mb-1" />
+                                        <p className="text-xs text-muted-foreground">
+                                          Tourist Location
+                                        </p>
+                                        <p className="text-xs font-medium text-danger">
+                                          High-Risk Area
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Response Actions & Timeline */}
+                                  <div className="space-y-4">
+                                    <div>
+                                      <h4 className="font-medium mb-2">
+                                        Response Timeline
+                                      </h4>
+                                      <div className="space-y-2 text-sm">
+                                        <div className="flex items-center gap-2">
+                                          <div className="w-2 h-2 bg-danger rounded-full"></div>
+                                          <span>Alert received</span>
+                                          <span className="text-muted-foreground ml-auto">
+                                            {alert.timestamp.toLocaleTimeString()}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                                          <span>Authorities notified</span>
+                                          <span className="text-muted-foreground ml-auto">
+                                            Processing...
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+                                          <span>Response team dispatched</span>
+                                          <span className="text-muted-foreground ml-auto">
+                                            Pending
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    <div className="flex gap-2">
+                                      <Button
+                                        size="sm"
+                                        className="flex-1 bg-safety hover:bg-safety/90 text-white"
+                                        onClick={() =>
+                                          handleResolveAlert(alert.id)
+                                        }
+                                      >
+                                        <CheckCircle className="h-4 w-4 mr-1" />
+                                        Mark Resolved
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="flex-1"
+                                        onClick={() =>
+                                          handleGenerateEFIR(tourist, alert)
+                                        }
+                                      >
+                                        <FileText className="h-4 w-4 mr-1" />
+                                        Generate E-FIR
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Alert History Table */}
+              <Card className="gradient-card shadow-soft">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <AlertTriangle className="mr-2 h-5 w-5 text-warning" />
+                    Alert History & Management
+                  </CardTitle>
+                  <CardDescription>
+                    Complete history of all tourist emergency alerts
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Alert ID</TableHead>
+                        <TableHead>Tourist</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Location</TableHead>
+                        <TableHead>Time</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Response Time</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {allAlerts.map((alert) => {
+                        const tourist = allTourists.find(
+                          (t) => t.id === alert.touristId
+                        );
+                        return (
+                          <TableRow key={alert.id}>
+                            <TableCell className="font-mono text-sm">
+                              {alert.id.slice(0, 12)}...
+                            </TableCell>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium">
+                                  {tourist?.touristName || "Unknown"}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  {alert.touristId.slice(0, 8)}...
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant="secondary"
+                                className="bg-danger/10 text-danger border-danger/20"
+                              >
+                                {alert.type}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-sm max-w-xs truncate">
+                              {alert.location.address}
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              {alert.timestamp.toLocaleTimeString()}
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant="secondary"
+                                className={
+                                  alert.status === "active"
+                                    ? "bg-danger/10 text-danger border-danger/20"
+                                    : alert.status === "responded"
+                                    ? "bg-warning/10 text-warning border-warning/20"
+                                    : "bg-safety/10 text-safety border-safety/20"
                                 }
                               >
-                                <FileText className="h-4 w-4 mr-1" />
-                                E-FIR
-                              </Button>
-                              {alert.status === "active" && (
+                                {alert.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              {alert.responseTime
+                                ? `${alert.responseTime} min`
+                                : "N/A"}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
                                 <Button
                                   size="sm"
-                                  className="bg-safety hover:bg-safety/90 text-white"
-                                  onClick={() => handleResolveAlert(alert.id)}
+                                  variant="outline"
+                                  onClick={() =>
+                                    handleGenerateEFIR(tourist, alert)
+                                  }
                                 >
-                                  Resolve
+                                  <FileText className="h-4 w-4 mr-1" />
+                                  E-FIR
                                 </Button>
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+                                {alert.status === "active" && (
+                                  <Button
+                                    size="sm"
+                                    className="bg-safety hover:bg-safety/90 text-white"
+                                    onClick={() => handleResolveAlert(alert.id)}
+                                  >
+                                    Resolve
+                                  </Button>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="map">

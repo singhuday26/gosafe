@@ -33,39 +33,42 @@ export const SOSAIDemo: React.FC = () => {
     setIsSOSActive(true);
     toast({
       title: "🚨 SOS Demo Triggered!",
-      description: "This is a demonstration of the enhanced SOS system with AI risk assessment.",
-      duration: 5000
+      description:
+        "This is a demonstration of the enhanced SOS system with AI risk assessment.",
+      duration: 5000,
     });
   };
 
   const simulateLocationWarning = () => {
     toast({
       title: "⚠️ High Risk Area Detected",
-      description: "You are entering an area flagged as HIGH risk. Recent incidents reported here include theft and harassment. Consider using alternative routes.",
+      description:
+        "You are entering an area flagged as HIGH risk. Recent incidents reported here include theft and harassment. Consider using alternative routes.",
       variant: "destructive",
-      duration: 8000
+      duration: 8000,
     });
   };
 
   const simulateAINotification = () => {
     toast({
       title: "🤖 AI Risk Assessment Update",
-      description: "Your risk profile has been updated to MEDIUM based on recent location patterns and time of travel. Stay alert and consider sharing your location with trusted contacts.",
-      duration: 6000
+      description:
+        "Your risk profile has been updated to MEDIUM based on recent location patterns and time of travel. Stay alert and consider sharing your location with trusted contacts.",
+      duration: 6000,
     });
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4">
       <div className="max-w-6xl mx-auto space-y-6">
-        
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
             🚨 Enhanced SOS System with AI Demo
           </h1>
           <p className="text-lg text-gray-600 mb-4">
-            Experience the future of tourist safety with AI-powered risk assessment and smart emergency response
+            Experience the future of tourist safety with AI-powered risk
+            assessment and smart emergency response
           </p>
           <Badge variant="default" className="text-sm px-4 py-2">
             🏆 SIH 2024 Hackathon Demo - GoSafe Platform
@@ -74,7 +77,6 @@ export const SOSAIDemo: React.FC = () => {
 
         {/* Main Demo Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
           {/* Left Column - Tourist Risk Index */}
           <div className="lg:col-span-1">
             <TouristRiskIndex showDetails={true} />
@@ -99,9 +101,17 @@ export const SOSAIDemo: React.FC = () => {
                   size="lg"
                   className="transform hover:scale-105 transition-transform"
                   emergencyContacts={[
-                    { name: "Emergency Services", number: "100", type: "emergency" },
-                    { name: "Tourist Helpline", number: "1363", type: "primary" },
-                    { name: "Local Police", number: "101", type: "secondary" }
+                    {
+                      name: "Emergency Services",
+                      number: "100",
+                      type: "emergency",
+                    },
+                    {
+                      name: "Tourist Helpline",
+                      number: "1363",
+                      type: "primary",
+                    },
+                    { name: "Local Police", number: "101", type: "secondary" },
                   ]}
                 />
                 <div className="text-center space-y-2">
@@ -143,24 +153,31 @@ export const SOSAIDemo: React.FC = () => {
                     </div>
                     <div className="flex justify-between">
                       <span>Risk Level:</span>
-                      <Badge variant={
-                        sosData.riskProfile?.riskLevel === 'HIGH' ? 'destructive' : 'default'
-                      }>
-                        {sosData.riskProfile?.riskLevel || 'MEDIUM'}
+                      <Badge
+                        variant={
+                          sosData.riskProfile?.riskLevel === "HIGH"
+                            ? "destructive"
+                            : "default"
+                        }
+                      >
+                        {sosData.riskProfile?.riskLevel || "MEDIUM"}
                       </Badge>
                     </div>
                     <div className="flex justify-between">
                       <span>Location:</span>
-                      <span>{sosData.location?.latitude?.toFixed(4)}, {sosData.location?.longitude?.toFixed(4)}</span>
+                      <span>
+                        {sosData.location?.latitude?.toFixed(4)},{" "}
+                        {sosData.location?.longitude?.toFixed(4)}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span>Battery:</span>
                       <span>{sosData.deviceContext?.batteryLevel}%</span>
                     </div>
                   </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className="w-full mt-3"
                     onClick={() => {
                       setIsSOSActive(false);
@@ -184,7 +201,7 @@ export const SOSAIDemo: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button 
+                <Button
                   onClick={simulateLocationWarning}
                   className="w-full"
                   variant="destructive"
@@ -192,8 +209,8 @@ export const SOSAIDemo: React.FC = () => {
                   <AlertTriangle className="mr-2 h-4 w-4" />
                   Simulate High Risk Area Warning
                 </Button>
-                
-                <Button 
+
+                <Button
                   onClick={simulateAINotification}
                   className="w-full"
                   variant="default"
@@ -203,7 +220,9 @@ export const SOSAIDemo: React.FC = () => {
                 </Button>
 
                 <div className="bg-muted/50 p-3 rounded-lg">
-                  <h4 className="font-semibold mb-2 text-sm">Demo Scenarios:</h4>
+                  <h4 className="font-semibold mb-2 text-sm">
+                    Demo Scenarios:
+                  </h4>
                   <ul className="text-xs space-y-1 text-muted-foreground">
                     <li>• Tourist entering risky neighborhood</li>
                     <li>• Late night travel pattern detection</li>
@@ -225,25 +244,37 @@ export const SOSAIDemo: React.FC = () => {
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center justify-between">
                     <span>AI Service:</span>
-                    <Badge variant="default" className="bg-green-100 text-green-700">
+                    <Badge
+                      variant="default"
+                      className="bg-green-100 text-green-700"
+                    >
                       ✓ Online
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
                     <span>Location Services:</span>
-                    <Badge variant="default" className="bg-green-100 text-green-700">
+                    <Badge
+                      variant="default"
+                      className="bg-green-100 text-green-700"
+                    >
                       ✓ Active
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
                     <span>Emergency Network:</span>
-                    <Badge variant="default" className="bg-green-100 text-green-700">
+                    <Badge
+                      variant="default"
+                      className="bg-green-100 text-green-700"
+                    >
                       ✓ Connected
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
                     <span>Risk Assessment:</span>
-                    <Badge variant="default" className="bg-blue-100 text-blue-700">
+                    <Badge
+                      variant="default"
+                      className="bg-blue-100 text-blue-700"
+                    >
                       🤖 AI Ready
                     </Badge>
                   </div>
@@ -260,7 +291,8 @@ export const SOSAIDemo: React.FC = () => {
               <Shield className="h-12 w-12 text-blue-500 mx-auto mb-4" />
               <h3 className="font-semibold mb-2">AI Risk Assessment</h3>
               <p className="text-sm text-muted-foreground">
-                Machine learning analyzes patterns to predict and prevent dangerous situations
+                Machine learning analyzes patterns to predict and prevent
+                dangerous situations
               </p>
             </CardContent>
           </Card>
@@ -270,7 +302,8 @@ export const SOSAIDemo: React.FC = () => {
               <MapPin className="h-12 w-12 text-green-500 mx-auto mb-4" />
               <h3 className="font-semibold mb-2">Location Intelligence</h3>
               <p className="text-sm text-muted-foreground">
-                Real-time analysis of location risk factors using crowd-sourced safety data
+                Real-time analysis of location risk factors using crowd-sourced
+                safety data
               </p>
             </CardContent>
           </Card>
@@ -280,7 +313,8 @@ export const SOSAIDemo: React.FC = () => {
               <Clock className="h-12 w-12 text-purple-500 mx-auto mb-4" />
               <h3 className="font-semibold mb-2">Smart Prioritization</h3>
               <p className="text-sm text-muted-foreground">
-                Intelligent alert routing based on risk level, device status, and context
+                Intelligent alert routing based on risk level, device status,
+                and context
               </p>
             </CardContent>
           </Card>
@@ -289,7 +323,8 @@ export const SOSAIDemo: React.FC = () => {
         {/* Footer */}
         <div className="text-center text-sm text-muted-foreground mt-8">
           <p>
-            🏆 GoSafe Platform - SIH 2024 | Enhanced SOS System with AI & Context Awareness
+            🏆 GoSafe Platform - SIH 2024 | Enhanced SOS System with AI &
+            Context Awareness
           </p>
         </div>
       </div>

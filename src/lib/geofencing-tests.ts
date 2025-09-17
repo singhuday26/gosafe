@@ -76,7 +76,10 @@ const testPoints = [
 ];
 
 // Function to check if point is inside geofence
-function checkPointInGeofence(point: [number, number], geofence: any): boolean {
+function checkPointInGeofence(
+  point: [number, number],
+  geofence: { coordinates: unknown }
+): boolean {
   try {
     const pointFeature = turf.point(point);
     const polygonFeature = turf.feature(geofence.coordinates);
@@ -89,7 +92,7 @@ function checkPointInGeofence(point: [number, number], geofence: any): boolean {
 
 // Function to get escalation type based on geofence
 function getEscalationType(
-  geofences: any[],
+  geofences: Array<{ type: string }>,
   point: [number, number]
 ): "ranger" | "police" {
   for (const geofence of geofences) {
@@ -203,7 +206,10 @@ export function runGeofencingTests(): boolean {
 }
 
 // Validate GeoJSON polygon helper
-function validateGeoJSONPolygon(geojson: any): boolean {
+function validateGeoJSONPolygon(geojson: {
+  type: string;
+  coordinates: unknown;
+}): boolean {
   try {
     if (!geojson || geojson.type !== "Polygon") return false;
 

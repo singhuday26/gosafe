@@ -11,7 +11,7 @@ interface GeoFence {
   id?: string;
   name: string;
   description?: string;
-  polygon_geojson: any; // GeoJSON Polygon
+  polygon_geojson: { type: string; coordinates: unknown }; // GeoJSON Polygon
   type: "restricted" | "danger" | "tourist_zone";
   active?: boolean;
   created_by?: string;
@@ -45,7 +45,7 @@ serve(async (req) => {
     // GET /api/geo_fences - List active geo-fences
     if (method === "GET" && !fenceId) {
       const bbox = url.searchParams.get("bbox");
-      let query = supabase
+      const query = supabase
         .from("geo_fences")
         .select("*")
         .eq("active", true)
@@ -310,7 +310,10 @@ serve(async (req) => {
 });
 
 // Helper function to validate GeoJSON polygon
-function isValidGeoJSONPolygon(geojson: any): boolean {
+function isValidGeoJSONPolygon(geojson: {
+  type: string;
+  coordinates: unknown;
+}): boolean {
   try {
     if (!geojson || geojson.type !== "Polygon") {
       return false;

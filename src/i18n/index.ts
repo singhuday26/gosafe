@@ -120,28 +120,25 @@ export const SUPPORTED_LANGUAGES = [
 ];
 
 // Load available translation files
-const resources = {
-  en: { translation: en },
-  hi: { translation: hi },
-  bn: { translation: bn },
-  te: { translation: te },
-  as: { translation: as },
-  es: { translation: es },
-  zh: { translation: zh },
-  ar: { translation: ar },
-  de: { translation: de },
-  pt: { translation: pt },
-  ru: { translation: ru },
+const resources: Record<string, { translation: unknown }> = {};
+
+// Initialize with English translations for immediate availability
+const initializeResources = async () => {
+  try {
+    const enTranslations = await import("./locales/en.json");
+    resources.en = { translation: enTranslations.default };
+    console.log("✅ i18n: English translations loaded");
+  } catch (error) {
+    console.error("❌ i18n: Failed to load English translations:", error);
+  }
 };
 
 // Lazy load additional translations
 const lazyLoadLanguage = async (language: string) => {
-  if (
-    !resources[language as keyof typeof resources] &&
-    availableLanguages.includes(language)
-  ) {
+  if (!resources[language] && availableLanguages.includes(language)) {
     try {
       const translations = await loadTranslations(language);
+      resources[language] = { translation: translations };
       i18n.addResourceBundle(language, "translation", translations, true, true);
       return true;
     } catch (error) {
@@ -152,101 +149,109 @@ const lazyLoadLanguage = async (language: string) => {
   return true;
 };
 
-// Enhanced i18n configuration with comprehensive fallback handling
-i18n.use(initReactI18next).init({
-  resources,
-  lng: localStorage.getItem("language") || "en", // Use stored language or default to English
-  fallbackLng: {
-    // Northeast languages fallback to Bengali or English
-    as: ["bn", "hi", "en"],
-    mni: ["bn", "hi", "en"],
-    grt: ["bn", "en"],
-    kha: ["en", "hi"],
-    lus: ["en", "hi"],
-    nag: ["en", "hi"],
-    adi: ["en", "hi"],
-    bpy: ["bn", "hi", "en"],
-    sit: ["hi", "en"],
+// Initialize i18n with async resource loading
+const initializeI18n = async () => {
+  await initializeResources();
 
-    // Indian languages fallback to Hindi then English
-    ta: ["hi", "en"],
-    ml: ["hi", "en"],
-    kn: ["hi", "en"],
-    gu: ["hi", "en"],
-    mr: ["hi", "en"],
-    pa: ["hi", "en"],
-    or: ["hi", "en"],
-    ur: ["hi", "en"],
-    te: ["hi", "en"],
+  // Enhanced i18n configuration with comprehensive fallback handling
+  i18n.use(initReactI18next).init({
+    resources,
+    lng: localStorage.getItem("language") || "en", // Use stored language or default to English
+    fallbackLng: {
+      // Northeast languages fallback to Bengali or English
+      as: ["bn", "hi", "en"],
+      mni: ["bn", "hi", "en"],
+      grt: ["bn", "en"],
+      kha: ["en", "hi"],
+      lus: ["en", "hi"],
+      nag: ["en", "hi"],
+      adi: ["en", "hi"],
+      bpy: ["bn", "hi", "en"],
+      sit: ["hi", "en"],
 
-    // International languages fallback to English
-    zh: ["en"],
-    es: ["en"],
-    ar: ["en"],
-    pt: ["en"],
-    ru: ["en"],
-    de: ["en"],
-    ja: ["en"],
-    ko: ["en"],
-    it: ["en"],
-    tr: ["en"],
-    pl: ["en"],
-    nl: ["en"],
-    sv: ["en"],
-    da: ["en"],
-    no: ["en"],
-    fi: ["en"],
-    hu: ["en"],
-    cs: ["en"],
-    sk: ["en"],
-    uk: ["en"],
-    bg: ["en"],
-    ro: ["en"],
-    hr: ["en"],
-    sr: ["en"],
-    sl: ["en"],
-    et: ["en"],
-    lv: ["en"],
-    lt: ["en"],
-    el: ["en"],
-    he: ["en"],
-    th: ["en"],
-    vi: ["en"],
-    id: ["en"],
-    ms: ["en"],
-    tl: ["en"],
-    sw: ["en"],
+      // Indian languages fallback to Hindi then English
+      ta: ["hi", "en"],
+      ml: ["hi", "en"],
+      kn: ["hi", "en"],
+      gu: ["hi", "en"],
+      mr: ["hi", "en"],
+      pa: ["hi", "en"],
+      or: ["hi", "en"],
+      ur: ["hi", "en"],
+      te: ["hi", "en"],
 
-    // Default fallback
-    default: ["en"],
-  },
-  debug: false, // Disable debug in production
+      // International languages fallback to English
+      zh: ["en"],
+      es: ["en"],
+      ar: ["en"],
+      pt: ["en"],
+      ru: ["en"],
+      de: ["en"],
+      ja: ["en"],
+      ko: ["en"],
+      it: ["en"],
+      tr: ["en"],
+      pl: ["en"],
+      nl: ["en"],
+      sv: ["en"],
+      da: ["en"],
+      no: ["en"],
+      fi: ["en"],
+      hu: ["en"],
+      cs: ["en"],
+      sk: ["en"],
+      uk: ["en"],
+      bg: ["en"],
+      ro: ["en"],
+      hr: ["en"],
+      sr: ["en"],
+      sl: ["en"],
+      et: ["en"],
+      lv: ["en"],
+      lt: ["en"],
+      el: ["en"],
+      he: ["en"],
+      th: ["en"],
+      vi: ["en"],
+      id: ["en"],
+      ms: ["en"],
+      tl: ["en"],
+      sw: ["en"],
 
-  interpolation: {
-    escapeValue: false, // not needed for react as it escapes by default
-  },
+      // Default fallback
+      default: ["en"],
+    },
+    debug: false, // Disable debug in production
 
-  // Handle missing translations gracefully
-  saveMissing: false,
-  returnEmptyString: false,
-  returnNull: false,
-  returnObjects: false,
+    interpolation: {
+      escapeValue: false, // not needed for react as it escapes by default
+    },
 
-  // React specific options
-  react: {
-    useSuspense: false,
-    bindI18n: "languageChanged",
-    bindI18nStore: "added",
-    transEmptyNodeValue: "",
-    transSupportBasicHtmlNodes: true,
-    transKeepBasicHtmlNodesFor: ["br", "strong", "i", "em"],
-  },
+    // Handle missing translations gracefully
+    saveMissing: false,
+    returnEmptyString: false,
+    returnNull: false,
+    returnObjects: false,
 
-  // Performance optimizations
-  load: "languageOnly", // Don't load country-specific variants
-  cleanCode: true,
-  lowerCaseLng: true,
-});
+    // React specific options
+    react: {
+      useSuspense: false,
+      bindI18n: "languageChanged",
+      bindI18nStore: "added",
+      transEmptyNodeValue: "",
+      transSupportBasicHtmlNodes: true,
+      transKeepBasicHtmlNodesFor: ["br", "strong", "i", "em"],
+    },
+
+    // Performance optimizations
+    load: "languageOnly", // Don't load country-specific variants
+    cleanCode: true,
+    lowerCaseLng: true,
+  });
+};
+
+// Initialize i18n
+initializeI18n();
 
 // Enhanced language change handler with lazy loading
 const enhancedChangeLanguage = async (language: string) => {

@@ -339,6 +339,18 @@ const TouristDashboard = () => {
         variant: "destructive",
       });
 
+      // Redirect to SOS confirmation page for proper emergency flow
+      setTimeout(() => {
+        navigate("/tourist/sos-confirmation", {
+          state: {
+            alert_id: sosAlert.id,
+            tourist_id: currentTouristId,
+            location: currentLocation,
+            escalation: currentEscalation,
+          },
+        });
+      }, 1000); // Shorter delay for immediate feedback
+
       // Auto-disable SOS after 30 seconds for demo
       setTimeout(async () => {
         setIsSOSActive(false);

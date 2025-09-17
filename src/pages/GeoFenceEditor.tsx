@@ -35,7 +35,7 @@ interface GeoFence {
   id: string;
   name: string;
   description?: string;
-  coordinates: any;
+  coordinates: unknown;
   type: "restricted" | "danger" | "tourist_zone";
   active: boolean;
   created_at?: string;
@@ -137,10 +137,9 @@ const GeoFenceEditor: React.FC = () => {
         // Convert coordinates to GeoJSON
         let geoJsonData;
         if (Array.isArray(fence.coordinates)) {
-          const coordinates = fence.coordinates.map((coord: any) => [
-            coord.lng,
-            coord.lat,
-          ]);
+          const coordinates = fence.coordinates.map(
+            (coord: { lng: number; lat: number }) => [coord.lng, coord.lat]
+          );
           coordinates.push(coordinates[0]); // Close polygon
 
           geoJsonData = {
@@ -208,7 +207,9 @@ const GeoFenceEditor: React.FC = () => {
   };
 
   // Handle drawing events
-  const handleDrawCreate = (e: any) => {
+  const handleDrawCreate = (e: {
+    features: Array<{ geometry: { type: string } }>;
+  }) => {
     const feature = e.features[0];
     if (feature.geometry.type === "Polygon") {
       // Auto-populate form if empty
@@ -221,12 +222,12 @@ const GeoFenceEditor: React.FC = () => {
     }
   };
 
-  const handleDrawUpdate = (e: any) => {
+  const handleDrawUpdate = (e: { features: unknown[] }) => {
     // Handle polygon updates
     console.log("Polygon updated:", e.features);
   };
 
-  const handleDrawDelete = (e: any) => {
+  const handleDrawDelete = (e: { features: unknown[] }) => {
     // Handle polygon deletion
     console.log("Polygon deleted:", e.features);
   };
@@ -358,10 +359,9 @@ const GeoFenceEditor: React.FC = () => {
 
       let feature;
       if (Array.isArray(fence.coordinates)) {
-        const coordinates = fence.coordinates.map((coord: any) => [
-          coord.lng,
-          coord.lat,
-        ]);
+        const coordinates = fence.coordinates.map(
+          (coord: { lng: number; lat: number }) => [coord.lng, coord.lat]
+        );
         coordinates.push(coordinates[0]);
 
         feature = {
@@ -499,9 +499,9 @@ const GeoFenceEditor: React.FC = () => {
                   <Label htmlFor="type">Type *</Label>
                   <Select
                     value={formData.type}
-                    onValueChange={(value: any) =>
-                      setFormData((prev) => ({ ...prev, type: value }))
-                    }
+                    onValueChange={(
+                      value: "restricted" | "danger" | "tourist_zone"
+                    ) => setFormData((prev) => ({ ...prev, type: value }))}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -596,7 +596,12 @@ const GeoFenceEditor: React.FC = () => {
                         <div>
                           <p className="font-medium text-sm">{fence.name}</p>
                           <Badge
-                            variant={getTypeColor(fence.type) as any}
+                            variant={
+                              getTypeColor(fence.type) as
+                                | "default"
+                                | "secondary"
+                                | "destructive"
+                            }
                             className="text-xs"
                           >
                             {fence.type.replace("_", " ")}

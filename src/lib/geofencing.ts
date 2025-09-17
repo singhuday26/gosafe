@@ -97,17 +97,14 @@ class GeoFencingService {
   ): boolean {
     try {
       // Use Turf.js for precise geometric calculations
-      const turf = require("@turf/turf");
-
       const pointFeature = turf.point(point);
 
       let polygonFeature;
       if (Array.isArray(geofence.coordinates)) {
         // Legacy format
-        const coordinates = geofence.coordinates.map((coord: any) => [
-          coord.lng,
-          coord.lat,
-        ]);
+        const coordinates = geofence.coordinates.map(
+          (coord: { lng: number; lat: number }) => [coord.lng, coord.lat]
+        );
         coordinates.push(coordinates[0]); // Close polygon
         polygonFeature = turf.polygon([coordinates]);
       } else {
@@ -137,7 +134,7 @@ class GeoFencingService {
   }
 
   // Validate GeoJSON polygon
-  validatePolygon(geojson: any): boolean {
+  validatePolygon(geojson: { type: string; coordinates: unknown }): boolean {
     try {
       if (!geojson || geojson.type !== "Polygon") return false;
 

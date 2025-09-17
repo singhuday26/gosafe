@@ -12,7 +12,7 @@ export interface DigitalTouristID {
   validTo: Date;
   blockchainHash: string;
   issuedAt: Date;
-  status: 'active' | 'expired' | 'revoked';
+  status: "active" | "expired" | "revoked";
 }
 
 export interface EmergencyContact {
@@ -31,8 +31,8 @@ export interface SOSAlert {
     address: string;
   };
   timestamp: Date;
-  type: 'panic' | 'medical' | 'security' | 'other';
-  status: 'active' | 'responded' | 'resolved';
+  type: "panic" | "medical" | "security" | "other";
+  status: "active" | "responded" | "resolved";
   message?: string;
   blockchainHash: string;
 }
@@ -50,28 +50,33 @@ export class BlockchainService {
     return BlockchainService.instance;
   }
 
-  private generateHash(data: any): string {
+  private generateHash(data: Record<string, unknown>): string {
     // Simple browser-compatible hash function for mock blockchain
     const str = JSON.stringify(data) + Date.now();
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32bit integer
     }
     return Math.abs(hash).toString(16);
   }
 
-  generateDigitalID(touristData: Omit<DigitalTouristID, 'id' | 'blockchainHash' | 'issuedAt' | 'status'>): DigitalTouristID {
+  generateDigitalID(
+    touristData: Omit<
+      DigitalTouristID,
+      "id" | "blockchainHash" | "issuedAt" | "status"
+    >
+  ): DigitalTouristID {
     const id = `TID-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const blockchainHash = this.generateHash({ ...touristData, id });
-    
+
     const digitalID: DigitalTouristID = {
       ...touristData,
       id,
       blockchainHash,
       issuedAt: new Date(),
-      status: 'active'
+      status: "active",
     };
 
     this.digitalIDs.set(id, digitalID);
@@ -84,22 +89,24 @@ export class BlockchainService {
 
     const now = new Date();
     if (now > digitalID.validTo) {
-      digitalID.status = 'expired';
+      digitalID.status = "expired";
     }
 
     return digitalID;
   }
 
-  createSOSAlert(alert: Omit<SOSAlert, 'id' | 'blockchainHash' | 'timestamp' | 'status'>): SOSAlert {
+  createSOSAlert(
+    alert: Omit<SOSAlert, "id" | "blockchainHash" | "timestamp" | "status">
+  ): SOSAlert {
     const id = `SOS-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const blockchainHash = this.generateHash({ ...alert, id });
-    
+
     const sosAlert: SOSAlert = {
       ...alert,
       id,
       blockchainHash,
       timestamp: new Date(),
-      status: 'active'
+      status: "active",
     };
 
     this.sosAlerts.set(id, sosAlert);
@@ -114,7 +121,7 @@ export class BlockchainService {
     return Array.from(this.sosAlerts.values());
   }
 
-  updateSOSStatus(alertId: string, status: SOSAlert['status']): boolean {
+  updateSOSStatus(alertId: string, status: SOSAlert["status"]): boolean {
     const alert = this.sosAlerts.get(alertId);
     if (alert) {
       alert.status = status;
@@ -136,43 +143,47 @@ export const calculateSafetyScore = (touristId: string): number => {
 export interface GeoFence {
   id: string;
   name: string;
-  type: 'safe' | 'restricted' | 'danger';
+  type: "safe" | "restricted" | "danger";
   coordinates: Array<{ lat: number; lng: number }>;
   description: string;
 }
 
 export const mockGeoFences: GeoFence[] = [
   {
-    id: 'safe-1',
-    name: 'Tourist Hub Area',
-    type: 'safe',
+    id: "safe-1",
+    name: "Tourist Hub Area",
+    type: "safe",
     coordinates: [
-      { lat: 28.6139, lng: 77.2090 }, // Delhi coordinates
+      { lat: 28.6139, lng: 77.209 }, // Delhi coordinates
       { lat: 28.6145, lng: 77.2095 },
-      { lat: 28.6135, lng: 77.2100 },
-      { lat: 28.6130, lng: 77.2085 }
+      { lat: 28.6135, lng: 77.21 },
+      { lat: 28.613, lng: 77.2085 },
     ],
-    description: 'Main tourist area with high security'
+    description: "Main tourist area with high security",
   },
   {
-    id: 'restricted-1',
-    name: 'Construction Zone',
-    type: 'restricted',
+    id: "restricted-1",
+    name: "Construction Zone",
+    type: "restricted",
     coordinates: [
-      { lat: 28.6120, lng: 77.2070 },
+      { lat: 28.612, lng: 77.207 },
       { lat: 28.6125, lng: 77.2075 },
-      { lat: 28.6115, lng: 77.2080 },
-      { lat: 28.6110, lng: 77.2065 }
+      { lat: 28.6115, lng: 77.208 },
+      { lat: 28.611, lng: 77.2065 },
     ],
-    description: 'Active construction area - avoid after 6 PM'
-  }
+    description: "Active construction area - avoid after 6 PM",
+  },
 ];
 
-export const checkGeoFenceStatus = (latitude: number, longitude: number): GeoFence | null => {
+export const checkGeoFenceStatus = (
+  latitude: number,
+  longitude: number
+): GeoFence | null => {
   // Simplified point-in-polygon check (mock implementation)
   for (const fence of mockGeoFences) {
-    const isInside = Math.abs(latitude - fence.coordinates[0].lat) < 0.005 && 
-                     Math.abs(longitude - fence.coordinates[0].lng) < 0.005;
+    const isInside =
+      Math.abs(latitude - fence.coordinates[0].lat) < 0.005 &&
+      Math.abs(longitude - fence.coordinates[0].lng) < 0.005;
     if (isInside) return fence;
   }
   return null;

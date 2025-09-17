@@ -27,7 +27,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 // Temporarily removed problematic imports
 // import { ChatBotWrapper } from "@/components/ChatBotWrapper";
 // import { AnomalyDetectionProvider } from "@/components/AnomalyDetectionProvider";
-// import "@/i18n";
+import "@/i18n";
 
 // Lazy load route components - Essential routes (keep current working state)
 const Home = lazy(() => import("./pages/Home"));
@@ -67,6 +67,11 @@ const GeoFenceEditor = lazy(() => import("./pages/GeoFenceEditor"));
 const BlockchainTouristRegistration = lazy(
   () => import("./pages/BlockchainTouristRegistration")
 );
+const SOSConfirmationPage = lazy(() => import("./pages/SOSConfirmationPage"));
+const SOSStatusPage = lazy(() => import("./pages/SOSStatusPage"));
+const AnomalyInvestigationDashboard = lazy(
+  () => import("./pages/AnomalyInvestigationDashboard")
+);
 const SupabaseTest = lazy(() => import("./components/SupabaseConnectionTest"));
 
 const queryClient = new QueryClient({
@@ -89,7 +94,13 @@ const LoadingSpinner = () => (
 );
 
 const App = () => {
-  console.log("App: Rendering - Main App");
+  console.log("🚀 App: Starting to render...");
+  console.log("📦 App: QueryClient created");
+  console.log("🔐 App: AuthProvider wrapping children");
+  console.log("🎨 App: TooltipProvider active");
+  console.log("🧭 App: BrowserRouter initialized");
+  console.log("⚛️ App: Suspense with LoadingSpinner");
+  console.log("📄 App: Routes rendering");
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -161,6 +172,14 @@ const App = () => {
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="/anomaly-investigation"
+                  element={
+                    <ProtectedRoute>
+                      <AnomalyInvestigationDashboard />
+                    </ProtectedRoute>
+                  }
+                />
 
                 {/* Navigation Routes - Restoring missing links */}
                 <Route path="/about" element={<About />} />
@@ -207,6 +226,25 @@ const App = () => {
                   element={<BlockchainTouristRegistration />}
                 />
                 <Route path="/supabase-test" element={<SupabaseTest />} />
+
+                {/* SOS Emergency Flow Routes */}
+                <Route
+                  path="/tourist/sos-confirmation"
+                  element={
+                    <ProtectedRoute requiredRole="tourist">
+                      <SOSConfirmationPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/tourist/sos-status"
+                  element={
+                    <ProtectedRoute requiredRole="tourist">
+                      <SOSStatusPage />
+                    </ProtectedRoute>
+                  }
+                />
+
                 <Route path="/privacy" element={<NotFound />} />
                 <Route path="/terms" element={<NotFound />} />
 

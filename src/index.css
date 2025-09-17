@@ -374,3 +374,77 @@
     animation: safety-glow 3s ease-in-out infinite;
   }
 }
+
+/* Emergency SOS Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-red {
+  0%,
+  100% {
+    background-color: rgb(239 68 68 / 0.1);
+    border-color: rgb(239 68 68 / 0.2);
+  }
+  50% {
+    background-color: rgb(239 68 68 / 0.2);
+    border-color: rgb(239 68 68 / 0.3);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+}
+
+.animation-delay-200 {
+  animation-delay: 0.2s;
+}
+
+.animation-delay-400 {
+  animation-delay: 0.4s;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.5s ease-out forwards;
+}
+
+.animate-pulse-red {
+  animation: pulse-red 2s infinite;
+}
+
+/* Status indicator animations */
+.status-completed {
+  background-color: rgb(34 197 94 / 0.1);
+  border-color: rgb(34 197 94 / 0.2);
+  animation: fade-in 0.3s ease-out;
+}
+
+.status-pending {
+  background-color: rgb(245 158 11 / 0.1);
+  border-color: rgb(245 158 11 / 0.2);
+  animation: pulse 2s infinite;
+}
+
+.status-failed {
+  background-color: rgb(239 68 68 / 0.1);
+  border-color: rgb(239 68 68 / 0.2);
+  animation: fade-in 0.3s ease-out;
+}

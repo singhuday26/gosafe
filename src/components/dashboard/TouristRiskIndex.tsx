@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Shield, AlertTriangle, TrendingUp, MapPin, Clock, Info } from "lucide-react";
+import {
+  Shield,
+  AlertTriangle,
+  TrendingUp,
+  MapPin,
+  Clock,
+  Info,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -22,13 +29,20 @@ interface LocationRiskCheck {
 
 export const TouristRiskIndex: React.FC<TouristRiskIndexProps> = ({
   className = "",
-  showDetails = true
+  showDetails = true,
 }) => {
-  const [riskProfile, setRiskProfile] = useState<TouristRiskProfile | null>(null);
+  const [riskProfile, setRiskProfile] = useState<TouristRiskProfile | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [locationRisk, setLocationRisk] = useState<LocationRiskCheck | null>(null);
+  const [location, setLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+  const [locationRisk, setLocationRisk] = useState<LocationRiskCheck | null>(
+    null
+  );
 
   const { user } = useAuth();
   const { toast } = useToast();
@@ -42,11 +56,12 @@ export const TouristRiskIndex: React.FC<TouristRiskIndexProps> = ({
       setRiskProfile(profile);
       setLastUpdated(new Date());
     } catch (error) {
-      console.error('Failed to load risk profile:', error);
+      console.error("Failed to load risk profile:", error);
       toast({
         title: "Risk Assessment Unavailable",
-        description: "Unable to load current risk assessment. Please try again later.",
-        variant: "destructive"
+        description:
+          "Unable to load current risk assessment. Please try again later.",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -61,17 +76,17 @@ export const TouristRiskIndex: React.FC<TouristRiskIndexProps> = ({
         location.latitude,
         location.longitude
       );
-      
+
       const locationRiskData: LocationRiskCheck = {
         isRisky: risk.isRisky,
         riskLevel: risk.riskLevel,
         warnings: risk.warnings,
-        source: risk.source
+        source: risk.source,
       };
-      
+
       setLocationRisk(locationRiskData);
     } catch (error) {
-      console.error('Location risk check failed:', error);
+      console.error("Location risk check failed:", error);
     }
   }, [location]);
 
@@ -81,11 +96,11 @@ export const TouristRiskIndex: React.FC<TouristRiskIndexProps> = ({
         (position) => {
           setLocation({
             latitude: position.coords.latitude,
-            longitude: position.coords.longitude
+            longitude: position.coords.longitude,
           });
         },
         (error) => {
-          console.error('Location access denied:', error);
+          console.error("Location access denied:", error);
         }
       );
     }
@@ -106,42 +121,42 @@ export const TouristRiskIndex: React.FC<TouristRiskIndexProps> = ({
 
   const getRiskColor = (riskLevel: string) => {
     switch (riskLevel) {
-      case 'CRITICAL':
-        return 'bg-red-500';
-      case 'HIGH':
-        return 'bg-orange-500';
-      case 'MEDIUM':
-        return 'bg-yellow-500';
-      case 'LOW':
+      case "CRITICAL":
+        return "bg-red-500";
+      case "HIGH":
+        return "bg-orange-500";
+      case "MEDIUM":
+        return "bg-yellow-500";
+      case "LOW":
       default:
-        return 'bg-green-500';
+        return "bg-green-500";
     }
   };
 
   const getRiskBadgeVariant = (riskLevel: string) => {
     switch (riskLevel) {
-      case 'CRITICAL':
-      case 'HIGH':
-        return 'destructive';
-      case 'MEDIUM':
-        return 'default';
-      case 'LOW':
+      case "CRITICAL":
+      case "HIGH":
+        return "destructive";
+      case "MEDIUM":
+        return "default";
+      case "LOW":
       default:
-        return 'secondary';
+        return "secondary";
     }
   };
 
   const getRiskDescription = (riskLevel: string, riskScore: number) => {
     switch (riskLevel) {
-      case 'CRITICAL':
-        return 'Immediate attention required. Consider emergency assistance.';
-      case 'HIGH':
-        return 'Elevated risk detected. Exercise extreme caution.';
-      case 'MEDIUM':
-        return 'Some risk factors present. Stay alert and cautious.';
-      case 'LOW':
+      case "CRITICAL":
+        return "Immediate attention required. Consider emergency assistance.";
+      case "HIGH":
+        return "Elevated risk detected. Exercise extreme caution.";
+      case "MEDIUM":
+        return "Some risk factors present. Stay alert and cautious.";
+      case "LOW":
       default:
-        return 'Low risk profile. Continue following safety guidelines.';
+        return "Low risk profile. Continue following safety guidelines.";
     }
   };
 
@@ -152,20 +167,20 @@ export const TouristRiskIndex: React.FC<TouristRiskIndexProps> = ({
       return {
         level: locationRisk.riskLevel,
         warning: `Current area has ${locationRisk.riskLevel.toLowerCase()} risk level`,
-        icon: <AlertTriangle className="h-4 w-4 text-orange-500" />
+        icon: <AlertTriangle className="h-4 w-4 text-orange-500" />,
       };
     }
 
     return {
-      level: 'SAFE',
-      warning: 'Current area appears safe',
-      icon: <Shield className="h-4 w-4 text-green-500" />
+      level: "SAFE",
+      warning: "Current area appears safe",
+      icon: <Shield className="h-4 w-4 text-green-500" />,
     };
   };
 
   // Helper function to get risk factor by type
   const getRiskFactorScore = (type: string) => {
-    return riskProfile?.factors.find(f => f.type === type)?.score || 0;
+    return riskProfile?.factors.find((f) => f.type === type)?.score || 0;
   };
 
   const locationRiskInfo = getLocationRiskInfo();
@@ -186,7 +201,7 @@ export const TouristRiskIndex: React.FC<TouristRiskIndexProps> = ({
         </CardContent>
       </Card>
     );
-  };
+  }
 
   if (!riskProfile) {
     return (
@@ -219,9 +234,9 @@ export const TouristRiskIndex: React.FC<TouristRiskIndexProps> = ({
             <Shield className="mr-2 h-5 w-5" />
             Tourist Risk Index
           </CardTitle>
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={loadRiskProfile}
             disabled={isLoading}
           >
@@ -234,11 +249,15 @@ export const TouristRiskIndex: React.FC<TouristRiskIndexProps> = ({
         {/* Main Risk Score Display */}
         <div className="text-center">
           <div className="flex items-center justify-center mb-2">
-            <div className={`w-16 h-16 rounded-full ${getRiskColor(riskProfile.riskLevel)} flex items-center justify-center text-white text-2xl font-bold`}>
+            <div
+              className={`w-16 h-16 rounded-full ${getRiskColor(
+                riskProfile.riskLevel
+              )} flex items-center justify-center text-white text-2xl font-bold`}
+            >
               {riskProfile.riskScore}
             </div>
           </div>
-          <Badge 
+          <Badge
             variant={getRiskBadgeVariant(riskProfile.riskLevel)}
             className="text-sm px-3 py-1"
           >
@@ -263,36 +282,45 @@ export const TouristRiskIndex: React.FC<TouristRiskIndexProps> = ({
             {/* Risk Factors */}
             <div className="space-y-2">
               <h4 className="text-sm font-semibold">Risk Factors:</h4>
-              
-              {getRiskFactorScore('frequency') > 30 && (
+
+              {getRiskFactorScore("frequency") > 30 && (
                 <div className="flex items-center text-sm">
                   <AlertTriangle className="h-3 w-3 mr-2 text-orange-500" />
-                  <span>Frequent emergency alerts ({getRiskFactorScore('frequency')}/100)</span>
-                </div>
-              )}
-              
-              {getRiskFactorScore('time_pattern') > 30 && (
-                <div className="flex items-center text-sm">
-                  <Clock className="h-3 w-3 mr-2 text-yellow-500" />
-                  <span>Unusual time patterns ({getRiskFactorScore('time_pattern')}/100)</span>
-                </div>
-              )}
-              
-              {getRiskFactorScore('location') > 30 && (
-                <div className="flex items-center text-sm">
-                  <MapPin className="h-3 w-3 mr-2 text-red-500" />
-                  <span>High-risk location history ({getRiskFactorScore('location')}/100)</span>
+                  <span>
+                    Frequent emergency alerts ({getRiskFactorScore("frequency")}
+                    /100)
+                  </span>
                 </div>
               )}
 
-              {getRiskFactorScore('frequency') <= 30 && 
-               getRiskFactorScore('time_pattern') <= 30 && 
-               getRiskFactorScore('location') <= 30 && (
+              {getRiskFactorScore("time_pattern") > 30 && (
                 <div className="flex items-center text-sm">
-                  <Shield className="h-3 w-3 mr-2 text-green-500" />
-                  <span>No significant risk factors detected</span>
+                  <Clock className="h-3 w-3 mr-2 text-yellow-500" />
+                  <span>
+                    Unusual time patterns ({getRiskFactorScore("time_pattern")}
+                    /100)
+                  </span>
                 </div>
               )}
+
+              {getRiskFactorScore("location") > 30 && (
+                <div className="flex items-center text-sm">
+                  <MapPin className="h-3 w-3 mr-2 text-red-500" />
+                  <span>
+                    High-risk location history ({getRiskFactorScore("location")}
+                    /100)
+                  </span>
+                </div>
+              )}
+
+              {getRiskFactorScore("frequency") <= 30 &&
+                getRiskFactorScore("time_pattern") <= 30 &&
+                getRiskFactorScore("location") <= 30 && (
+                  <div className="flex items-center text-sm">
+                    <Shield className="h-3 w-3 mr-2 text-green-500" />
+                    <span>No significant risk factors detected</span>
+                  </div>
+                )}
             </div>
 
             {/* Current Location Risk */}
@@ -300,19 +328,26 @@ export const TouristRiskIndex: React.FC<TouristRiskIndexProps> = ({
               <div className="bg-muted/50 p-3 rounded-lg">
                 <div className="flex items-center mb-1">
                   {locationRiskInfo.icon}
-                  <span className="ml-2 text-sm font-semibold">Current Location</span>
+                  <span className="ml-2 text-sm font-semibold">
+                    Current Location
+                  </span>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {locationRiskInfo.warning}
                 </p>
                 {locationRisk?.warnings?.length > 0 && (
                   <div className="mt-2">
-                    {locationRisk.warnings.slice(0, 2).map((warning: string, index: number) => (
-                      <p key={index} className="text-xs text-orange-600 flex items-center">
-                        <Info className="h-3 w-3 mr-1" />
-                        {warning}
-                      </p>
-                    ))}
+                    {locationRisk.warnings
+                      .slice(0, 2)
+                      .map((warning: string, index: number) => (
+                        <p
+                          key={index}
+                          className="text-xs text-orange-600 flex items-center"
+                        >
+                          <Info className="h-3 w-3 mr-1" />
+                          {warning}
+                        </p>
+                      ))}
                   </div>
                 )}
               </div>
@@ -322,9 +357,16 @@ export const TouristRiskIndex: React.FC<TouristRiskIndexProps> = ({
             {riskProfile.factors.length > 0 && (
               <div className="grid grid-cols-2 gap-2 text-xs">
                 {riskProfile.factors.slice(0, 4).map((factor, index) => (
-                  <div key={index} className="bg-muted/50 p-2 rounded text-center">
-                    <div className="font-semibold capitalize">{factor.type.replace('_', ' ')}</div>
-                    <div className="text-muted-foreground">{factor.score}/100</div>
+                  <div
+                    key={index}
+                    className="bg-muted/50 p-2 rounded text-center"
+                  >
+                    <div className="font-semibold capitalize">
+                      {factor.type.replace("_", " ")}
+                    </div>
+                    <div className="text-muted-foreground">
+                      {factor.score}/100
+                    </div>
                   </div>
                 ))}
               </div>
@@ -341,38 +383,45 @@ export const TouristRiskIndex: React.FC<TouristRiskIndexProps> = ({
 
         {/* Quick Actions */}
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             className="flex-1"
             onClick={loadRiskProfile}
             disabled={isLoading}
           >
             Refresh
           </Button>
-          {riskProfile.riskLevel === 'HIGH' || riskProfile.riskLevel === 'CRITICAL' ? (
-            <Button 
-              variant="destructive" 
-              size="sm" 
+          {riskProfile.riskLevel === "HIGH" ||
+          riskProfile.riskLevel === "CRITICAL" ? (
+            <Button
+              variant="destructive"
+              size="sm"
               className="flex-1"
-              onClick={() => toast({
-                title: "Emergency Contact",
-                description: "Consider contacting emergency services or trusted contacts.",
-                duration: 5000
-              })}
+              onClick={() =>
+                toast({
+                  title: "Emergency Contact",
+                  description:
+                    "Consider contacting emergency services or trusted contacts.",
+                  duration: 5000,
+                })
+              }
             >
               Get Help
             </Button>
           ) : (
-            <Button 
-              variant="default" 
-              size="sm" 
+            <Button
+              variant="default"
+              size="sm"
               className="flex-1"
-              onClick={() => toast({
-                title: "Safety Tips",
-                description: "Always share your location with trusted contacts and stay aware of your surroundings.",
-                duration: 5000
-              })}
+              onClick={() =>
+                toast({
+                  title: "Safety Tips",
+                  description:
+                    "Always share your location with trusted contacts and stay aware of your surroundings.",
+                  duration: 5000,
+                })
+              }
             >
               Safety Tips
             </Button>

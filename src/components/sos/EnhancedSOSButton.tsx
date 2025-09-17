@@ -1,11 +1,24 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { AlertTriangle, Phone, MapPin, Clock, Shield, Wifi, Battery } from "lucide-react";
+import {
+  AlertTriangle,
+  Phone,
+  MapPin,
+  Clock,
+  Shield,
+  Wifi,
+  Battery,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { sosAIService, type TouristRiskProfile, type EnhancedSOSRequest, type DeviceContext } from "@/services/sosAIService";
+import {
+  sosAIService,
+  type TouristRiskProfile,
+  type EnhancedSOSRequest,
+  type DeviceContext,
+} from "@/services/sosAIService";
 import { useAuth } from "@/hooks/useAuth";
 
 interface SOSData {
@@ -47,18 +60,24 @@ export const EnhancedSOSButton: React.FC<EnhancedSOSButtonProps> = ({
   disabled = false,
   size = "lg",
   className = "",
-  emergencyContacts = []
+  emergencyContacts = [],
 }) => {
   const [isPressed, setIsPressed] = useState(false);
   const [holdDuration, setHoldDuration] = useState(0);
   const [showOverlay, setShowOverlay] = useState(false);
   const [countdown, setCountdown] = useState(5);
   const [location, setLocation] = useState<LocationData | null>(null);
-  const [riskProfile, setRiskProfile] = useState<TouristRiskProfile | null>(null);
-  const [locationRisk, setLocationRisk] = useState<LocationRiskCheck | null>(null);
-  const [deviceContext, setDeviceContext] = useState<DeviceContext | null>(null);
+  const [riskProfile, setRiskProfile] = useState<TouristRiskProfile | null>(
+    null
+  );
+  const [locationRisk, setLocationRisk] = useState<LocationRiskCheck | null>(
+    null
+  );
+  const [deviceContext, setDeviceContext] = useState<DeviceContext | null>(
+    null
+  );
   const [isProcessing, setIsProcessing] = useState(false);
-  
+
   const { toast } = useToast();
   const { user } = useAuth();
   const countdownRef = useRef<NodeJS.Timeout>();
@@ -88,15 +107,16 @@ export const EnhancedSOSButton: React.FC<EnhancedSOSButtonProps> = ({
         (position) => {
           setLocation({
             latitude: position.coords.latitude,
-            longitude: position.coords.longitude
+            longitude: position.coords.longitude,
           });
         },
         (error) => {
-          console.error('Location access denied:', error);
+          console.error("Location access denied:", error);
           toast({
             title: "Location Access Required",
-            description: "Please enable location access for emergency features.",
-            variant: "destructive"
+            description:
+              "Please enable location access for emergency features.",
+            variant: "destructive",
           });
         }
       );
@@ -110,12 +130,12 @@ export const EnhancedSOSButton: React.FC<EnhancedSOSButtonProps> = ({
 
   const loadRiskProfile = useCallback(async () => {
     if (!user?.id) return;
-    
+
     try {
       const profile = await sosAIService.analyzeRiskProfile(user.id);
       setRiskProfile(profile);
     } catch (error) {
-      console.error('Failed to load risk profile:', error);
+      console.error("Failed to load risk profile:", error);
     }
   }, [user?.id]);
 
@@ -127,27 +147,27 @@ export const EnhancedSOSButton: React.FC<EnhancedSOSButtonProps> = ({
         location.latitude,
         location.longitude
       );
-      
+
       // Map the returned risk data to our interface
       const locationRiskData: LocationRiskCheck = {
         isRisky: risk.isRisky,
         riskLevel: risk.riskLevel,
         warnings: risk.warnings,
-        source: risk.source
+        source: risk.source,
       };
-      
+
       setLocationRisk(locationRiskData);
-      
-      if (risk.isRisky && risk.riskLevel !== 'LOW') {
+
+      if (risk.isRisky && risk.riskLevel !== "LOW") {
         toast({
           title: "⚠️ Location Warning",
           description: `This area has been flagged as ${risk.riskLevel} risk. Stay alert and consider moving to a safer location.`,
           variant: "destructive",
-          duration: 8000
+          duration: 8000,
         });
       }
     } catch (error) {
-      console.error('Location risk check failed:', error);
+      console.error("Location risk check failed:", error);
     }
   }, [location, toast]);
 
@@ -156,7 +176,7 @@ export const EnhancedSOSButton: React.FC<EnhancedSOSButtonProps> = ({
       toast({
         title: "SOS Error",
         description: "Unable to trigger SOS. Missing required data.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -166,19 +186,25 @@ export const EnhancedSOSButton: React.FC<EnhancedSOSButtonProps> = ({
 
     try {
       // Prepare enhanced SOS request
-      const sosRequest: Omit<EnhancedSOSRequest, 'riskScore' | 'priority' | 'suggestedEscalation'> = {
+      const sosRequest: Omit<
+        EnhancedSOSRequest,
+        "riskScore" | "priority" | "suggestedEscalation"
+      > = {
         touristId: user.id,
-        type: 'panic',
+        type: "panic",
         location,
-        message: `Emergency SOS triggered from ${location.address || 'current location'}`,
+        message: `Emergency SOS triggered from ${
+          location.address || "current location"
+        }`,
         batteryLevel: deviceContext.batteryLevel,
         networkStrength: deviceContext.networkStrength,
         timestamp: new Date(),
         deviceInfo: {
-          userAgent: (deviceContext.deviceInfo.userAgent as string) || 'Unknown',
+          userAgent:
+            (deviceContext.deviceInfo.userAgent as string) || "Unknown",
           isOnline: (deviceContext.deviceInfo.isOnline as boolean) || true,
-          connectionType: deviceContext.deviceInfo.connectionType as string
-        }
+          connectionType: deviceContext.deviceInfo.connectionType as string,
+        },
       };
 
       // Create enhanced SOS with AI analysis
@@ -187,8 +213,10 @@ export const EnhancedSOSButton: React.FC<EnhancedSOSButtonProps> = ({
       if (result.success) {
         toast({
           title: "🚨 SOS Alert Sent!",
-          description: `Emergency services notified. Priority: ${result.riskProfile?.riskLevel || 'MEDIUM'}`,
-          duration: 10000
+          description: `Emergency services notified. Priority: ${
+            result.riskProfile?.riskLevel || "MEDIUM"
+          }`,
+          duration: 10000,
         });
 
         // Update risk profile
@@ -205,26 +233,32 @@ export const EnhancedSOSButton: React.FC<EnhancedSOSButtonProps> = ({
             sosId: result.sosId,
             riskProfile: result.riskProfile,
             location,
-            deviceContext
+            deviceContext,
           });
         }
-
       } else {
-        throw new Error(result.error || 'SOS creation failed');
+        throw new Error(result.error || "SOS creation failed");
       }
-
     } catch (error) {
-      console.error('SOS trigger failed:', error);
+      console.error("SOS trigger failed:", error);
       toast({
         title: "SOS Error",
-        description: "Failed to send SOS alert. Please try again or call emergency services directly.",
-        variant: "destructive"
+        description:
+          "Failed to send SOS alert. Please try again or call emergency services directly.",
+        variant: "destructive",
       });
       setShowOverlay(false);
     } finally {
       setIsProcessing(false);
     }
-  }, [user?.id, location, deviceContext, toast, onTrigger, startEmergencyCountdown]);
+  }, [
+    user?.id,
+    location,
+    deviceContext,
+    toast,
+    onTrigger,
+    startEmergencyCountdown,
+  ]);
 
   useEffect(() => {
     getCurrentLocation();
@@ -276,7 +310,7 @@ export const EnhancedSOSButton: React.FC<EnhancedSOSButtonProps> = ({
     if (countdownRef.current) {
       clearInterval(countdownRef.current);
     }
-    
+
     toast({
       title: "SOS Cancelled",
       description: "Emergency alert has been cancelled.",
@@ -287,7 +321,7 @@ export const EnhancedSOSButton: React.FC<EnhancedSOSButtonProps> = ({
     if (!disabled && !isActive) {
       setIsPressed(true);
       updateDeviceContext(); // Refresh device context on interaction
-      
+
       toast({
         title: "Hold to activate SOS",
         description: "Keep holding for 3 seconds to trigger emergency alert",
@@ -332,7 +366,11 @@ export const EnhancedSOSButton: React.FC<EnhancedSOSButtonProps> = ({
                 : "bg-red-500 hover:bg-red-600"
             }
             text-white shadow-lg transition-all duration-200
-            ${locationRisk?.isRisky && locationRisk?.riskLevel === 'HIGH' ? 'ring-4 ring-orange-400 ring-opacity-75' : ''}
+            ${
+              locationRisk?.isRisky && locationRisk?.riskLevel === "HIGH"
+                ? "ring-4 ring-orange-400 ring-opacity-75"
+                : ""
+            }
           `}
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
@@ -385,11 +423,15 @@ export const EnhancedSOSButton: React.FC<EnhancedSOSButtonProps> = ({
         {/* Risk Level Indicator */}
         {riskProfile && (
           <div className="absolute -top-2 -right-2">
-            <Badge 
+            <Badge
               variant={
-                riskProfile.riskLevel === 'CRITICAL' ? 'destructive' :
-                riskProfile.riskLevel === 'HIGH' ? 'destructive' :
-                riskProfile.riskLevel === 'MEDIUM' ? 'default' : 'secondary'
+                riskProfile.riskLevel === "CRITICAL"
+                  ? "destructive"
+                  : riskProfile.riskLevel === "HIGH"
+                  ? "destructive"
+                  : riskProfile.riskLevel === "MEDIUM"
+                  ? "default"
+                  : "secondary"
               }
               className="text-xs px-1 py-0"
             >
@@ -441,11 +483,17 @@ export const EnhancedSOSButton: React.FC<EnhancedSOSButtonProps> = ({
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Risk Level:</span>
-                    <Badge variant={
-                      riskProfile.riskLevel === 'CRITICAL' ? 'destructive' :
-                      riskProfile.riskLevel === 'HIGH' ? 'destructive' :
-                      riskProfile.riskLevel === 'MEDIUM' ? 'default' : 'secondary'
-                    }>
+                    <Badge
+                      variant={
+                        riskProfile.riskLevel === "CRITICAL"
+                          ? "destructive"
+                          : riskProfile.riskLevel === "HIGH"
+                          ? "destructive"
+                          : riskProfile.riskLevel === "MEDIUM"
+                          ? "default"
+                          : "secondary"
+                      }
+                    >
                       {riskProfile.riskLevel} ({riskProfile.riskScore}/100)
                     </Badge>
                   </div>
@@ -461,7 +509,9 @@ export const EnhancedSOSButton: React.FC<EnhancedSOSButtonProps> = ({
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {location.address ||
-                      `${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`}
+                      `${location.latitude.toFixed(
+                        6
+                      )}, ${location.longitude.toFixed(6)}`}
                   </p>
                   {locationRisk?.isRisky && (
                     <div className="mt-2">
@@ -511,9 +561,13 @@ export const EnhancedSOSButton: React.FC<EnhancedSOSButtonProps> = ({
                           {contact.number}
                         </div>
                       </div>
-                      <Badge variant={
-                        contact.type === "emergency" ? "destructive" : "secondary"
-                      }>
+                      <Badge
+                        variant={
+                          contact.type === "emergency"
+                            ? "destructive"
+                            : "secondary"
+                        }
+                      >
                         {contact.type}
                       </Badge>
                     </div>
@@ -534,13 +588,19 @@ export const EnhancedSOSButton: React.FC<EnhancedSOSButtonProps> = ({
                   <div>✓ Location shared with authorities</div>
                   <div>✓ Risk assessment completed</div>
                   <div>✓ Emergency contacts notified</div>
-                  <div className="animate-pulse">⏳ Waiting for response...</div>
+                  <div className="animate-pulse">
+                    ⏳ Waiting for response...
+                  </div>
                 </div>
               </div>
 
               {/* Actions */}
               <div className="flex gap-2">
-                <Button variant="outline" className="flex-1" onClick={cancelSOS}>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={cancelSOS}
+                >
                   Cancel Alert
                 </Button>
                 <Button variant="destructive" className="flex-1" asChild>
