@@ -4,6 +4,7 @@ export type { MapComponentProps, Tourist, GeoFence, SOSAlert } from "./map";
 
 // SOS Components
 export { SOSButton, SOSOverlay, SOSHistory } from "./sos";
+export { EnhancedSOSButton } from "./sos/EnhancedSOSButton";
 export type {
   SOSAlert as SOSComponentAlert,
   EmergencyContact,
@@ -12,6 +13,7 @@ export type {
 
 // Dashboard Components
 export { StatCard, AlertQueue, ActivityFeed } from "./dashboard";
+export { TouristRiskIndex } from "./dashboard/TouristRiskIndex";
 export type { DashboardStats, DashboardAlert, ActivityItem } from "./dashboard";
 
 // GeoFence Components

@@ -16,7 +16,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { I18nextProvider } from "react-i18next";
 import { ChatBot } from "../../components/ChatBot";
 import { supabase } from "../../integrations/supabase/client";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../hooks/useAuth";
 import i18n from "../../i18n";
 import type { User } from "@supabase/supabase-js";
 
